@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financiero Avanzado</title>
+    <title>Dashboard Financiero Móvil</title>
 
     <!-- Tailwind CSS desde CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,68 +22,50 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        /* Nuevo tema claro */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f3f4f6; /* bg-gray-100 */
+        }
+        /* Scrollbar para la tabla en tema claro */
         .table-scrollbar::-webkit-scrollbar { width: 8px; }
-        .table-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
-        .table-scrollbar::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 4px; }
-        .flatpickr-calendar.dark { background: #1f2937; border-color: #374151; color: #d1d5db; }
-        .flatpickr-calendar.dark .flatpickr-month,
-        .flatpickr-calendar.dark .flatpickr-weekday,
-        .flatpickr-calendar.dark .flatpickr-day { color: #d1d5db; }
-        .flatpickr-calendar.dark .flatpickr-day.selected,
-        .flatpickr-calendar.dark .flatpickr-day.startRange,
-        .flatpickr-calendar.dark .flatpickr-day.endRange { background: #3b82f6; border-color: #3b82f6; }
-        .flatpickr-calendar.dark .flatpickr-day:hover { background: #374151; }
-        .flatpickr-calendar.dark .numInput { background: #374151; color: #d1d5db; }
+        .table-scrollbar::-webkit-scrollbar-track { background: #e5e7eb; /* bg-gray-200 */ }
+        .table-scrollbar::-webkit-scrollbar-thumb { background-color: #9ca3af; /* bg-gray-400 */ border-radius: 4px; }
     </style>
 </head>
-<body class="text-gray-200 p-4 sm:p-6 lg:p-8">
+<body class="text-gray-800 p-4 sm:p-6 lg:p-8">
 
     <div class="max-w-7xl mx-auto">
 
         <!-- Encabezado -->
         <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-white">Operadora y Comercializadora de Alimentos Moyuk</h1>
-            <p class="text-gray-400 mt-2">Análisis de rendimiento por negocio, categoría y proveedor.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Operadora y Comercializadora de Alimentos Moyuk</h1>
+            <p class="text-gray-600 mt-2">Dashboard Financiero de Agosto. Análisis de rendimiento por negocio, categoría y proveedor.</p>
         </header>
 
         <!-- Panel de Filtros -->
-        <div class="bg-gray-800 p-4 rounded-lg shadow-lg mb-8">
+        <div class="bg-white p-4 rounded-lg shadow-md mb-8">
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Columna 1 -->
+                <!-- Filtros -->
                 <div>
-                    <label for="negocio-filter" class="block text-sm font-medium text-gray-400 mb-1">Negocio</label>
-                    <select id="negocio-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="todos">Todos los Negocios</option>
-                    </select>
+                    <label for="negocio-filter" class="block text-sm font-medium text-gray-700 mb-1">Negocio</label>
+                    <select id="negocio-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
                 <div>
-                    <label for="categoria-filter" class="block text-sm font-medium text-gray-400 mb-1">Categoría</label>
-                    <select id="categoria-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="todos">Todas las Categorías</option>
-                    </select>
-                </div>
-                
-                <!-- Columna 2 -->
-                <div>
-                    <label for="transaccion-filter" class="block text-sm font-medium text-gray-400 mb-1">Tipo de Transacción</label>
-                    <select id="transaccion-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="todos">Todos</option>
-                        <option value="Ingreso">Ingreso</option>
-                        <option value="Egreso">Egreso</option>
-                    </select>
+                    <label for="categoria-filter" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <select id="categoria-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
                 <div>
-                     <label for="proveedor-filter" class="block text-sm font-medium text-gray-400 mb-1">Proveedor</label>
-                    <select id="proveedor-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="todos">Todos los Proveedores</option>
-                    </select>
+                    <label for="transaccion-filter" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Transacción</label>
+                    <select id="transaccion-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                 </div>
-
-                <!-- Columna 3 -->
+                <div>
+                     <label for="proveedor-filter" class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                    <select id="proveedor-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                </div>
                 <div class="sm:col-span-2 lg:col-span-1">
-                    <label for="date-range-filter" class="block text-sm font-medium text-gray-400 mb-1">Rango de Fechas</label>
-                    <input type="text" id="date-range-filter" placeholder="Seleccionar rango..." class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <label for="date-range-filter" class="block text-sm font-medium text-gray-700 mb-1">Rango de Fechas</label>
+                    <input type="text" id="date-range-filter" placeholder="Seleccionar rango..." class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
                 </div>
                 <div class="flex items-end">
                     <button id="clear-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
@@ -95,26 +77,34 @@
 
         <!-- KPIs -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Ingresos Totales</h3><p id="kpi-ingresos" class="text-3xl font-bold text-green-400 mt-2">$0.00 MXN</p></div>
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Egresos Totales</h3><p id="kpi-egresos" class="text-3xl font-bold text-red-400 mt-2">$0.00 MXN</p></div>
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Beneficio Neto</h3><p id="kpi-beneficio" class="text-3xl font-bold text-blue-400 mt-2">$0.00 MXN</p></div>
-            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Nº de Transacciones</h3><p id="kpi-transacciones" class="text-3xl font-bold text-white mt-2">0</p></div>
+            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Ingresos Totales</h3><p id="kpi-ingresos" class="text-3xl font-bold text-green-600 mt-2">$0.00 MXN</p></div>
+            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Egresos Totales</h3><p id="kpi-egresos" class="text-3xl font-bold text-red-600 mt-2">$0.00 MXN</p></div>
+            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Beneficio Neto</h3><p id="kpi-beneficio" class="text-3xl font-bold text-blue-600 mt-2">$0.00 MXN</p></div>
+            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Nº de Transacciones</h3><p id="kpi-transacciones" class="text-3xl font-bold text-gray-900 mt-2">0</p></div>
         </div>
 
-        <!-- Gráficas -->
+        <!-- Gráficas: 1 columna en móvil, 2 en pantallas grandes -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="flowChart"></canvas></div>
-            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="barChart"></canvas></div>
-            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="doughnutChart"></canvas></div>
-            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="horizontalBarChart"></canvas></div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="h-80 md:h-96"><canvas id="flowChart"></canvas></div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="h-80 md:h-96"><canvas id="barChart"></canvas></div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="h-80 md:h-96"><canvas id="doughnutChart"></canvas></div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <div class="h-80 md:h-96"><canvas id="horizontalBarChart"></canvas></div>
+            </div>
         </div>
 
         <!-- Tabla de Datos -->
-        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-xl font-semibold mb-4 text-white">Detalle de Transacciones</h3>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold mb-4 text-gray-900">Detalle de Transacciones</h3>
             <div class="max-h-96 overflow-y-auto table-scrollbar">
-                <table class="min-w-full text-sm text-left text-gray-300">
-                    <thead class="text-xs text-gray-400 uppercase bg-gray-700 sticky top-0">
+                <table class="min-w-full text-sm text-left text-gray-700">
+                    <thead class="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
                         <tr>
                             <th scope="col" class="px-4 py-3">Fecha</th>
                             <th scope="col" class="px-4 py-3">Negocio</th>
@@ -5865,7 +5855,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!jsonData || jsonData.length === 0) {
         console.error("No se han cargado datos.");
-        document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-white text-2xl font-bold">Error: No se han cargado los datos. Revisa las instrucciones en el código HTML.</div>';
+        document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-gray-800 text-2xl font-bold">Error: No se han cargado los datos. Revisa las instrucciones en el código HTML.</div>';
         return;
     }
 
@@ -5892,41 +5882,32 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }).sort((a, b) => a.FECHA_UTC - b.FECHA_UTC);
 
-    Chart.defaults.color = 'rgba(209, 213, 219, 0.8)';
-    Chart.defaults.borderColor = 'rgba(55, 65, 81, 0.8)';
+    // Colores para el tema claro
+    Chart.defaults.color = '#4b5563'; // gray-600
+    Chart.defaults.borderColor = '#d1d5db'; // gray-300
     
     const charts = {
         flow: new Chart(document.getElementById('flowChart'), {
-            type: 'bar',
-            data: { labels: [], datasets: [] },
-            options: { 
-                responsive: true, maintainAspectRatio: false, 
-                plugins: { 
-                    title: { display: true, text: 'Flujo de Caja Semanal y Beneficio Acumulado' },
-                    tooltip: { mode: 'index', intersect: false }
-                }, 
-                scales: { x: { stacked: false }, y: { stacked: false, beginAtZero: true } } 
-            }
+            type: 'bar', data: { labels: [], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Flujo de Caja Semanal y Beneficio Acumulado', font: { size: 16 } }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { stacked: false }, y: { stacked: false, beginAtZero: true } } }
         }),
         bar: new Chart(document.getElementById('barChart'), {
             type: 'bar', data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Totales por Negocio' } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Totales por Negocio', font: { size: 16 } } } }
         }),
         doughnut: new Chart(document.getElementById('doughnutChart'), {
             type: 'doughnut', data: { labels: ['Ingresos', 'Egresos'], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Proporción Ingresos vs. Egresos' } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Proporción Ingresos vs. Egresos', font: { size: 16 } } } }
         }),
         horizontalBar: new Chart(document.getElementById('horizontalBarChart'), {
             type: 'bar', data: { labels: [], datasets: [] },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Top 5 Categorías de Gasto' } } }
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Top 5 Categorías de Gasto', font: { size: 16 } } } }
         })
     };
     
     const filters = {
-        negocio: document.getElementById('negocio-filter'),
-        transaccion: document.getElementById('transaccion-filter'),
-        dateRange: document.getElementById('date-range-filter'),
-        categoria: document.getElementById('categoria-filter'),
+        negocio: document.getElementById('negocio-filter'), transaccion: document.getElementById('transaccion-filter'),
+        dateRange: document.getElementById('date-range-filter'), categoria: document.getElementById('categoria-filter'),
         proveedor: document.getElementById('proveedor-filter')
     };
     
@@ -5939,10 +5920,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearFiltersBtn = document.getElementById('clear-filters-btn');
 
     const datePicker = flatpickr(filters.dateRange, {
-        mode: "range", dateFormat: "Y-m-d", locale: "es", theme: "dark", onChange: () => updateDashboard()
+        mode: "range", dateFormat: "Y-m-d", locale: "es", onChange: () => updateDashboard()
     });
 
-    const populateFilter = (element, values) => {
+    const populateFilter = (element, values, defaultOptionText) => {
+        element.innerHTML = ''; // Limpiar opciones existentes
+        const defaultOption = document.createElement('option');
+        defaultOption.value = 'todos';
+        defaultOption.textContent = defaultOptionText;
+        element.appendChild(defaultOption);
+
         values.forEach(value => {
             const option = document.createElement('option');
             option.value = value;
@@ -5951,9 +5938,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    populateFilter(filters.negocio, [...new Set(processedData.map(item => item.NEGOCIO))].sort());
-    populateFilter(filters.categoria, [...new Set(processedData.map(item => item.CATEGORIA))].sort());
-    populateFilter(filters.proveedor, [...new Set(processedData.map(item => item.PROVEEDOR))].sort());
+    populateFilter(filters.negocio, [...new Set(processedData.map(item => item.NEGOCIO))].sort(), 'Todos los Negocios');
+    populateFilter(filters.categoria, [...new Set(processedData.map(item => item.CATEGORIA))].sort(), 'Todas las Categorías');
+    populateFilter(filters.proveedor, [...new Set(processedData.map(item => item.PROVEEDOR))].sort(), 'Todos los Proveedores');
+    
+    // Poblar filtro de transacción estáticamente
+    filters.transaccion.innerHTML = `
+        <option value="todos">Todos</option>
+        <option value="Ingreso">Ingreso</option>
+        <option value="Egreso">Egreso</option>
+    `;
 
     const formatCurrency = (amount) => amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
     
@@ -5994,7 +5988,7 @@ document.addEventListener('DOMContentLoaded', () => {
         kpis.ingresos.textContent = formatCurrency(ingresos);
         kpis.egresos.textContent = formatCurrency(egresos);
         kpis.beneficio.textContent = formatCurrency(beneficio);
-        kpis.beneficio.style.color = beneficio >= 0 ? '#4ade80' : '#f87171';
+        kpis.beneficio.style.color = beneficio >= 0 ? '#16a34a' : '#dc2626'; // green-600, red-600
         kpis.transacciones.textContent = data.length;
     };
     
@@ -6006,20 +6000,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         data.forEach(item => {
             const row = document.createElement('tr');
-            row.className = 'border-b border-gray-700 hover:bg-gray-700/50';
+            row.className = 'border-b border-gray-200 hover:bg-gray-50';
             row.innerHTML = `
                 <td class="px-4 py-2">${item.FECHA_UTC.toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                 <td class="px-4 py-2">${item.NEGOCIO}</td>
                 <td class="px-4 py-2">${item.CATEGORIA}</td>
                 <td class="px-4 py-2">${item.PROVEEDOR}</td>
-                <td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${item.TRANSACCION === 'Ingreso' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${item.TRANSACCION}</span></td>
+                <td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${item.TRANSACCION === 'Ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${item.TRANSACCION}</span></td>
                 <td class="px-4 py-2 text-right font-mono">${formatCurrency(item.IMPORTE)}</td>`;
             tableBody.appendChild(row);
         });
     };
     
     const updateCharts = (data) => {
-        // Flow Chart - Weekly Aggregation
+        // Colores para las gráficas
+        const greenColor = 'rgba(22, 163, 74, 0.7)'; // green-600
+        const redColor = 'rgba(220, 38, 38, 0.7)';   // red-600
+        const blueColor = '#3b82f6';                // blue-500
+        const lightBlueColor = '#60a5fa';           // blue-400
+
+        // Flow Chart
         const weeklyData = data.reduce((acc, item) => {
             const startOfWeek = getStartOfWeek(item.FECHA_UTC);
             const weekKey = startOfWeek.toISOString().split('T')[0];
@@ -6028,27 +6028,16 @@ document.addEventListener('DOMContentLoaded', () => {
             else acc[weekKey].egresos += item.IMPORTE;
             return acc;
         }, {});
-
         const sortedWeeks = Object.keys(weeklyData).sort();
-        const weekLabels = sortedWeeks.map(weekKey => {
-            const date = new Date(weekKey);
-            const day = ('0' + date.getUTCDate()).slice(-2);
-            const month = ('0' + (date.getUTCMonth() + 1)).slice(-2);
-            return `Sem. del ${day}/${month}`;
-        });
-        
+        const weekLabels = sortedWeeks.map(weekKey => `Sem. ${new Date(weekKey).toLocaleDateString('es-MX', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}`);
         const weeklyNet = sortedWeeks.map(weekKey => weeklyData[weekKey].ingresos - weeklyData[weekKey].egresos);
-        
         let cumulative = 0;
-        const cumulativeBenefit = weeklyNet.map(net => {
-            cumulative += net;
-            return cumulative;
-        });
+        const cumulativeBenefit = weeklyNet.map(net => cumulative += net);
 
         charts.flow.data.labels = weekLabels;
         charts.flow.data.datasets = [
-            { type: 'bar', label: 'Flujo Neto Semanal', data: weeklyNet, backgroundColor: weeklyNet.map(v => v >= 0 ? 'rgba(74, 222, 128, 0.7)' : 'rgba(248, 113, 113, 0.7)'), order: 2 },
-            { type: 'line', label: 'Beneficio Acumulado', data: cumulativeBenefit, borderColor: '#60a5fa', backgroundColor: '#60a5fa', tension: 0.1, fill: false, order: 1 }
+            { type: 'bar', label: 'Flujo Neto Semanal', data: weeklyNet, backgroundColor: weeklyNet.map(v => v >= 0 ? greenColor : redColor), order: 2 },
+            { type: 'line', label: 'Beneficio Acumulado', data: cumulativeBenefit, borderColor: blueColor, backgroundColor: blueColor, tension: 0.1, fill: false, order: 1 }
         ];
         charts.flow.update();
 
@@ -6061,18 +6050,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {});
         charts.bar.data.labels = Object.keys(negocioData);
         charts.bar.data.datasets = [
-            { label: 'Ingresos', data: Object.values(negocioData).map(d => d.ingresos), backgroundColor: 'rgba(74, 222, 128, 0.7)' },
-            { label: 'Egresos', data: Object.values(negocioData).map(d => d.egresos), backgroundColor: 'rgba(248, 113, 113, 0.7)' }
+            { label: 'Ingresos', data: Object.values(negocioData).map(d => d.ingresos), backgroundColor: greenColor },
+            { label: 'Egresos', data: Object.values(negocioData).map(d => d.egresos), backgroundColor: redColor }
         ];
         charts.bar.update();
         
         // Doughnut Chart
         const totalIngresos = data.filter(d => d.TRANSACCION === 'Ingreso').reduce((sum, item) => sum + item.IMPORTE, 0);
         const totalEgresos = data.filter(d => d.TRANSACCION === 'Egreso').reduce((sum, item) => sum + item.IMPORTE, 0);
-        charts.doughnut.data.datasets = [{
-            data: [totalIngresos, totalEgresos],
-            backgroundColor: ['rgba(74, 222, 128, 0.7)', 'rgba(248, 113, 113, 0.7)']
-        }];
+        charts.doughnut.data.datasets = [{ data: [totalIngresos, totalEgresos], backgroundColor: [greenColor, redColor] }];
         charts.doughnut.update();
 
         // Horizontal Bar Chart
@@ -6082,11 +6068,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, {});
         const top5Gastos = Object.entries(gastoCategorias).sort((a, b) => b[1] - a[1]).slice(0, 5);
         charts.horizontalBar.data.labels = top5Gastos.map(item => item[0]);
-        charts.horizontalBar.data.datasets = [{
-            label: 'Total Gastado',
-            data: top5Gastos.map(item => item[1]),
-            backgroundColor: 'rgba(96, 165, 250, 0.7)'
-        }];
+        charts.horizontalBar.data.datasets = [{ label: 'Total Gastado', data: top5Gastos.map(item => item[1]), backgroundColor: lightBlueColor }];
         charts.horizontalBar.update();
     };
     
