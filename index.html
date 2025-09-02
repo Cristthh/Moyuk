@@ -1,0 +1,6113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Financiero Avanzado</title>
+
+    <!-- Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Chart.js desde CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Flatpickr desde CDN (CSS y JS) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #111827; }
+        .table-scrollbar::-webkit-scrollbar { width: 8px; }
+        .table-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
+        .table-scrollbar::-webkit-scrollbar-thumb { background-color: #4b5563; border-radius: 4px; }
+        .flatpickr-calendar.dark { background: #1f2937; border-color: #374151; color: #d1d5db; }
+        .flatpickr-calendar.dark .flatpickr-month,
+        .flatpickr-calendar.dark .flatpickr-weekday,
+        .flatpickr-calendar.dark .flatpickr-day { color: #d1d5db; }
+        .flatpickr-calendar.dark .flatpickr-day.selected,
+        .flatpickr-calendar.dark .flatpickr-day.startRange,
+        .flatpickr-calendar.dark .flatpickr-day.endRange { background: #3b82f6; border-color: #3b82f6; }
+        .flatpickr-calendar.dark .flatpickr-day:hover { background: #374151; }
+        .flatpickr-calendar.dark .numInput { background: #374151; color: #d1d5db; }
+    </style>
+</head>
+<body class="text-gray-200 p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Encabezado -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-white">Operadora y Comercializadora de Alimentos Moyuk</h1>
+            <p class="text-gray-400 mt-2">Análisis de rendimiento por negocio, categoría y proveedor.</p>
+        </header>
+
+        <!-- Panel de Filtros -->
+        <div class="bg-gray-800 p-4 rounded-lg shadow-lg mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Columna 1 -->
+                <div>
+                    <label for="negocio-filter" class="block text-sm font-medium text-gray-400 mb-1">Negocio</label>
+                    <select id="negocio-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="todos">Todos los Negocios</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="categoria-filter" class="block text-sm font-medium text-gray-400 mb-1">Categoría</label>
+                    <select id="categoria-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="todos">Todas las Categorías</option>
+                    </select>
+                </div>
+                
+                <!-- Columna 2 -->
+                <div>
+                    <label for="transaccion-filter" class="block text-sm font-medium text-gray-400 mb-1">Tipo de Transacción</label>
+                    <select id="transaccion-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="todos">Todos</option>
+                        <option value="Ingreso">Ingreso</option>
+                        <option value="Egreso">Egreso</option>
+                    </select>
+                </div>
+                <div>
+                     <label for="proveedor-filter" class="block text-sm font-medium text-gray-400 mb-1">Proveedor</label>
+                    <select id="proveedor-filter" class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="todos">Todos los Proveedores</option>
+                    </select>
+                </div>
+
+                <!-- Columna 3 -->
+                <div class="sm:col-span-2 lg:col-span-1">
+                    <label for="date-range-filter" class="block text-sm font-medium text-gray-400 mb-1">Rango de Fechas</label>
+                    <input type="text" id="date-range-filter" placeholder="Seleccionar rango..." class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="flex items-end">
+                    <button id="clear-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                        Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Ingresos Totales</h3><p id="kpi-ingresos" class="text-3xl font-bold text-green-400 mt-2">$0.00 MXN</p></div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Egresos Totales</h3><p id="kpi-egresos" class="text-3xl font-bold text-red-400 mt-2">$0.00 MXN</p></div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Beneficio Neto</h3><p id="kpi-beneficio" class="text-3xl font-bold text-blue-400 mt-2">$0.00 MXN</p></div>
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg"><h3 class="text-gray-400 text-sm font-medium">Nº de Transacciones</h3><p id="kpi-transacciones" class="text-3xl font-bold text-white mt-2">0</p></div>
+        </div>
+
+        <!-- Gráficas -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="flowChart"></canvas></div>
+            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="barChart"></canvas></div>
+            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="doughnutChart"></canvas></div>
+            <div class="bg-gray-800 p-4 rounded-lg shadow-lg"><canvas id="horizontalBarChart"></canvas></div>
+        </div>
+
+        <!-- Tabla de Datos -->
+        <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold mb-4 text-white">Detalle de Transacciones</h3>
+            <div class="max-h-96 overflow-y-auto table-scrollbar">
+                <table class="min-w-full text-sm text-left text-gray-300">
+                    <thead class="text-xs text-gray-400 uppercase bg-gray-700 sticky top-0">
+                        <tr>
+                            <th scope="col" class="px-4 py-3">Fecha</th>
+                            <th scope="col" class="px-4 py-3">Negocio</th>
+                            <th scope="col" class="px-4 py-3">Categoría</th>
+                            <th scope="col" class="px-4 py-3">Proveedor</th>
+                            <th scope="col" class="px-4 py-3">Tipo</th>
+                            <th scope="col" class="px-4 py-3 text-right">Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ===================================================================================
+// INSTRUCCIONES: Pega el contenido de tu archivo '.json'
+// dentro de los corchetes vacíos de la variable 'jsonData'.
+// ===================================================================================
+
+const jsonData = [
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":12488.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":9718.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":22053.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":6233.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":9478.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":8780.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":8389.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":9192.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":16796.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-10",
+        "PROVEEDOR":null,
+        "IMPORTE":13136.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":4998.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":10322.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":6117.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":13942.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":13819.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":8758.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":14035.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":6854.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":8568.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":3829.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":9850.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":14838.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":8985.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":15319.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":4087.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":9287.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":7201.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":7284.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":9778.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":null,
+        "IMPORTE":7137.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-31",
+        "PROVEEDOR":null,
+        "IMPORTE":12825.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":6720.6,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":11442.3,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":14292.4,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":6364.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":4867.3,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":10602.8,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":5037.7,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":8495.9,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":6424.2,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-10",
+        "PROVEEDOR":null,
+        "IMPORTE":5873.5,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":6027.3,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":3328.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":10251.1,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":10460.3,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":8539.35,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":11569.6,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":10345.4,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":7370.2,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":8204.3,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":6623.2,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":9080.3,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":4640.4,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":12642.9,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":14750.4,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":4871.8,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":4825.25,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":3039.6,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":4612.7,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":4521.4,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":null,
+        "IMPORTE":4079.6,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-31",
+        "PROVEEDOR":null,
+        "IMPORTE":11482.9,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":284.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":260.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":1000.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":633.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":408.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":524.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":124.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":120.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":785.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":234.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":891.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":741.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":844.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":581.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":336.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":null,
+        "IMPORTE":699.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"DESAYUNO EMPLEADOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":150.0,
+        "CATEGORIA":"DESAYUNO EMPLEADOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"DESAYUNO EMPLEADOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":150.0,
+        "CATEGORIA":"DESAYUNO EMPLEADOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":30.0,
+        "CATEGORIA":"DESAYUNO EMPLEADOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":30.0,
+        "CATEGORIA":"DESAYUNO EMPLEADOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"DESAYUNO EMPLEADOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":74.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":1477.84,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":20.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":286.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":183.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":28.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":86.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":80.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":1376.7,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":308.81,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":1388.4,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":1445.6,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":1162.32,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":1189.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":1173.6,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":1167.54,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":985.0,
+        "CATEGORIA":"HUEVOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":997.0,
+        "CATEGORIA":"HUEVOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":1159.0,
+        "CATEGORIA":"HUEVOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":110.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":10.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":2410.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-10",
+        "PROVEEDOR":null,
+        "IMPORTE":88.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":2270.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":101.67,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":215.98,
+        "CATEGORIA":"CERVEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":615.0,
+        "CATEGORIA":"CERVEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":315.0,
+        "CATEGORIA":"CERVEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":215.98,
+        "CATEGORIA":"CERVEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":530.99,
+        "CATEGORIA":"CERVEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":210.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":80.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":387.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":88.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":64.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":130.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":210.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":168.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":80.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":325.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":128.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":96.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":315.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-10",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":19.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":20.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":40.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":199.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":8685.2,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":4182.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":19518.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":4182.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":12646.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":4182.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":11777.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":4182.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":4182.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":2792.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-31",
+        "PROVEEDOR":null,
+        "IMPORTE":8664.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":400.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":1000.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":32.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":800.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-10",
+        "PROVEEDOR":null,
+        "IMPORTE":800.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":400.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":1000.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":200.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":200.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":1000.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":64.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":null,
+        "IMPORTE":100.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-31",
+        "PROVEEDOR":null,
+        "IMPORTE":1000.0,
+        "CATEGORIA":"EVENTUAL Mesero\/Barra\/ Cocina\/Apoyo\/ Servicio",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":10.0,
+        "CATEGORIA":"COMISIONES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-31",
+        "PROVEEDOR":null,
+        "IMPORTE":35.0,
+        "CATEGORIA":"COMISIONES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":1000.0,
+        "CATEGORIA":"PRESTAMOS\/ ADELANTOS QUINCENA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":533.6,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":894.3,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":764.4,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":423.0,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":515.3,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":691.8,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":351.7,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":954.9,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":352.8,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-10",
+        "PROVEEDOR":null,
+        "IMPORTE":348.5,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":301.3,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":393.0,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":662.1,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":558.0,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":627.0,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":739.4,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":752.4,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":556.2,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":511.3,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":363.9,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":698.3,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":347.4,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":881.9,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":810.0,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":338.6,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":337.25,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":120.6,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":342.7,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":358.4,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":null,
+        "IMPORTE":271.6,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-31",
+        "PROVEEDOR":null,
+        "IMPORTE":823.9,
+        "CATEGORIA":"PROPINAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":1900.0,
+        "CATEGORIA":"GAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":1900.0,
+        "CATEGORIA":"GAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":1900.0,
+        "CATEGORIA":"GAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":1050.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":130.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":114.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":812.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":144.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":99.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":415.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":134.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":99.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":114.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":170.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":1172.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":160.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":178.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":130.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":125.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":953.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":114.0,
+        "CATEGORIA":"CORTESIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":20.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":45.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":20.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MOTOENVIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":259.0,
+        "CATEGORIA":"TICKET CANCELADO\/ DEVOLUCIONES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":70.0,
+        "CATEGORIA":"TICKET CANCELADO\/ DEVOLUCIONES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-10",
+        "PROVEEDOR":null,
+        "IMPORTE":70.0,
+        "CATEGORIA":"TICKET CANCELADO\/ DEVOLUCIONES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":59.0,
+        "CATEGORIA":"TICKET CANCELADO\/ DEVOLUCIONES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":20.0,
+        "CATEGORIA":"TICKET CANCELADO\/ DEVOLUCIONES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-02",
+        "PROVEEDOR":null,
+        "IMPORTE":3000.0,
+        "CATEGORIA":"OTROS GASTOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":null,
+        "IMPORTE":10000.0,
+        "CATEGORIA":"OTROS GASTOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":530.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":966.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":2400.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":651.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":1235.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":20.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":410.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":225.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":205.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":482.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":150.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":70.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":157.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":682.0,
+        "CATEGORIA":"TRANSFERENCIAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":1500.0,
+        "CATEGORIA":"GAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":128.0,
+        "CATEGORIA":"EXTRA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":9370.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":9439.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":10317.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":11919.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":10168.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":10195.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":9197.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":8712.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":10015.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":12447.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":10170.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":6173.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":7874.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":3353.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":5269.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":6951.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":11225.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":8671.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":10977.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":9549.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":4117.0,
+        "CATEGORIA":"PAGO EFECTIVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":1348.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":1271.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":2540.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":1402.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":2576.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":null,
+        "IMPORTE":1483.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":1787.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":2476.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":1436.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":1853.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":2068.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":1073.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":1659.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":1114.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":null,
+        "IMPORTE":1608.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":1525.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":1855.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":1887.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":1948.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":976.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Venta",
+        "TRANSACCION":"Ingreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":933.0,
+        "CATEGORIA":"PAGO CON TARJETA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":223.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":74.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":24.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":74.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":27.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":5095.28,
+        "CATEGORIA":"BIMBO Y SABRITAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":4001.0,
+        "CATEGORIA":"BIMBO Y SABRITAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":2499.0,
+        "CATEGORIA":"BIMBO Y SABRITAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":4752.0,
+        "CATEGORIA":"BIMBO Y SABRITAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":4005.0,
+        "CATEGORIA":"BIMBO Y SABRITAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":2012.0,
+        "CATEGORIA":"BIMBO Y SABRITAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":4804.0,
+        "CATEGORIA":"BIMBO Y SABRITAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":null,
+        "IMPORTE":126.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":126.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":360.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":180.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":126.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":null,
+        "IMPORTE":144.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":null,
+        "IMPORTE":90.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":54.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":null,
+        "IMPORTE":9900.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":null,
+        "IMPORTE":6200.0,
+        "CATEGORIA":"NOMINA Y BONOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":null,
+        "IMPORTE":200.0,
+        "CATEGORIA":"TELCEL",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":null,
+        "IMPORTE":100.0,
+        "CATEGORIA":"OTROS GASTOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":222.5,
+        "CATEGORIA":"OTROS GASTOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":null,
+        "IMPORTE":16.0,
+        "CATEGORIA":"OTROS GASTOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":2044.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"PITICO",
+        "IMPORTE":72.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"LOS COLOCHOS",
+        "IMPORTE":216.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":2915.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":820.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":238.45,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"POLLOS YUVE",
+        "IMPORTE":911.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":1100.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-01",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":171.0,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":706.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":339.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":517.62,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":604.12,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":3412.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":354.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":659.8,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":920.0,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1583.16,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":570.84,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":420.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":300.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-04",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":504.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1095.64,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1470.4,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1439.0,
+        "CATEGORIA":"REFRESCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-05",
+        "PROVEEDOR":"DEPOSITO VOLT",
+        "IMPORTE":2335.0,
+        "CATEGORIA":"REFRESCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"EL CONEJO ROJO",
+        "IMPORTE":1425.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"JARABES"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":1531.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":522.92,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":214.88,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":196.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":560.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"DON FER",
+        "IMPORTE":310.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":4864.27,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1138.62,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":590.4,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":340.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":"FRIJOL"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":366.0,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":4894.0,
+        "CATEGORIA":"REFRESCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":370.0,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":6002.84,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"JUGOS, ELECTROLITOS"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":280.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":"ARFE",
+        "IMPORTE":738.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":"ANGLO CORP",
+        "IMPORTE":1611.82,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":600.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":4831.57,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":3621.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":394.7,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"LOS COLOCHOS",
+        "IMPORTE":393.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":218.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"PAN MOLIDO"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":298.72,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":236.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":1207.39,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"WALMART",
+        "IMPORTE":200.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1703.37,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"AGUA Y HORCHATA"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":828.63,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":535.04,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"POLLOS YUVE",
+        "IMPORTE":1135.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-08",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":1767.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":"SANTA CRUZ",
+        "IMPORTE":452.4,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-09",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":2728.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":1019.7,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-12",
+        "PROVEEDOR":"ING ISRAEL",
+        "IMPORTE":1650.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":"REPARACION DE CONGELADOR BARRA"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":2638.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":1025.84,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"LOS COLOCHOS",
+        "IMPORTE":360.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":250.74,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":472.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":3808.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"CANDIFER",
+        "IMPORTE":700.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-13",
+        "PROVEEDOR":"DON WERO",
+        "IMPORTE":250.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":540.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":1019.7,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":961.6,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":354.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"POLLOS YUVE",
+        "IMPORTE":1130.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":350.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":420.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":535.92,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":1183.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":3286.11,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":644.49,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"ARFE",
+        "IMPORTE":576.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"ARFE",
+        "IMPORTE":891.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":488.0,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":814.0,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":2265.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"EL CONEJO ROJO",
+        "IMPORTE":1700.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"JARABES"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":142.9,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":479.9,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":3248.02,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"JARABE, COFFE MATE, PAN MOLIDO, ETC"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1377.98,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":645.01,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":643.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":224.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":420.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"ABARROTES MONTERREY",
+        "IMPORTE":128.0,
+        "CATEGORIA":"TORTILLA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":600.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-15",
+        "PROVEEDOR":"SANTA CRUZ",
+        "IMPORTE":452.4,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":"CFE",
+        "IMPORTE":4425.0,
+        "CATEGORIA":"LUZ",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":403.31,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":4673.96,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":276.21,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":570.84,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":"DON FER",
+        "IMPORTE":275.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-18",
+        "PROVEEDOR":"IMSS",
+        "IMPORTE":4077.78,
+        "CATEGORIA":"IMSS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":236.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":"PITICO",
+        "IMPORTE":255.78,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":4450.43,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":350.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-19",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":3208.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-20",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":1077.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"EL CONEJO ROJO",
+        "IMPORTE":950.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"JARABES"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":924.79,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1769.79,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"ACEITE, HARINA"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":3169.01,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1878.47,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":1950.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":530.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"CARNICERIA SAN JUAN",
+        "IMPORTE":116.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":3048.11,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":172.89,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":503.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":420.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"DON FER",
+        "IMPORTE":85.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":98.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-21",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":526.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":925.79,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":794.88,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":66.49,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1197.13,
+        "CATEGORIA":"BEBIDAS NO GASEOSAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1607.14,
+        "CATEGORIA":"REFRESCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":76.74,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"CANDIFER",
+        "IMPORTE":700.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"DIDI",
+        "IMPORTE":150.0,
+        "CATEGORIA":"GASTOS OPERATIVOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":354.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":339.9,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":1291.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":210.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":140.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"POLLOS YUVE",
+        "IMPORTE":847.2,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1590.02,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":977.97,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":3778.0,
+        "CATEGORIA":"BEBIDAS NO GASEOSAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":969.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":2669.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-22",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":450.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":393.65,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":210.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":535.92,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":"DON FER",
+        "IMPORTE":55.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-23",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":1085.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"LA HOJALDRA",
+        "IMPORTE":150.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":532.7,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":1003.38,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"QUESAFRAN",
+        "IMPORTE":236.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":539.34,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"POLLOS YUVE",
+        "IMPORTE":453.75,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":210.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"CERRAJERIA",
+        "IMPORTE":120.0,
+        "CATEGORIA":"GASTOS OPERATIVOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":4028.98,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1783.61,
+        "CATEGORIA":"BEBIDAS NO GASEOSAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":204.6,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":277.24,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":172.89,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":141.18,
+        "CATEGORIA":"TORTILLA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":856.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":4232.0,
+        "CATEGORIA":"REFRESCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":985.14,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1061.88,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":276.21,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-25",
+        "PROVEEDOR":"JUAN MARIMBA",
+        "IMPORTE":810.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"SRA MALU",
+        "IMPORTE":130.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"SRA MALU",
+        "IMPORTE":130.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"SRA MALU",
+        "IMPORTE":64.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"DON LENIN",
+        "IMPORTE":2400.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":120.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"LOS COLOCHOS",
+        "IMPORTE":250.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":143.25,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"DON FER",
+        "IMPORTE":100.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":604.16,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":210.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":2542.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"PITICO",
+        "IMPORTE":791.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"GELATINAS"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":"TIENDA AMIGA",
+        "IMPORTE":1068.08,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"DON WERO",
+        "IMPORTE":300.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"BIO CAFE",
+        "IMPORTE":2025.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":"CAFE"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"EL CONEJO ROJO",
+        "IMPORTE":1425.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":"JARABES"
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":120.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":949.35,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":487.98,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1502.77,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":248.59,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":276.2,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1515.05,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":286.44,
+        "CATEGORIA":"REFRESCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-27",
+        "PROVEEDOR":"INV SAUCES",
+        "IMPORTE":727.22,
+        "CATEGORIA":"PLASTICOS Y PAPELERIA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"CANDIFER",
+        "IMPORTE":540.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"WILLYS",
+        "IMPORTE":267.9,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":973.6,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":149.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":2499.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":98.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"DON FER",
+        "IMPORTE":215.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":420.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":116.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":467.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":140.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"SUKARNE",
+        "IMPORTE":4450.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"MARISCOS VASA",
+        "IMPORTE":1410.0,
+        "CATEGORIA":"MARISCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":2445.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-28",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":90.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":191.3,
+        "CATEGORIA":"REFRESCOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":478.77,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":2588.07,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"DON WERO",
+        "IMPORTE":75.0,
+        "CATEGORIA":"AGUA Y HIELO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":660.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":74.5,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":1189.49,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":5943.01,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":977.0,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"POLLOS YUVE",
+        "IMPORTE":1055.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":1075.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":1075.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"CANDIFER",
+        "IMPORTE":1000.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"STEREN",
+        "IMPORTE":218.01,
+        "CATEGORIA":"COMPRA DE EQUIPO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"LA FRAILESCA",
+        "IMPORTE":701.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"CARNEMART",
+        "IMPORTE":1006.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"LA HOJALDRA",
+        "IMPORTE":200.0,
+        "CATEGORIA":"PAN",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":5386.0,
+        "CATEGORIA":"ABARROTES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"ROSARIO POLLO",
+        "IMPORTE":646.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"NOTA",
+        "IMPORTE":442.0,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"POLLOS YUVE",
+        "IMPORTE":541.0,
+        "CATEGORIA":"CARNES",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"DON LORENZO",
+        "IMPORTE":1431.5,
+        "CATEGORIA":"FRUTAS Y VERDURAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"MALAGUISIMA",
+        "IMPORTE":848.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"JUAN MARIMBA",
+        "IMPORTE":2200.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"PABLIN",
+        "IMPORTE":29.58,
+        "CATEGORIA":"PLASTICOS Y UTENCILIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":279.0,
+        "CATEGORIA":"LIMPIEZA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":186.18,
+        "CATEGORIA":"HUEVO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"SAMS",
+        "IMPORTE":1041.82,
+        "CATEGORIA":"LACTEOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"PABLIN",
+        "IMPORTE":46.4,
+        "CATEGORIA":"PLASTICOS Y UTENCILIOS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"PRISCILLA GOURMET",
+        "IMPORTE":1190.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    }
+]; // <-- ¡PEGA TUS DATOS JSON AQUÍ!
+
+// ===================================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    if (!jsonData || jsonData.length === 0) {
+        console.error("No se han cargado datos.");
+        document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-white text-2xl font-bold">Error: No se han cargado los datos. Revisa las instrucciones en el código HTML.</div>';
+        return;
+    }
+
+    const normalizeCategory = (category) => {
+        if (typeof category !== 'string') return category;
+        const lowerCategory = category.toLowerCase().trim();
+        const categoryMap = {
+            'verduras y frutas': 'FRUTAS Y VERDURAS', 'nominas/ bonos': 'NOMINA Y BONOS',
+            'garrafones de agua/ hielo': 'AGUA Y HIELO', 'cancelacion/ devolucion': 'TICKET CANCELADO/ DEVOLUCIONES',
+            'comidas/ vales descuentos': 'VALES DE COMIDA'
+        };
+        return categoryMap[lowerCategory] || category;
+    };
+
+    const processedData = jsonData.map(item => {
+        const parts = item.FECHA.split('-');
+        return {
+            ...item,
+            NEGOCIO: (item['NEGOCIO '] || item.NEGOCIO || '').trim(),
+            CATEGORIA: normalizeCategory(item.CATEGORIA),
+            PROVEEDOR: item.PROVEEDOR || 'No especificado',
+            FECHA_UTC: new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))),
+            IMPORTE: parseFloat(item.IMPORTE)
+        };
+    }).sort((a, b) => a.FECHA_UTC - b.FECHA_UTC);
+
+    Chart.defaults.color = 'rgba(209, 213, 219, 0.8)';
+    Chart.defaults.borderColor = 'rgba(55, 65, 81, 0.8)';
+    
+    const charts = {
+        flow: new Chart(document.getElementById('flowChart'), {
+            type: 'bar',
+            data: { labels: [], datasets: [] },
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                plugins: { 
+                    title: { display: true, text: 'Flujo de Caja Semanal y Beneficio Acumulado' },
+                    tooltip: { mode: 'index', intersect: false }
+                }, 
+                scales: { x: { stacked: false }, y: { stacked: false, beginAtZero: true } } 
+            }
+        }),
+        bar: new Chart(document.getElementById('barChart'), {
+            type: 'bar', data: { labels: [], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Totales por Negocio' } } }
+        }),
+        doughnut: new Chart(document.getElementById('doughnutChart'), {
+            type: 'doughnut', data: { labels: ['Ingresos', 'Egresos'], datasets: [] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Proporción Ingresos vs. Egresos' } } }
+        }),
+        horizontalBar: new Chart(document.getElementById('horizontalBarChart'), {
+            type: 'bar', data: { labels: [], datasets: [] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Top 5 Categorías de Gasto' } } }
+        })
+    };
+    
+    const filters = {
+        negocio: document.getElementById('negocio-filter'),
+        transaccion: document.getElementById('transaccion-filter'),
+        dateRange: document.getElementById('date-range-filter'),
+        categoria: document.getElementById('categoria-filter'),
+        proveedor: document.getElementById('proveedor-filter')
+    };
+    
+    const kpis = {
+        ingresos: document.getElementById('kpi-ingresos'), egresos: document.getElementById('kpi-egresos'),
+        beneficio: document.getElementById('kpi-beneficio'), transacciones: document.getElementById('kpi-transacciones'),
+    };
+    
+    const tableBody = document.getElementById('data-table-body');
+    const clearFiltersBtn = document.getElementById('clear-filters-btn');
+
+    const datePicker = flatpickr(filters.dateRange, {
+        mode: "range", dateFormat: "Y-m-d", locale: "es", theme: "dark", onChange: () => updateDashboard()
+    });
+
+    const populateFilter = (element, values) => {
+        values.forEach(value => {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            element.appendChild(option);
+        });
+    };
+
+    populateFilter(filters.negocio, [...new Set(processedData.map(item => item.NEGOCIO))].sort());
+    populateFilter(filters.categoria, [...new Set(processedData.map(item => item.CATEGORIA))].sort());
+    populateFilter(filters.proveedor, [...new Set(processedData.map(item => item.PROVEEDOR))].sort());
+
+    const formatCurrency = (amount) => amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
+    
+    const getStartOfWeek = (date) => {
+        const d = new Date(date);
+        const day = d.getUTCDay();
+        const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
+        d.setUTCDate(diff);
+        d.setUTCHours(0, 0, 0, 0);
+        return d;
+    };
+
+    const updateDashboard = () => {
+        const selectedNegocio = filters.negocio.value;
+        const selectedTransaccion = filters.transaccion.value;
+        const selectedCategoria = filters.categoria.value;
+        const selectedProveedor = filters.proveedor.value;
+        const selectedDates = datePicker.selectedDates;
+        
+        const filteredData = processedData.filter(item => 
+            (selectedNegocio === 'todos' || item.NEGOCIO === selectedNegocio) &&
+            (selectedTransaccion === 'todos' || item.TRANSACCION === selectedTransaccion) &&
+            (selectedCategoria === 'todos' || item.CATEGORIA === selectedCategoria) &&
+            (selectedProveedor === 'todos' || item.PROVEEDOR === selectedProveedor) &&
+            (selectedDates.length < 2 || (item.FECHA_UTC >= selectedDates[0] && item.FECHA_UTC <= selectedDates[1]))
+        );
+
+        updateKPIs(filteredData);
+        updateCharts(filteredData);
+        updateTable(filteredData);
+    };
+    
+    const updateKPIs = (data) => {
+        const ingresos = data.filter(d => d.TRANSACCION === 'Ingreso').reduce((sum, item) => sum + item.IMPORTE, 0);
+        const egresos = data.filter(d => d.TRANSACCION === 'Egreso').reduce((sum, item) => sum + item.IMPORTE, 0);
+        const beneficio = ingresos - egresos;
+        
+        kpis.ingresos.textContent = formatCurrency(ingresos);
+        kpis.egresos.textContent = formatCurrency(egresos);
+        kpis.beneficio.textContent = formatCurrency(beneficio);
+        kpis.beneficio.style.color = beneficio >= 0 ? '#4ade80' : '#f87171';
+        kpis.transacciones.textContent = data.length;
+    };
+    
+    const updateTable = (data) => {
+        tableBody.innerHTML = '';
+        if (data.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">No hay datos para los filtros seleccionados.</td></tr>';
+            return;
+        }
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-700 hover:bg-gray-700/50';
+            row.innerHTML = `
+                <td class="px-4 py-2">${item.FECHA_UTC.toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
+                <td class="px-4 py-2">${item.NEGOCIO}</td>
+                <td class="px-4 py-2">${item.CATEGORIA}</td>
+                <td class="px-4 py-2">${item.PROVEEDOR}</td>
+                <td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${item.TRANSACCION === 'Ingreso' ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'}">${item.TRANSACCION}</span></td>
+                <td class="px-4 py-2 text-right font-mono">${formatCurrency(item.IMPORTE)}</td>`;
+            tableBody.appendChild(row);
+        });
+    };
+    
+    const updateCharts = (data) => {
+        // Flow Chart - Weekly Aggregation
+        const weeklyData = data.reduce((acc, item) => {
+            const startOfWeek = getStartOfWeek(item.FECHA_UTC);
+            const weekKey = startOfWeek.toISOString().split('T')[0];
+            if (!acc[weekKey]) acc[weekKey] = { ingresos: 0, egresos: 0 };
+            if (item.TRANSACCION === 'Ingreso') acc[weekKey].ingresos += item.IMPORTE;
+            else acc[weekKey].egresos += item.IMPORTE;
+            return acc;
+        }, {});
+
+        const sortedWeeks = Object.keys(weeklyData).sort();
+        const weekLabels = sortedWeeks.map(weekKey => {
+            const date = new Date(weekKey);
+            const day = ('0' + date.getUTCDate()).slice(-2);
+            const month = ('0' + (date.getUTCMonth() + 1)).slice(-2);
+            return `Sem. del ${day}/${month}`;
+        });
+        
+        const weeklyNet = sortedWeeks.map(weekKey => weeklyData[weekKey].ingresos - weeklyData[weekKey].egresos);
+        
+        let cumulative = 0;
+        const cumulativeBenefit = weeklyNet.map(net => {
+            cumulative += net;
+            return cumulative;
+        });
+
+        charts.flow.data.labels = weekLabels;
+        charts.flow.data.datasets = [
+            { type: 'bar', label: 'Flujo Neto Semanal', data: weeklyNet, backgroundColor: weeklyNet.map(v => v >= 0 ? 'rgba(74, 222, 128, 0.7)' : 'rgba(248, 113, 113, 0.7)'), order: 2 },
+            { type: 'line', label: 'Beneficio Acumulado', data: cumulativeBenefit, borderColor: '#60a5fa', backgroundColor: '#60a5fa', tension: 0.1, fill: false, order: 1 }
+        ];
+        charts.flow.update();
+
+        // Bar Chart
+        const negocioData = data.reduce((acc, item) => {
+            if (!acc[item.NEGOCIO]) acc[item.NEGOCIO] = { ingresos: 0, egresos: 0 };
+            if (item.TRANSACCION === 'Ingreso') acc[item.NEGOCIO].ingresos += item.IMPORTE;
+            else acc[item.NEGOCIO].egresos += item.IMPORTE;
+            return acc;
+        }, {});
+        charts.bar.data.labels = Object.keys(negocioData);
+        charts.bar.data.datasets = [
+            { label: 'Ingresos', data: Object.values(negocioData).map(d => d.ingresos), backgroundColor: 'rgba(74, 222, 128, 0.7)' },
+            { label: 'Egresos', data: Object.values(negocioData).map(d => d.egresos), backgroundColor: 'rgba(248, 113, 113, 0.7)' }
+        ];
+        charts.bar.update();
+        
+        // Doughnut Chart
+        const totalIngresos = data.filter(d => d.TRANSACCION === 'Ingreso').reduce((sum, item) => sum + item.IMPORTE, 0);
+        const totalEgresos = data.filter(d => d.TRANSACCION === 'Egreso').reduce((sum, item) => sum + item.IMPORTE, 0);
+        charts.doughnut.data.datasets = [{
+            data: [totalIngresos, totalEgresos],
+            backgroundColor: ['rgba(74, 222, 128, 0.7)', 'rgba(248, 113, 113, 0.7)']
+        }];
+        charts.doughnut.update();
+
+        // Horizontal Bar Chart
+        const gastoCategorias = data.filter(d => d.TRANSACCION === 'Egreso').reduce((acc, item) => {
+            acc[item.CATEGORIA] = (acc[item.CATEGORIA] || 0) + item.IMPORTE;
+            return acc;
+        }, {});
+        const top5Gastos = Object.entries(gastoCategorias).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        charts.horizontalBar.data.labels = top5Gastos.map(item => item[0]);
+        charts.horizontalBar.data.datasets = [{
+            label: 'Total Gastado',
+            data: top5Gastos.map(item => item[1]),
+            backgroundColor: 'rgba(96, 165, 250, 0.7)'
+        }];
+        charts.horizontalBar.update();
+    };
+    
+    [filters.negocio, filters.transaccion, filters.categoria, filters.proveedor].forEach(filter => {
+        filter.addEventListener('change', updateDashboard);
+    });
+
+    clearFiltersBtn.addEventListener('click', () => {
+        filters.negocio.value = 'todos';
+        filters.transaccion.value = 'todos';
+        filters.categoria.value = 'todos';
+        filters.proveedor.value = 'todos';
+        datePicker.clear();
+        updateDashboard();
+    });
+
+    updateDashboard();
+});
+
+</script>
+
+</body>
+</html>
+
