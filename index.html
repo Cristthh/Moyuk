@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financiero Móvil</title>
+    <title>Dashboard Financiero Multi-Página</title>
 
     <!-- Tailwind CSS desde CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,103 +22,171 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Nuevo tema claro */
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #f3f4f6; /* bg-gray-100 */
+            background-color: #f3f4f6;
         }
-        /* Scrollbar para la tabla en tema claro */
         .table-scrollbar::-webkit-scrollbar { width: 8px; }
-        .table-scrollbar::-webkit-scrollbar-track { background: #e5e7eb; /* bg-gray-200 */ }
-        .table-scrollbar::-webkit-scrollbar-thumb { background-color: #9ca3af; /* bg-gray-400 */ border-radius: 4px; }
+        .table-scrollbar::-webkit-scrollbar-track { background: #e5e7eb; }
+        .table-scrollbar::-webkit-scrollbar-thumb { background-color: #9ca3af; border-radius: 4px; }
+        .nav-btn-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        summary .arrow {
+            transition: transform 0.2s;
+        }
+        details[open] summary .arrow {
+            transform: rotate(180deg);
+        }
+        /* Estilos para la fila clicable en PnL */
+        .pnl-clickable-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .pnl-clickable-row:hover {
+            background-color: #eff6ff; /* blue-50 */
+        }
     </style>
 </head>
 <body class="text-gray-800 p-4 sm:p-6 lg:p-8">
 
     <div class="max-w-7xl mx-auto">
 
-        <!-- Encabezado -->
+        <!-- Encabezado y Navegación -->
         <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Operadora y Comerzializadora de Alimentos Moyuk</h1>
-            <p class="text-gray-600 mt-2">Análisis de Agosto sobre el rendimiento por negocio, categoría y proveedor.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Operadora y Comercializadora de Alimentos Moyuk</h1>
+            <p class="text-gray-600 mt-2">Análisis Financiero</p>
+            
+            <nav class="mt-6 flex justify-center bg-gray-200 rounded-lg p-1 max-w-sm mx-auto">
+                <button id="nav-dashboard" class="nav-btn w-1/2 py-2 px-4 rounded-md font-semibold transition-colors duration-300 nav-btn-active">Dashboard General</button>
+                <button id="nav-pnl" class="nav-btn w-1/2 py-2 px-4 rounded-md font-semibold transition-colors duration-300">Estado de Resultados</button>
+            </nav>
         </header>
 
-        <!-- Panel de Filtros -->
-        <div class="bg-white p-4 rounded-lg shadow-md mb-8">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Filtros -->
-                <div>
-                    <label for="negocio-filter" class="block text-sm font-medium text-gray-700 mb-1">Negocio</label>
-                    <select id="negocio-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
-                </div>
-                <div>
-                    <label for="categoria-filter" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                    <select id="categoria-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
-                </div>
-                <div>
-                    <label for="transaccion-filter" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Transacción</label>
-                    <select id="transaccion-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
-                </div>
-                <div>
-                     <label for="proveedor-filter" class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
-                    <select id="proveedor-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
-                </div>
-                <div class="sm:col-span-2 lg:col-span-1">
-                    <label for="date-range-filter" class="block text-sm font-medium text-gray-700 mb-1">Rango de Fechas</label>
-                    <input type="text" id="date-range-filter" placeholder="Seleccionar rango..." class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                </div>
-                <div class="flex items-end">
-                    <button id="clear-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
-                        Limpiar Filtros
-                    </button>
+        <!-- Contenedor de la Página: Dashboard General -->
+        <main id="page-dashboard">
+            <div class="bg-white p-4 rounded-lg shadow-md mb-8">
+                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label for="negocio-filter" class="block text-sm font-medium text-gray-700 mb-1">Negocio</label>
+                        <select id="negocio-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    </div>
+                    <div>
+                        <label for="categoria-filter" class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                        <select id="categoria-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    </div>
+                    <div>
+                        <label for="transaccion-filter" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Transacción</label>
+                        <select id="transaccion-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    </div>
+                    <div>
+                         <label for="proveedor-filter" class="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                        <select id="proveedor-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    </div>
+                    <div class="sm:col-span-2 lg:col-span-1">
+                        <label for="date-range-filter" class="block text-sm font-medium text-gray-700 mb-1">Rango de Fechas</label>
+                        <input type="text" id="date-range-filter" placeholder="Seleccionar rango..." class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div class="flex items-end">
+                        <button id="clear-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                            Limpiar Filtros
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- KPIs -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Ingresos Totales</h3><p id="kpi-ingresos" class="text-3xl font-bold text-green-600 mt-2">$0.00 MXN</p></div>
-            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Egresos Totales</h3><p id="kpi-egresos" class="text-3xl font-bold text-red-600 mt-2">$0.00 MXN</p></div>
-            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Beneficio Neto</h3><p id="kpi-beneficio" class="text-3xl font-bold text-blue-600 mt-2">$0.00 MXN</p></div>
-            <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Nº de Transacciones</h3><p id="kpi-transacciones" class="text-3xl font-bold text-gray-900 mt-2">0</p></div>
-        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Ingresos Totales</h3><p id="kpi-ingresos" class="text-3xl font-bold text-green-600 mt-2">$0.00 MXN</p></div>
+                <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Egresos Totales</h3><p id="kpi-egresos" class="text-3xl font-bold text-red-600 mt-2">$0.00 MXN</p></div>
+                <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Beneficio Neto</h3><p id="kpi-beneficio" class="text-3xl font-bold text-blue-600 mt-2">$0.00 MXN</p></div>
+                <div class="bg-white p-6 rounded-lg shadow-md"><h3 class="text-gray-600 text-sm font-medium">Nº de Transacciones</h3><p id="kpi-transacciones" class="text-3xl font-bold text-gray-900 mt-2">0</p></div>
+            </div>
 
-        <!-- Gráficas: 1 columna en móvil, 2 en pantallas grandes -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div class="bg-white p-4 rounded-lg shadow-md">
-                <div class="h-80 md:h-96"><canvas id="flowChart"></canvas></div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="bg-white p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="flowChart"></canvas></div></div>
+                <div class="bg-white p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="barChart"></canvas></div></div>
+                <div class="bg-white p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="doughnutChart"></canvas></div></div>
+                <div class="bg-white p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="horizontalBarChart"></canvas></div></div>
             </div>
-            <div class="bg-white p-4 rounded-lg shadow-md">
-                <div class="h-80 md:h-96"><canvas id="barChart"></canvas></div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-md">
-                <div class="h-80 md:h-96"><canvas id="doughnutChart"></canvas></div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-md">
-                <div class="h-80 md:h-96"><canvas id="horizontalBarChart"></canvas></div>
-            </div>
-        </div>
 
-        <!-- Tabla de Datos -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <h3 class="text-xl font-semibold mb-4 text-gray-900">Detalle de Transacciones</h3>
-            <div class="max-h-96 overflow-y-auto table-scrollbar">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold mb-4 text-gray-900">Detalle de Transacciones</h3>
+                <div class="max-h-96 overflow-y-auto table-scrollbar">
+                    <table class="min-w-full text-sm text-left text-gray-700">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">Fecha</th> <th scope="col" class="px-4 py-3">Negocio</th>
+                                <th scope="col" class="px-4 py-3">Categoría</th> <th scope="col" class="px-4 py-3">Proveedor</th>
+                                <th scope="col" class="px-4 py-3">Tipo</th> <th scope="col" class="px-4 py-3 text-right">Importe</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <main id="page-pnl" class="hidden">
+            <div class="bg-white p-4 rounded-lg shadow-md mb-8">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label for="pnl-negocio-filter" class="block text-sm font-medium text-gray-700 mb-1">Negocio</label>
+                        <select id="pnl-negocio-filter" class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
+                    </div>
+                    <div>
+                        <label for="pnl-date-range-filter" class="block text-sm font-medium text-gray-700 mb-1">Rango de Fechas</label>
+                        <input type="text" id="pnl-date-range-filter" placeholder="Seleccionar rango..." class="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <button id="pnl-clear-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                            Limpiar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-900">Estado de Resultados Detallado</h3>
+                    <div id="pnl-table-container" class="space-y-1 text-sm"></div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <div class="h-64"><canvas id="pnlDoughnutChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg shadow-md">
+                        <div class="h-64"><canvas id="pnlBarChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para detalles de categoría -->
+    <div id="details-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-semibold">Detalles</h3>
+                <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div class="p-4 overflow-y-auto table-scrollbar">
                 <table class="min-w-full text-sm text-left text-gray-700">
                     <thead class="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
                         <tr>
                             <th scope="col" class="px-4 py-3">Fecha</th>
-                            <th scope="col" class="px-4 py-3">Negocio</th>
-                            <th scope="col" class="px-4 py-3">Categoría</th>
                             <th scope="col" class="px-4 py-3">Proveedor</th>
-                            <th scope="col" class="px-4 py-3">Tipo</th>
+                            <th scope="col" class="px-4 py-3">Descripción</th>
                             <th scope="col" class="px-4 py-3 text-right">Importe</th>
                         </tr>
                     </thead>
-                    <tbody id="data-table-body"></tbody>
+                    <tbody id="modal-table-body"></tbody>
                 </table>
             </div>
         </div>
     </div>
+
 
 <script>
 // ===================================================================================
@@ -2131,6 +2199,76 @@ const jsonData = [
         "ESTADO DE RESULTADOS":"Gasto Operativo",
         "TRANSACCION":"Egreso",
         "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-03",
+        "PROVEEDOR":null,
+        "IMPORTE":200.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-06",
+        "PROVEEDOR":null,
+        "IMPORTE":195.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-07",
+        "PROVEEDOR":null,
+        "IMPORTE":195.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-14",
+        "PROVEEDOR":null,
+        "IMPORTE":1200.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-16",
+        "PROVEEDOR":null,
+        "IMPORTE":250.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-17",
+        "PROVEEDOR":null,
+        "IMPORTE":250.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-24",
+        "PROVEEDOR":null,
+        "IMPORTE":25.0,
+        "CATEGORIA":"MTTO",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
         "FECHA":"2025-08-01",
         "PROVEEDOR":null,
         "IMPORTE":1050.0,
@@ -2635,6 +2773,26 @@ const jsonData = [
         "PROVEEDOR":null,
         "IMPORTE":1500.0,
         "CATEGORIA":"GAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-26",
+        "PROVEEDOR":null,
+        "IMPORTE":115.0,
+        "CATEGORIA":"TORTILLAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":null,
+        "IMPORTE":115.0,
+        "CATEGORIA":"TORTILLAS",
         "DESCRIPCION":null
     },
     {
@@ -3594,7 +3752,7 @@ const jsonData = [
         "FECHA":"2025-08-04",
         "PROVEEDOR":"SAMS",
         "IMPORTE":920.0,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -3984,7 +4142,7 @@ const jsonData = [
         "FECHA":"2025-08-08",
         "PROVEEDOR":"SAMS",
         "IMPORTE":828.63,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -4024,7 +4182,7 @@ const jsonData = [
         "FECHA":"2025-08-09",
         "PROVEEDOR":"SANTA CRUZ",
         "IMPORTE":452.4,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -4048,7 +4206,17 @@ const jsonData = [
         "DESCRIPCION":null
     },
     {
-        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"CRIT",
+        "FECHA":"2025-08-11",
+        "PROVEEDOR":"CRI",
+        "IMPORTE":5000.0,
+        "CATEGORIA":"RENTA",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
         "TRANSACCION":"Egreso",
         "NEGOCIO":"LA CASA DE ADOBE",
         "FECHA":"2025-08-12",
@@ -4244,7 +4412,7 @@ const jsonData = [
         "FECHA":"2025-08-14",
         "PROVEEDOR":"SAMS",
         "IMPORTE":644.49,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -4394,7 +4562,7 @@ const jsonData = [
         "FECHA":"2025-08-15",
         "PROVEEDOR":"ABARROTES MONTERREY",
         "IMPORTE":128.0,
-        "CATEGORIA":"TORTILLA",
+        "CATEGORIA":"TORTILLAS",
         "DESCRIPCION":null
     },
     {
@@ -4414,7 +4582,7 @@ const jsonData = [
         "FECHA":"2025-08-15",
         "PROVEEDOR":"SANTA CRUZ",
         "IMPORTE":452.4,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -4454,7 +4622,7 @@ const jsonData = [
         "FECHA":"2025-08-16",
         "PROVEEDOR":"SAMS",
         "IMPORTE":276.21,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -4714,7 +4882,7 @@ const jsonData = [
         "FECHA":"2025-08-22",
         "PROVEEDOR":"SAMS",
         "IMPORTE":794.88,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -4768,7 +4936,7 @@ const jsonData = [
         "DESCRIPCION":null
     },
     {
-        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
         "TRANSACCION":"Egreso",
         "NEGOCIO":"CRIT",
         "FECHA":"2025-08-22",
@@ -5018,7 +5186,7 @@ const jsonData = [
         "DESCRIPCION":null
     },
     {
-        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
         "TRANSACCION":"Egreso",
         "NEGOCIO":"ANDES",
         "FECHA":"2025-08-25",
@@ -5084,7 +5252,7 @@ const jsonData = [
         "FECHA":"2025-08-25",
         "PROVEEDOR":"SAMS",
         "IMPORTE":141.18,
-        "CATEGORIA":"TORTILLA",
+        "CATEGORIA":"TORTILLAS",
         "DESCRIPCION":null
     },
     {
@@ -5134,7 +5302,7 @@ const jsonData = [
         "FECHA":"2025-08-25",
         "PROVEEDOR":"SAMS",
         "IMPORTE":276.21,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -5178,7 +5346,7 @@ const jsonData = [
         "DESCRIPCION":null
     },
     {
-        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
         "TRANSACCION":"Egreso",
         "NEGOCIO":"LA CASA DE ADOBE",
         "FECHA":"2025-08-26",
@@ -5274,7 +5442,7 @@ const jsonData = [
         "FECHA":"2025-08-26",
         "PROVEEDOR":"TIENDA AMIGA",
         "IMPORTE":1068.08,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -5671,6 +5839,16 @@ const jsonData = [
         "ESTADO DE RESULTADOS":"Costo de Venta",
         "TRANSACCION":"Egreso",
         "NEGOCIO":"ANDES",
+        "FECHA":"2025-08-29",
+        "PROVEEDOR":"CHILE Y SEMILLAS MICHEL",
+        "IMPORTE":163.0,
+        "CATEGORIA":"DULCES, POSTRES Y GALLETAS",
+        "DESCRIPCION":null
+    },
+    {
+        "ESTADO DE RESULTADOS":"Costo de Venta",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"ANDES",
         "FECHA":"2025-08-30",
         "PROVEEDOR":"CANDIFER",
         "IMPORTE":1000.0,
@@ -5814,7 +5992,7 @@ const jsonData = [
         "FECHA":"2025-08-30",
         "PROVEEDOR":"SAMS",
         "IMPORTE":186.18,
-        "CATEGORIA":"HUEVO",
+        "CATEGORIA":"HUEVOS",
         "DESCRIPCION":null
     },
     {
@@ -5838,6 +6016,16 @@ const jsonData = [
         "DESCRIPCION":null
     },
     {
+        "ESTADO DE RESULTADOS":"Gasto Operativo",
+        "TRANSACCION":"Egreso",
+        "NEGOCIO":"LA CASA DE ADOBE",
+        "FECHA":"2025-08-30",
+        "PROVEEDOR":"ING RICARDO",
+        "IMPORTE":10000.0,
+        "CATEGORIA":"RENTA",
+        "DESCRIPCION":null
+    },
+    {
         "ESTADO DE RESULTADOS":"Costo de Venta",
         "TRANSACCION":"Egreso",
         "NEGOCIO":"ANDES",
@@ -5855,253 +6043,349 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!jsonData || jsonData.length === 0) {
         console.error("No se han cargado datos.");
-        document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-gray-800 text-2xl font-bold">Error: No se han cargado los datos. Revisa las instrucciones en el código HTML.</div>';
+        document.body.innerHTML = '<div class="h-screen flex items-center justify-center text-gray-800 text-2xl font-bold">Error: No se han cargado los datos.</div>';
         return;
     }
 
+    const parseDate = (dateString) => {
+        if (!dateString || typeof dateString !== 'string') return null;
+        let parts;
+        if (dateString.includes('/')) {
+            parts = dateString.split('/'); // Formato DD/MM/YYYY
+            return new Date(Date.UTC(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0])));
+        } else if (dateString.includes('-')) {
+            parts = dateString.split('-'); // Formato YYYY-MM-DD
+            return new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+        }
+        return null;
+    };
+    
     const normalizeCategory = (category) => {
         if (typeof category !== 'string') return category;
         const lowerCategory = category.toLowerCase().trim();
-        
-        // --- MAPA DE UNIFICACIÓN DE CATEGORÍAS (VERSIÓN CORREGIDA Y COMPLETA) ---
         const categoryMap = {
-            'verduras y frutas': 'FRUTAS Y VERDURAS',
-            'nominas/ bonos': 'NOMINA Y BONOS',
-            'garrafones de agua/ hielo': 'AGUA Y HIELO',
-            'cancelacion/ devolucion': 'TICKET CANCELADO/ DEVOLUCIONES',
-            'comidas/ vales descuentos': 'VALES DE COMIDA',
-            // Reglas de unificación añadidas
-            'huevo': 'HUEVOS',
-            'huevos': 'HUEVOS',
-            'tortilla': 'TORTILLAS',
-            'tortillas': 'TORTILLAS',
-            'plasticos y papeleria': 'PLASTICOS Y PAPELERIA',
-            // --- ¡AQUÍ ESTÁ LA CORRECCIÓN DEL ERROR DE TIPEO! ---
-            'plasticos y utencilios': 'PLASTICOS Y PAPELERIA' 
+            'verduras y frutas': 'FRUTAS Y VERDURAS', 'nominas/ bonos': 'NOMINA Y BONOS',
+            'garrafones de agua/ hielo': 'AGUA Y HIELO', 'cancelacion/ devolucion': 'TICKET CANCELADO/ DEVOLUCIONES',
+            'comidas/ vales descuentos': 'VALES DE COMIDA', 'huevo': 'HUEVOS',
+            'huevos': 'HUEVOS', 'tortilla': 'TORTILLAS', 'tortillas': 'TORTILLAS',
+            'plasticos y papeleria': 'PLASTICOS Y PAPELERIA', 'plasticos y utencilios': 'PLASTICOS Y PAPELERIA',
+            'renta': 'RENTA'
         };
-
-        // Devuelve la categoría unificada o la original en mayúsculas si no está en el mapa
         return categoryMap[lowerCategory] || category.toUpperCase();
     };
 
-    const processedData = jsonData.map(item => {
-        const parts = item.FECHA.split('-');
-        return {
-            ...item,
-            NEGOCIO: (item['NEGOCIO '] || item.NEGOCIO || '').trim(),
-            CATEGORIA: normalizeCategory(item.CATEGORIA),
-            PROVEEDOR: item.PROVEEDOR || 'No especificado',
-            FECHA_UTC: new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))),
-            IMPORTE: parseFloat(item.IMPORTE)
-        };
-    }).sort((a, b) => a.FECHA_UTC - b.FECHA_UTC);
+    const processedData = jsonData.map(item => ({
+        ...item,
+        ESTADO_DE_RESULTADOS: item['ESTADO DE RESULTADOS'],
+        NEGOCIO: (item['NEGOCIO '] || item.NEGOCIO || '').trim(),
+        CATEGORIA: normalizeCategory(item.CATEGORIA),
+        PROVEEDOR: item.PROVEEDOR || 'No especificado',
+        FECHA_UTC: parseDate(item.FECHA),
+        IMPORTE: parseFloat(item.IMPORTE)
+    })).filter(item => item.FECHA_UTC).sort((a, b) => a.FECHA_UTC - b.FECHA_UTC);
 
-    // Colores para el tema claro
-    Chart.defaults.color = '#4b5563'; // gray-600
-    Chart.defaults.borderColor = '#d1d5db'; // gray-300
+    Chart.defaults.color = '#4b5563';
+    Chart.defaults.borderColor = '#d1d5db';
     
-    const charts = {
-        flow: new Chart(document.getElementById('flowChart'), {
-            type: 'bar', data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Flujo de Caja Semanal y Beneficio Acumulado', font: { size: 16 } }, tooltip: { mode: 'index', intersect: false } }, scales: { x: { stacked: false }, y: { stacked: false, beginAtZero: true } } }
-        }),
-        bar: new Chart(document.getElementById('barChart'), {
-            type: 'bar', data: { labels: [], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Totales por Negocio', font: { size: 16 } } } }
-        }),
-        doughnut: new Chart(document.getElementById('doughnutChart'), {
-            type: 'doughnut', data: { labels: ['Ingresos', 'Egresos'], datasets: [] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Proporción Ingresos vs. Egresos', font: { size: 16 } } } }
-        }),
-        horizontalBar: new Chart(document.getElementById('horizontalBarChart'), {
-            type: 'bar', data: { labels: [], datasets: [] },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Top 5 Categorías de Gasto', font: { size: 16 } } } }
-        })
-    };
-    
-    const filters = {
-        negocio: document.getElementById('negocio-filter'), transaccion: document.getElementById('transaccion-filter'),
-        dateRange: document.getElementById('date-range-filter'), categoria: document.getElementById('categoria-filter'),
-        proveedor: document.getElementById('proveedor-filter')
-    };
-    
-    const kpis = {
-        ingresos: document.getElementById('kpi-ingresos'), egresos: document.getElementById('kpi-egresos'),
-        beneficio: document.getElementById('kpi-beneficio'), transacciones: document.getElementById('kpi-transacciones'),
-    };
-    
-    const tableBody = document.getElementById('data-table-body');
-    const clearFiltersBtn = document.getElementById('clear-filters-btn');
-
-    const datePicker = flatpickr(filters.dateRange, {
-        mode: "range", dateFormat: "Y-m-d", locale: "es", onChange: () => updateDashboard()
-    });
-
-    const populateFilter = (element, values, defaultOptionText) => {
-        element.innerHTML = ''; // Limpiar opciones existentes
-        const defaultOption = document.createElement('option');
-        defaultOption.value = 'todos';
-        defaultOption.textContent = defaultOptionText;
-        element.appendChild(defaultOption);
-
-        values.forEach(value => {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            element.appendChild(option);
-        });
-    };
-
-    populateFilter(filters.negocio, [...new Set(processedData.map(item => item.NEGOCIO))].sort(), 'Todos los Negocios');
-    populateFilter(filters.categoria, [...new Set(processedData.map(item => item.CATEGORIA))].sort(), 'Todas las Categorías');
-    populateFilter(filters.proveedor, [...new Set(processedData.map(item => item.PROVEEDOR))].sort(), 'Todos los Proveedores');
-    
-    // Poblar filtro de transacción estáticamente
-    filters.transaccion.innerHTML = `
-        <option value="todos">Todos</option>
-        <option value="Ingreso">Ingreso</option>
-        <option value="Egreso">Egreso</option>
-    `;
-
     const formatCurrency = (amount) => amount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' });
-    
-    const getStartOfWeek = (date) => {
-        const d = new Date(date);
-        const day = d.getUTCDay();
-        const diff = d.getUTCDate() - day + (day === 0 ? -6 : 1);
-        d.setUTCDate(diff);
-        d.setUTCHours(0, 0, 0, 0);
-        return d;
-    };
+    const navDashboardBtn = document.getElementById('nav-dashboard');
+    const navPnlBtn = document.getElementById('nav-pnl');
+    const pageDashboard = document.getElementById('page-dashboard');
+    const pagePnl = document.getElementById('page-pnl');
 
-    const updateDashboard = () => {
-        const selectedNegocio = filters.negocio.value;
-        const selectedTransaccion = filters.transaccion.value;
-        const selectedCategoria = filters.categoria.value;
-        const selectedProveedor = filters.proveedor.value;
-        const selectedDates = datePicker.selectedDates;
-        
-        const filteredData = processedData.filter(item => 
-            (selectedNegocio === 'todos' || item.NEGOCIO === selectedNegocio) &&
-            (selectedTransaccion === 'todos' || item.TRANSACCION === selectedTransaccion) &&
-            (selectedCategoria === 'todos' || item.CATEGORIA === selectedCategoria) &&
-            (selectedProveedor === 'todos' || item.PROVEEDOR === selectedProveedor) &&
-            (selectedDates.length < 2 || (item.FECHA_UTC >= selectedDates[0] && item.FECHA_UTC <= selectedDates[1]))
-        );
+    const showPage = (pageToShow) => {
+        pageDashboard.classList.toggle('hidden', pageToShow !== 'dashboard');
+        pagePnl.classList.toggle('hidden', pageToShow !== 'pnl');
+        navDashboardBtn.classList.toggle('nav-btn-active', pageToShow === 'dashboard');
+        navPnlBtn.classList.toggle('nav-btn-active', pageToShow === 'pnl');
+    };
+    navDashboardBtn.addEventListener('click', () => showPage('dashboard'));
+    navPnlBtn.addEventListener('click', () => showPage('pnl'));
 
-        updateKPIs(filteredData);
-        updateCharts(filteredData);
-        updateTable(filteredData);
-    };
-    
-    const updateKPIs = (data) => {
-        const ingresos = data.filter(d => d.TRANSACCION === 'Ingreso').reduce((sum, item) => sum + item.IMPORTE, 0);
-        const egresos = data.filter(d => d.TRANSACCION === 'Egreso').reduce((sum, item) => sum + item.IMPORTE, 0);
-        const beneficio = ingresos - egresos;
+    const initDashboardPage = () => {
+        const charts = {
+            flow: new Chart(document.getElementById('flowChart'), { type: 'bar', options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Flujo de Caja Semanal y Beneficio Acumulado', font: { size: 16 } } } } }),
+            bar: new Chart(document.getElementById('barChart'), { type: 'bar', options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Totales por Negocio', font: { size: 16 } } } } }),
+            doughnut: new Chart(document.getElementById('doughnutChart'), { type: 'doughnut', options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Proporción Ingresos vs. Egresos', font: { size: 16 } } } } }),
+            horizontalBar: new Chart(document.getElementById('horizontalBarChart'), { type: 'bar', options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Top 5 Categorías de Gasto', font: { size: 16 } } } } })
+        };
+        const filters = {
+            negocio: document.getElementById('negocio-filter'), transaccion: document.getElementById('transaccion-filter'),
+            dateRange: document.getElementById('date-range-filter'), categoria: document.getElementById('categoria-filter'),
+            proveedor: document.getElementById('proveedor-filter')
+        };
+        const kpis = {
+            ingresos: document.getElementById('kpi-ingresos'), egresos: document.getElementById('kpi-egresos'),
+            beneficio: document.getElementById('kpi-beneficio'), transacciones: document.getElementById('kpi-transacciones'),
+        };
+        const tableBody = document.getElementById('data-table-body');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
+        const datePicker = flatpickr(filters.dateRange, { mode: "range", dateFormat: "Y-m-d", locale: "es", onChange: updateDashboard });
+
+        const populateFilter = (element, values, defaultOptionText) => {
+            element.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = 'todos'; defaultOption.textContent = defaultOptionText;
+            element.appendChild(defaultOption);
+            values.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value; option.textContent = value;
+                element.appendChild(option);
+            });
+        };
         
-        kpis.ingresos.textContent = formatCurrency(ingresos);
-        kpis.egresos.textContent = formatCurrency(egresos);
-        kpis.beneficio.textContent = formatCurrency(beneficio);
-        kpis.beneficio.style.color = beneficio >= 0 ? '#16a34a' : '#dc2626'; // green-600, red-600
-        kpis.transacciones.textContent = data.length;
-    };
-    
-    const updateTable = (data) => {
-        tableBody.innerHTML = '';
-        if (data.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">No hay datos para los filtros seleccionados.</td></tr>';
-            return;
+        populateFilter(filters.negocio, [...new Set(processedData.map(item => item.NEGOCIO))].sort(), 'Todos los Negocios');
+        populateFilter(filters.categoria, [...new Set(processedData.map(item => item.CATEGORIA))].sort(), 'Todas las Categorías');
+        populateFilter(filters.proveedor, [...new Set(processedData.map(item => item.PROVEEDOR))].sort(), 'Todos los Proveedores');
+        filters.transaccion.innerHTML = `<option value="todos">Todos</option><option value="Ingreso">Ingreso</option><option value="Egreso">Egreso</option>`;
+
+        function updateDashboard() {
+            const selectedNegocio = filters.negocio.value;
+            const selectedTransaccion = filters.transaccion.value;
+            const selectedCategoria = filters.categoria.value;
+            const selectedProveedor = filters.proveedor.value;
+            const selectedDates = datePicker.selectedDates;
+            
+            const filteredData = processedData.filter(item => 
+                (selectedNegocio === 'todos' || item.NEGOCIO === selectedNegocio) &&
+                (selectedTransaccion === 'todos' || item.TRANSACCION === selectedTransaccion) &&
+                (selectedCategoria === 'todos' || item.CATEGORIA === selectedCategoria) &&
+                (selectedProveedor === 'todos' || item.PROVEEDOR === selectedProveedor) &&
+                (!selectedDates.length || (item.FECHA_UTC >= selectedDates[0] && item.FECHA_UTC <= selectedDates[1]))
+            );
+            updateKPIs(filteredData); updateCharts(filteredData); updateTable(filteredData);
         }
-        data.forEach(item => {
-            const row = document.createElement('tr');
-            row.className = 'border-b border-gray-200 hover:bg-gray-50';
-            row.innerHTML = `
-                <td class="px-4 py-2">${item.FECHA_UTC.toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
-                <td class="px-4 py-2">${item.NEGOCIO}</td>
-                <td class="px-4 py-2">${item.CATEGORIA}</td>
-                <td class="px-4 py-2">${item.PROVEEDOR}</td>
-                <td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${item.TRANSACCION === 'Ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${item.TRANSACCION}</span></td>
-                <td class="px-4 py-2 text-right font-mono">${formatCurrency(item.IMPORTE)}</td>`;
-            tableBody.appendChild(row);
-        });
-    };
-    
-    const updateCharts = (data) => {
-        // Colores para las gráficas
-        const greenColor = 'rgba(22, 163, 74, 0.7)'; // green-600
-        const redColor = 'rgba(220, 38, 38, 0.7)';   // red-600
-        const blueColor = '#3b82f6';                // blue-500
-        const lightBlueColor = '#60a5fa';           // blue-400
+        function updateKPIs(data) {
+            const ingresos = data.filter(d => d.TRANSACCION === 'Ingreso').reduce((sum, item) => sum + item.IMPORTE, 0);
+            const egresos = data.filter(d => d.TRANSACCION === 'Egreso').reduce((sum, item) => sum + item.IMPORTE, 0);
+            const beneficio = ingresos - egresos;
+            kpis.ingresos.textContent = formatCurrency(ingresos); kpis.egresos.textContent = formatCurrency(egresos);
+            kpis.beneficio.textContent = formatCurrency(beneficio);
+            kpis.beneficio.style.color = beneficio >= 0 ? '#16a34a' : '#dc2626';
+            kpis.transacciones.textContent = data.length;
+        }
+        function updateTable(data) {
+            tableBody.innerHTML = '';
+            if (!data.length) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">No hay datos.</td></tr>';
+                return;
+            }
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200 hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-4 py-2">${item.FECHA_UTC.toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
+                    <td class="px-4 py-2">${item.NEGOCIO}</td>
+                    <td class="px-4 py-2">${item.CATEGORIA}</td>
+                    <td class="px-4 py-2">${item.PROVEEDOR}</td>
+                    <td class="px-4 py-2"><span class="px-2 py-1 text-xs rounded-full ${item.TRANSACCION === 'Ingreso' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${item.TRANSACCION}</span></td>
+                    <td class="px-4 py-2 text-right font-mono">${formatCurrency(item.IMPORTE)}</td>`;
+                tableBody.appendChild(row);
+            });
+        }
+        function updateCharts(data) {
+            const greenColor = 'rgba(22, 163, 74, 0.7)'; const redColor = 'rgba(220, 38, 38, 0.7)';
+            const blueColor = '#3b82f6'; const lightBlueColor = '#60a5fa';
+            const getStartOfWeek = d => { const date = new Date(d); date.setUTCDate(date.getUTCDate() - date.getUTCDay() + 1); return date; };
+            
+            const weeklyData = data.reduce((acc, item) => {
+                const weekStart = getStartOfWeek(item.FECHA_UTC).toISOString().split('T')[0];
+                if (!acc[weekStart]) acc[weekStart] = { ingresos: 0, egresos: 0 };
+                if (item.TRANSACCION === 'Ingreso') acc[weekStart].ingresos += item.IMPORTE; else acc[weekStart].egresos += item.IMPORTE;
+                return acc;
+            }, {});
+            const sortedWeeks = Object.keys(weeklyData).sort();
+            const weeklyNet = sortedWeeks.map(w => weeklyData[w].ingresos - weeklyData[w].egresos);
+            let cumulative = 0;
+            charts.flow.data.labels = sortedWeeks.map(w => `Sem. ${new Date(w).toLocaleDateString('es-MX', { timeZone: 'UTC', day:'2-digit', month:'2-digit' })}`);
+            charts.flow.data.datasets = [ { type: 'bar', label: 'Flujo Neto Semanal', data: weeklyNet, backgroundColor: weeklyNet.map(v => v >= 0 ? greenColor : redColor), order: 2 }, { type: 'line', label: 'Beneficio Acumulado', data: weeklyNet.map(n => cumulative += n), borderColor: blueColor, fill: false, order: 1 } ];
+            charts.flow.update();
+            
+            const negocioData = data.reduce((acc, { NEGOCIO, TRANSACCION, IMPORTE }) => {
+                if (!acc[NEGOCIO]) acc[NEGOCIO] = { ingresos: 0, egresos: 0 };
+                if (TRANSACCION === 'Ingreso') acc[NEGOCIO].ingresos += IMPORTE; else acc[NEGOCIO].egresos += IMPORTE;
+                return acc;
+            }, {});
+            charts.bar.data.labels = Object.keys(negocioData);
+            charts.bar.data.datasets = [ { label: 'Ingresos', data: Object.values(negocioData).map(d => d.ingresos), backgroundColor: greenColor }, { label: 'Egresos', data: Object.values(negocioData).map(d => d.egresos), backgroundColor: redColor } ];
+            charts.bar.update();
+            
+            const totalIngresos = data.filter(d => d.TRANSACCION === 'Ingreso').reduce((s, i) => s + i.IMPORTE, 0);
+            const totalEgresos = data.filter(d => d.TRANSACCION === 'Egreso').reduce((s, i) => s + i.IMPORTE, 0);
+            charts.doughnut.data.datasets = [{ data: [totalIngresos, totalEgresos], backgroundColor: [greenColor, redColor] }];
+            charts.doughnut.data.labels = ['Ingresos', 'Egresos'];
+            charts.doughnut.update();
 
-        // Flow Chart
-        const weeklyData = data.reduce((acc, item) => {
-            const startOfWeek = getStartOfWeek(item.FECHA_UTC);
-            const weekKey = startOfWeek.toISOString().split('T')[0];
-            if (!acc[weekKey]) acc[weekKey] = { ingresos: 0, egresos: 0 };
-            if (item.TRANSACCION === 'Ingreso') acc[weekKey].ingresos += item.IMPORTE;
-            else acc[weekKey].egresos += item.IMPORTE;
-            return acc;
-        }, {});
-        const sortedWeeks = Object.keys(weeklyData).sort();
-        const weekLabels = sortedWeeks.map(weekKey => `Sem. ${new Date(weekKey).toLocaleDateString('es-MX', { timeZone: 'UTC', day: '2-digit', month: '2-digit' })}`);
-        const weeklyNet = sortedWeeks.map(weekKey => weeklyData[weekKey].ingresos - weeklyData[weekKey].egresos);
-        let cumulative = 0;
-        const cumulativeBenefit = weeklyNet.map(net => cumulative += net);
+            const gastoCategorias = data.filter(d => d.TRANSACCION === 'Egreso').reduce((acc, { CATEGORIA, IMPORTE }) => { acc[CATEGORIA] = (acc[CATEGORIA] || 0) + IMPORTE; return acc; }, {});
+            const top5Gastos = Object.entries(gastoCategorias).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            charts.horizontalBar.data.labels = top5Gastos.map(i => i[0]);
+            charts.horizontalBar.data.datasets = [{ label: 'Total Gastado', data: top5Gastos.map(i => i[1]), backgroundColor: lightBlueColor }];
+            charts.horizontalBar.update();
+        }
 
-        charts.flow.data.labels = weekLabels;
-        charts.flow.data.datasets = [
-            { type: 'bar', label: 'Flujo Neto Semanal', data: weeklyNet, backgroundColor: weeklyNet.map(v => v >= 0 ? greenColor : redColor), order: 2 },
-            { type: 'line', label: 'Beneficio Acumulado', data: cumulativeBenefit, borderColor: blueColor, backgroundColor: blueColor, tension: 0.1, fill: false, order: 1 }
-        ];
-        charts.flow.update();
-
-        // Bar Chart
-        const negocioData = data.reduce((acc, item) => {
-            if (!acc[item.NEGOCIO]) acc[item.NEGOCIO] = { ingresos: 0, egresos: 0 };
-            if (item.TRANSACCION === 'Ingreso') acc[item.NEGOCIO].ingresos += item.IMPORTE;
-            else acc[item.NEGOCIO].egresos += item.IMPORTE;
-            return acc;
-        }, {});
-        charts.bar.data.labels = Object.keys(negocioData);
-        charts.bar.data.datasets = [
-            { label: 'Ingresos', data: Object.values(negocioData).map(d => d.ingresos), backgroundColor: greenColor },
-            { label: 'Egresos', data: Object.values(negocioData).map(d => d.egresos), backgroundColor: redColor }
-        ];
-        charts.bar.update();
-        
-        // Doughnut Chart
-        const totalIngresos = data.filter(d => d.TRANSACCION === 'Ingreso').reduce((sum, item) => sum + item.IMPORTE, 0);
-        const totalEgresos = data.filter(d => d.TRANSACCION === 'Egreso').reduce((sum, item) => sum + item.IMPORTE, 0);
-        charts.doughnut.data.datasets = [{ data: [totalIngresos, totalEgresos], backgroundColor: [greenColor, redColor] }];
-        charts.doughnut.update();
-
-        // Horizontal Bar Chart
-        const gastoCategorias = data.filter(d => d.TRANSACCION === 'Egreso').reduce((acc, item) => {
-            acc[item.CATEGORIA] = (acc[item.CATEGORIA] || 0) + item.IMPORTE;
-            return acc;
-        }, {});
-        const top5Gastos = Object.entries(gastoCategorias).sort((a, b) => b[1] - a[1]).slice(0, 5);
-        charts.horizontalBar.data.labels = top5Gastos.map(item => item[0]);
-        charts.horizontalBar.data.datasets = [{ label: 'Total Gastado', data: top5Gastos.map(item => item[1]), backgroundColor: lightBlueColor }];
-        charts.horizontalBar.update();
-    };
-    
-    [filters.negocio, filters.transaccion, filters.categoria, filters.proveedor].forEach(filter => {
-        filter.addEventListener('change', updateDashboard);
-    });
-
-    clearFiltersBtn.addEventListener('click', () => {
-        filters.negocio.value = 'todos';
-        filters.transaccion.value = 'todos';
-        filters.categoria.value = 'todos';
-        filters.proveedor.value = 'todos';
-        datePicker.clear();
+        Object.values(filters).forEach(f => f.addEventListener('change', updateDashboard));
+        clearFiltersBtn.addEventListener('click', () => { Object.values(filters).forEach(f => f.value = 'todos'); datePicker.clear(); updateDashboard(); });
         updateDashboard();
-    });
+    };
 
-    updateDashboard();
+    const initPnlPage = () => {
+        const modal = document.getElementById('details-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalTableBody = document.getElementById('modal-table-body');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        const pnlCharts = {
+            doughnut: new Chart(document.getElementById('pnlDoughnutChart'), { type: 'doughnut', options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Composición de la Venta', font: { size: 16 } } } } }),
+            bar: new Chart(document.getElementById('pnlBarChart'), { type: 'bar', options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Desglose de Gastos Operativos', font: { size: 16 } } } } })
+        };
+        const pnlFilters = {
+            negocio: document.getElementById('pnl-negocio-filter'),
+            dateRange: document.getElementById('pnl-date-range-filter')
+        };
+        const pnlTableContainer = document.getElementById('pnl-table-container');
+        const pnlClearFiltersBtn = document.getElementById('pnl-clear-filters-btn');
+        const pnlDatePicker = flatpickr(pnlFilters.dateRange, { mode: "range", dateFormat: "Y-m-d", locale: "es", onChange: updatePnl });
+        
+        let currentPnlData = [];
+
+        pnlFilters.negocio.innerHTML = `<option value="todos">Todos los Negocios</option>`;
+        [...new Set(processedData.map(item => item.NEGOCIO))].sort().forEach(n => {
+            const opt = document.createElement('option'); opt.value = n; opt.textContent = n; pnlFilters.negocio.appendChild(opt);
+        });
+        
+        function updatePnl() {
+            const selectedNegocio = pnlFilters.negocio.value;
+            const selectedDates = pnlDatePicker.selectedDates;
+            
+            currentPnlData = processedData.filter(item => 
+                (selectedNegocio === 'todos' || item.NEGOCIO === selectedNegocio) &&
+                (!selectedDates.length || (item.FECHA_UTC >= selectedDates[0] && item.FECHA_UTC <= selectedDates[1]))
+            );
+
+            const pnlData = { ventas: { total: 0, breakdown: {} }, costoVenta: { total: 0, breakdown: {} }, gastoOperativo: { total: 0, breakdown: {} } };
+            currentPnlData.forEach(item => {
+                if (item.ESTADO_DE_RESULTADOS === 'Venta') {
+                    pnlData.ventas.total += item.IMPORTE;
+                    pnlData.ventas.breakdown[item.CATEGORIA] = (pnlData.ventas.breakdown[item.CATEGORIA] || 0) + item.IMPORTE;
+                } else if (item.ESTADO_DE_RESULTADOS === 'Costo de Venta') {
+                    pnlData.costoVenta.total += item.IMPORTE;
+                    pnlData.costoVenta.breakdown[item.CATEGORIA] = (pnlData.costoVenta.breakdown[item.CATEGORIA] || 0) + item.IMPORTE;
+                } else if (item.ESTADO_DE_RESULTADOS === 'Gasto Operativo') {
+                    pnlData.gastoOperativo.total += item.IMPORTE;
+                    pnlData.gastoOperativo.breakdown[item.CATEGORIA] = (pnlData.gastoOperativo.breakdown[item.CATEGORIA] || 0) + item.IMPORTE;
+                }
+            });
+
+            const utilidadBruta = pnlData.ventas.total - pnlData.costoVenta.total;
+            const utilidadOperativa = utilidadBruta - pnlData.gastoOperativo.total;
+            
+            renderPnlTable(pnlData, utilidadBruta, utilidadOperativa);
+            updatePnlCharts(pnlData, utilidadOperativa);
+        }
+
+        function renderPnlTable(pnlData, utilidadBruta, utilidadOperativa) {
+            const createRow = (label, value, isBold = false, isSub = false, isTotal = false, category = '') => `
+                <div class="flex justify-between py-2 ${isSub ? 'pl-4 pnl-clickable-row' : ''} ${isTotal ? 'border-t border-gray-300' : ''}" ${isSub ? `data-category="${category}"` : ''}>
+                    <span class="${isBold ? 'font-semibold' : 'text-gray-600'}">${label}</span>
+                    <span class="${isBold ? 'font-semibold' : ''} font-mono">${formatCurrency(value)}</span>
+                </div>`;
+            
+            const createBreakdown = (breakdown, topN = 5) => {
+                const sorted = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
+                const topItems = sorted.slice(0, topN);
+                const otherItems = sorted.slice(topN);
+                let html = topItems.map(([cat, val]) => createRow(cat, val, false, true, false, cat)).join('');
+                if (otherItems.length > 0) {
+                    const othersTotal = otherItems.reduce((sum, item) => sum + item[1], 0);
+                    const otherCategories = otherItems.map(item => item[0]).join(',');
+                    html += createRow(`Otros (${otherItems.length})`, othersTotal, false, true, false, otherCategories);
+                }
+                return html;
+            };
+
+            const createCollapsibleSection = (title, total, breakdown) => {
+                const sign = title.includes('Ventas') ? '(+)' : '(-)';
+                return `
+                    <details class="border-b border-gray-200">
+                        <summary class="flex justify-between items-center py-2 cursor-pointer list-none">
+                            <span class="font-semibold text-base">${sign} ${title}</span>
+                            <div class="flex items-center">
+                                <span class="font-semibold font-mono text-base mr-2">${formatCurrency(total)}</span>
+                                <span class="arrow text-gray-500">▼</span>
+                            </div>
+                        </summary>
+                        <div class="pl-4 border-l-2 border-gray-200 ml-2 mt-1 pb-1">
+                            ${createBreakdown(breakdown)}
+                        </div>
+                    </details>`;
+            };
+            pnlTableContainer.innerHTML = `
+                ${createCollapsibleSection('Ventas Totales', pnlData.ventas.total, pnlData.ventas.breakdown)}
+                ${createCollapsibleSection('Costo de Venta', pnlData.costoVenta.total, pnlData.costoVenta.breakdown)}
+                ${createRow('(=) Utilidad Bruta', utilidadBruta, true, false, true)}
+                <div class="h-4"></div>
+                ${createCollapsibleSection('Gastos Operativos', pnlData.gastoOperativo.total, pnlData.gastoOperativo.breakdown)}
+                ${createRow('(=) Utilidad Operativa', utilidadOperativa, true, false, true)}
+            `;
+        }
+        
+        function showDetailsModal(categories) {
+            const categoryList = categories.split(',');
+            modalTitle.textContent = `Detalle de: ${categoryList.length > 1 ? 'Otros' : categoryList[0]}`;
+            modalTableBody.innerHTML = '';
+
+            const detailData = currentPnlData.filter(item => categoryList.includes(item.CATEGORIA));
+
+            if (detailData.length === 0) {
+                modalTableBody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-gray-500">No hay transacciones detalladas.</td></tr>`;
+            } else {
+                detailData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = 'border-b border-gray-200';
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${item.FECHA_UTC.toLocaleDateString('es-MX', {timeZone: 'UTC'})}</td>
+                        <td class="px-4 py-2">${item.PROVEEDOR}</td>
+                        <td class="px-4 py-2">${item.DESCRIPCION || '-'}</td>
+                        <td class="px-4 py-2 text-right font-mono">${formatCurrency(item.IMPORTE)}</td>
+                    `;
+                    modalTableBody.appendChild(row);
+                });
+            }
+            modal.classList.remove('hidden');
+        }
+
+        pnlTableContainer.addEventListener('click', (e) => {
+            const row = e.target.closest('.pnl-clickable-row');
+            if (row && row.dataset.category) {
+                showDetailsModal(row.dataset.category);
+            }
+        });
+        
+        modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+        
+        function updatePnlCharts(pnlData, utilidadOperativa) {
+            pnlCharts.doughnut.data.labels = ['Costo de Venta', 'Gasto Operativo', 'Utilidad Operativa'];
+            pnlCharts.doughnut.data.datasets = [{ data: [pnlData.costoVenta.total, pnlData.gastoOperativo.total, utilidadOperativa > 0 ? utilidadOperativa : 0], backgroundColor: ['#f59e0b', '#ef4444', '#22c55e'], hoverOffset: 4 }];
+            pnlCharts.doughnut.update();
+            const sortedGastos = Object.entries(pnlData.gastoOperativo.breakdown).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            pnlCharts.bar.data.labels = sortedGastos.map(item => item[0]);
+            pnlCharts.bar.data.datasets = [{ label: 'Total de Gasto', data: sortedGastos.map(item => item[1]), backgroundColor: 'rgba(239, 68, 68, 0.7)' }];
+            pnlCharts.bar.update();
+        }
+
+        pnlFilters.negocio.addEventListener('change', updatePnl);
+        pnlClearFiltersBtn.addEventListener('click', () => { pnlFilters.negocio.value = 'todos'; pnlDatePicker.clear(); updatePnl(); });
+        updatePnl();
+    };
+
+    initDashboardPage();
+    initPnlPage();
 });
-
 </script>
 
 </body>
