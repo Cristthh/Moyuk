@@ -39,8 +39,8 @@
 
         <!-- Encabezado -->
         <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Operadora y Comercializadora de Alimentos Moyuk</h1>
-            <p class="text-gray-600 mt-2">Dashboard Financiero de Agosto. Análisis de rendimiento por negocio, categoría y proveedor.</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900">Dashboard Financiero</h1>
+            <p class="text-gray-600 mt-2">Análisis de rendimiento por negocio, categoría y proveedor.</p>
         </header>
 
         <!-- Panel de Filtros -->
@@ -5862,12 +5862,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const normalizeCategory = (category) => {
         if (typeof category !== 'string') return category;
         const lowerCategory = category.toLowerCase().trim();
+        
+        // Mapa de unificación de categorías
         const categoryMap = {
-            'verduras y frutas': 'FRUTAS Y VERDURAS', 'nominas/ bonos': 'NOMINA Y BONOS',
-            'garrafones de agua/ hielo': 'AGUA Y HIELO', 'cancelacion/ devolucion': 'TICKET CANCELADO/ DEVOLUCIONES',
-            'comidas/ vales descuentos': 'VALES DE COMIDA'
+            'verduras y frutas': 'FRUTAS Y VERDURAS',
+            'nominas/ bonos': 'NOMINA Y BONOS',
+            'garrafones de agua/ hielo': 'AGUA Y HIELO',
+            'cancelacion/ devolucion': 'TICKET CANCELADO/ DEVOLUCIONES',
+            'comidas/ vales descuentos': 'VALES DE COMIDA',
+            // NUEVAS REGLAS DE UNIFICACIÓN:
+            'huevo': 'HUEVOS',
+            'huevos': 'HUEVOS',
+            'tortilla': 'TORTILLAS',
+            'tortillas': 'TORTILLAS',
+            'plasticos y papeleria': 'PLASTICOS Y PAPELERIA',
+            'plasticos y utenicilios': 'PLASTICOS Y PAPELERIA'
         };
-        return categoryMap[lowerCategory] || category;
+
+        // Devuelve la categoría unificada o la original si no está en el mapa
+        return categoryMap[lowerCategory] || category.toUpperCase();
     };
 
     const processedData = jsonData.map(item => {
