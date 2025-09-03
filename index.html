@@ -5863,14 +5863,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof category !== 'string') return category;
         const lowerCategory = category.toLowerCase().trim();
         
-        // Mapa de unificación de categorías
+        // --- MAPA DE UNIFICACIÓN DE CATEGORÍAS (VERSIÓN CORREGIDA Y COMPLETA) ---
         const categoryMap = {
             'verduras y frutas': 'FRUTAS Y VERDURAS',
             'nominas/ bonos': 'NOMINA Y BONOS',
             'garrafones de agua/ hielo': 'AGUA Y HIELO',
             'cancelacion/ devolucion': 'TICKET CANCELADO/ DEVOLUCIONES',
             'comidas/ vales descuentos': 'VALES DE COMIDA',
-            // NUEVAS REGLAS DE UNIFICACIÓN:
+            // Reglas de unificación añadidas
             'huevo': 'HUEVOS',
             'huevos': 'HUEVOS',
             'tortilla': 'TORTILLAS',
@@ -5879,7 +5879,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'plasticos y utenicilios': 'PLASTICOS Y PAPELERIA'
         };
 
-        // Devuelve la categoría unificada o la original si no está en el mapa
+        // Devuelve la categoría unificada o la original en mayúsculas si no está en el mapa
         return categoryMap[lowerCategory] || category.toUpperCase();
     };
 
