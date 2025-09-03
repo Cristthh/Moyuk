@@ -6290,7 +6290,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="${isBold ? 'font-semibold' : ''} font-mono">${formatCurrency(value)}</span>
                 </div>`;
             
-            const createBreakdown = (breakdown, topN = 5) => {
+            const createBreakdown = (breakdown, topN = 10) => {
                 const sorted = Object.entries(breakdown).sort((a, b) => b[1] - a[1]);
                 const topItems = sorted.slice(0, topN);
                 const otherItems = sorted.slice(topN);
@@ -6372,7 +6372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pnlCharts.doughnut.data.labels = ['Costo de Venta', 'Gasto Operativo', 'Utilidad Operativa'];
             pnlCharts.doughnut.data.datasets = [{ data: [pnlData.costoVenta.total, pnlData.gastoOperativo.total, utilidadOperativa > 0 ? utilidadOperativa : 0], backgroundColor: ['#f59e0b', '#ef4444', '#22c55e'], hoverOffset: 4 }];
             pnlCharts.doughnut.update();
-            const sortedGastos = Object.entries(pnlData.gastoOperativo.breakdown).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            const sortedGastos = Object.entries(pnlData.gastoOperativo.breakdown).sort((a,b) => b[1] - a[1]).slice(0, 10);
             pnlCharts.bar.data.labels = sortedGastos.map(item => item[0]);
             pnlCharts.bar.data.datasets = [{ label: 'Total de Gasto', data: sortedGastos.map(item => item[1]), backgroundColor: 'rgba(239, 68, 68, 0.7)' }];
             pnlCharts.bar.update();
@@ -6390,4 +6390,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
