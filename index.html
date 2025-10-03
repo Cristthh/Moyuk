@@ -22940,7 +22940,7 @@ const jsonData = [
     "FECHA":"2025-09-27",
     "PROVEEDOR":"MAICITOS",
     "IMPORTE":1560.0,
-    "CATEGORIA":"MAICITOS",
+    "CATEGORIA":"SNACKS",
     "DESCRIPCION":null
   },
   {
@@ -23251,7 +23251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return categoryMap[lowerCategory] || category.toUpperCase();
     };
 
-    const processedData = jsonData.map(item => ({
+    const initialData = jsonData.map(item => ({
         ...item,
         ESTADO_DE_RESULTADOS: (item['ESTADO DE RESULTADOS'] || 'INDEFINIDO').trim(),
         TRANSACCION: (item.TRANSACCION || 'INDEFINIDO').trim(),
@@ -23260,26 +23260,37 @@ document.addEventListener('DOMContentLoaded', () => {
         PROVEEDOR: (item.PROVEEDOR || 'No especificado').trim(),
         FECHA_UTC: parseDate(item.FECHA),
         IMPORTE: parseFloat(item.IMPORTE || 0)
-    })).filter(item => item.FECHA_UTC && item.NEGOCIO !== 'INDEFINIDO').sort((a, b) => a.FECHA_UTC - b.FECHA_UTC);
+    }));
 
     // ===================================================================================
-    // CORRECCIÓN AUTOMÁTICA: Reclasificación de categorías a Gastos Operativos
-    // Esta sección asegura que ciertas categorías siempre se traten como Gastos Operativos,
-    // sin importar cómo estén etiquetadas en el JSON de origen.
+    // LÓGICA DE RECLASIFICACIÓN AUTOMÁTICA
+    // Se definen las categorías para asegurar su correcta asignación en el Estado de Resultados.
     // ===================================================================================
+    const costOfSalesCategories = new Set([
+        'FRUTAS, VERDURAS, CHILES Y SEMILLAS', 'CARNES', 'LACTEOS', 'HUEVOS', 'TORTILLAS', 'CERVEZAS',
+        'AGUA Y HIELO', 'PANADERIA Y REPOSTERIA', 'ABARROTES', 'PLASTICOS',
+        'DEVOLUCIONES Y CANCELACION', 'OTROS GASTOS', 'TICKET CANCELADO/ DEVOLUCIONES',
+        'MARISCOS', 'REFRESCOS', 'SNACKS', 'MAICITOS', 'BEBIDAS NO GASEOSAS'
+    ]);
+
     const operationalCategories = new Set([
         'MANTENIMIENTO', 'LIMPIEZA', 'PERMISOS Y LICENCIAS', 'PUBLICIDAD',
         'GASTOS DE OFICINA', 'NAN', 'SEGURIDAD Y VIGILANCIA', 'TELMEX', 'IMSS',
-        'GAS', 'LUZ', 'RENTA', 'COMPRA DE EQUIPO', 'EQUIPO PARA PERSONAL', 'TELCEL'
+        'GAS', 'LUZ', 'RENTA', 'COMPRA DE EQUIPO', 'EQUIPO PARA PERSONAL', 'TELCEL',
+        'PROPINAS', 'GASTOS ADMINISTRATIVOS (NOMINAS / EVENTUALES / PRESTAMOS)',
+        'CORTESIAS', 'MOTOENVIOS', 'INVERSIONES', 'NOMINA Y BONOS'
     ]);
 
-    processedData.forEach(item => {
-        if (operationalCategories.has(item.CATEGORIA)) {
-            item.ESTADO_DE_RESULTADOS = 'Gasto Operativo';
+    const processedData = initialData.map(item => {
+        const newItem = { ...item };
+        if (costOfSalesCategories.has(newItem.CATEGORIA)) {
+            newItem.ESTADO_DE_RESULTADOS = 'Costo de Venta';
+        } else if (operationalCategories.has(newItem.CATEGORIA)) {
+            newItem.ESTADO_DE_RESULTADOS = 'Gasto Operativo';
         }
-    });
+        return newItem;
+    }).filter(item => item.FECHA_UTC && item.NEGOCIO !== 'INDEFINIDO').sort((a, b) => a.FECHA_UTC - b.FECHA_UTC);
     // ===================================================================================
-
 
     let charts = {};
     let currentPnlData = [];
