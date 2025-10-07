@@ -14,7 +14,7 @@
                 extend: {
                     colors: {
                         'primary-bg': '#f3f4f6', 'secondary-bg': '#ffffff', 'primary-text': '#111827',
-                        'secondary-text': '#4b5563', 'border-color': '#e5e7eb',
+                        'secondary-text': '#6b7280', 'border-color': '#e5e7eb',
                         'dark-primary-bg': '#111827', 'dark-secondary-bg': '#1f2937', 'dark-primary-text': '#f9fafb',
                         'dark-secondary-text': '#9ca3af', 'dark-border-color': '#374151',
                     }
@@ -26,7 +26,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -73,12 +73,25 @@
         html.dark .table-scrollbar::-webkit-scrollbar-track { background: #374151; }
         .table-scrollbar::-webkit-scrollbar-thumb { background-color: #9ca3af; border-radius: 4px; }
         html.dark .table-scrollbar::-webkit-scrollbar-thumb { background-color: #4b5563; }
-        .nav-btn-active { background-color: #3b82f6; color: white; }
+        
+        /* Navigation Styles */
+        .nav-btn { color: var(--secondary-text-color, #6b7280); }
+        html.dark .nav-btn { color: var(--dark-secondary-text-color, #9ca3af); }
+        .nav-btn-active { 
+            color: #2563eb; /* text-blue-600 */
+            border-bottom: 2px solid #2563eb;
+            font-weight: 600;
+        }
+        html.dark .nav-btn-active { color: #60a5fa; border-bottom-color: #60a5fa; }
+        
         summary .arrow { transition: transform 0.2s; }
         details[open] summary .arrow { transform: rotate(180deg); }
+        
+        /* Subtle Hover Effect */
         .pnl-clickable-row { cursor: pointer; transition: background-color: 0.2s; }
-        .pnl-clickable-row:hover { background-color: #eff6ff; }
-        html.dark .pnl-clickable-row:hover { background-color: #1e40af; }
+        .pnl-clickable-row:hover { background-color: #f9fafb; } /* gray-50 */
+        html.dark .pnl-clickable-row:hover { background-color: #374151; } /* dark-border-color */
+
         .toggle-checkbox:checked+.toggle-label { background-color: #3b82f6; }
         .toggle-checkbox:checked {
             transform: translateX(1.1rem);
@@ -94,14 +107,14 @@
 
     <div class="max-w-7xl mx-auto">
 
-        <header class="text-center mb-8">
+        <header class="mb-8">
             <div class="flex justify-between items-center">
                 <div class="w-16"></div>
-                <div>
-                    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold">Operadora de Alimentos Moyuk</h1>
-                    <p class="text-secondary-text dark:text-dark-secondary-text text-sm sm:text-base mt-2">Análisis Financiero</p>
+                <div class="text-center">
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-primary-text dark:text-dark-primary-text">Operadora de Alimentos Moyuk</h1>
+                    <p class="text-secondary-text dark:text-dark-secondary-text text-md sm:text-lg mt-1">Análisis Financiero</p>
                 </div>
-                <div class="flex items-center space-x-2 w-24" aria-label="Cambiar tema">
+                <div class="flex items-center space-x-2 w-24 justify-end" aria-label="Cambiar tema">
                     <svg class="text-secondary-text dark:text-dark-secondary-text" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                     <div class="relative inline-block w-10 mr-2 align-middle select-none">
                         <input type="checkbox" name="toggle" id="theme-toggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" />
@@ -111,14 +124,14 @@
                 </div>
             </div>
 
-            <nav class="mt-6 flex justify-center bg-gray-200 dark:bg-dark-secondary-bg rounded-lg p-1 max-w-sm mx-auto">
-                <button id="nav-dashboard" class="nav-btn w-1/2 py-2 px-4 rounded-md font-semibold transition-colors duration-300 nav-btn-active">Dashboard</button>
-                <button id="nav-pnl" class="nav-btn w-1/2 py-2 px-4 rounded-md font-semibold transition-colors duration-300">Estado de Resultados</button>
+            <nav class="mt-6 flex justify-center space-x-8">
+                <button id="nav-dashboard" class="nav-btn py-2 px-4 font-semibold transition-colors duration-300">Dashboard</button>
+                <button id="nav-pnl" class="nav-btn py-2 px-4 font-semibold transition-colors duration-300">Estado de Resultados</button>
             </nav>
         </header>
 
         <main id="page-dashboard">
-            <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md mb-8">
+            <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color mb-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                         <label for="negocio-filter" class="block text-sm font-medium text-secondary-text dark:text-dark-secondary-text mb-1">Negocio</label>
@@ -137,14 +150,17 @@
                         <select id="proveedor-filter" class="w-full bg-primary-bg dark:bg-dark-primary-bg border border-border-color dark:border-dark-border-color rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"><option value="all">Todos</option></select>
                     </div>
                 </div>
-                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                     <div class="md:col-span-1">
                         <label for="month-filter" class="block text-sm font-medium text-secondary-text dark:text-dark-secondary-text mb-1">Mes</label>
                         <select id="month-filter" class="w-full bg-primary-bg dark:bg-dark-primary-bg border border-border-color dark:border-dark-border-color rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                     </div>
-                    <div class="flex items-end">
-                        <button id="clear-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
-                            Limpiar Filtros
+                    <div class="md:col-span-2 flex items-end space-x-2">
+                        <button id="apply-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                            Aplicar Filtros
+                        </button>
+                        <button id="clear-filters-btn" class="w-full bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700 text-blue-600 dark:text-blue-400 font-bold py-2 px-4 rounded-md border border-blue-600 dark:border-blue-400 transition duration-200">
+                            Limpiar
                         </button>
                     </div>
                 </div>
@@ -152,34 +168,41 @@
 
             <div class="space-y-4 mb-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md flex items-center space-x-4"><div class="text-green-500"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Margen Operativo</h3><p id="kpi-margen-op" class="text-2xl font-bold mt-1">0.00%</p></div></div>
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md flex items-center space-x-4"><div class="text-blue-500"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path><line x1="2" y1="9" x2="22" y2="9"></line></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Margen Neto</h3><p id="kpi-margen-neto" class="text-2xl font-bold mt-1">0.00%</p></div></div>
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md flex items-center space-x-4"><div class="text-purple-500"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="6" y1="12" x2="18" y2="12"></line></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">% Ingresos Electrónicos</h3><p id="kpi-electronico" class="text-2xl font-bold mt-1">0.00%</p></div></div>
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md flex items-center space-x-4"><div class="text-orange-500"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Venta Promedio Diaria</h3><p id="kpi-venta-diaria" class="text-2xl font-bold mt-1">$0.00</p></div></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color flex items-center space-x-4"><div class="text-secondary-text dark:text-dark-secondary-text"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-xs font-semibold uppercase tracking-wider">Margen Operativo</h3><p id="kpi-margen-op" class="text-2xl font-bold mt-1">0.00%</p></div></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color flex items-center space-x-4"><div class="text-secondary-text dark:text-dark-secondary-text"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 5H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"></path><line x1="2" y1="9" x2="22" y2="9"></line></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-xs font-semibold uppercase tracking-wider">Margen Neto</h3><p id="kpi-margen-neto" class="text-2xl font-bold mt-1">0.00%</p></div></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color flex items-center space-x-4"><div class="text-secondary-text dark:text-dark-secondary-text"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="6" y1="12" x2="18" y2="12"></line></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-xs font-semibold uppercase tracking-wider">% Ingresos Electrónicos</h3><p id="kpi-electronico" class="text-2xl font-bold mt-1">0.00%</p></div></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color flex items-center space-x-4"><div class="text-secondary-text dark:text-dark-secondary-text"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg></div><div><h3 class="text-secondary-text dark:text-dark-secondary-text text-xs font-semibold uppercase tracking-wider">Venta Promedio Diaria</h3><p id="kpi-venta-diaria" class="text-2xl font-bold mt-1">$0.00</p></div></div>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Ingresos Totales</h3><p id="kpi-ingresos" class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">$0.00 MXN</p></div>
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Egresos Totales</h3><p id="kpi-egresos" class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">$0.00 MXN</p></div>
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Beneficio Neto</h3><p id="kpi-beneficio" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">$0.00 MXN</p></div>
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Nº de Transacciones</h3><p id="kpi-transacciones" class="text-2xl font-bold mt-1">0</p></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Ingresos Totales</h3><p id="kpi-ingresos" class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">$0.00 MXN</p></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Egresos Totales</h3><p id="kpi-egresos" class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">$0.00 MXN</p></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Beneficio Neto</h3><p id="kpi-beneficio" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">$0.00 MXN</p></div>
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color"><h3 class="text-secondary-text dark:text-dark-secondary-text text-sm font-medium">Nº de Transacciones</h3><p id="kpi-transacciones" class="text-2xl font-bold mt-1">0</p></div>
                 </div>
             </div>
 
-            <div id="narrative-summary-container" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-6 rounded-lg shadow-md mb-8">
+            <div id="narrative-summary-container" class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-6 rounded-lg mb-8">
                 <h3 class="font-semibold text-lg mb-2 text-primary-text dark:text-dark-primary-text">Resumen del Periodo</h3>
                 <div id="narrative-summary" class="text-secondary-text dark:text-dark-secondary-text">
                     <p>Seleccione un mes para generar el resumen.</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="flowChart"></canvas></div></div>
-                <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="barChart"></canvas></div></div>
-                <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="doughnutChart"></canvas></div></div>
-                <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md"><div class="h-80 md:h-96"><canvas id="horizontalBarChart"></canvas></div></div>
+            <!-- Flujo de efectivo Diario Ancho -->
+            <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color mb-6">
+                <div class="h-80 md:h-96">
+                    <canvas id="flowChart"></canvas>
+                </div>
             </div>
 
-            <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md">
+            <!-- Otras Gráficas -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color"><div class="h-80 md:h-96"><canvas id="barChart"></canvas></div></div>
+                <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color"><div class="h-80 md:h-96"><canvas id="doughnutChart"></canvas></div></div>
+                <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color"><div class="h-80 md:h-96"><canvas id="horizontalBarChart"></canvas></div></div>
+            </div>
+
+            <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color">
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
                     <h3 class="text-xl font-semibold">Detalle de Transacciones</h3>
                     <input type="text" id="table-search" placeholder="Buscar..." class="w-full sm:w-64 mt-2 sm:mt-0 bg-primary-bg dark:bg-dark-primary-bg border border-border-color dark:border-dark-border-color rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
@@ -200,7 +223,7 @@
         </main>
 
         <main id="page-pnl" class="hidden">
-            <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md mb-8">
+            <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color mb-8">
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
                     <div>
                         <label for="pnl-negocio-filter" class="block text-sm font-medium text-secondary-text dark:text-dark-secondary-text mb-1">Negocio</label>
@@ -211,24 +234,24 @@
                         <select id="pnl-month-filter" class="w-full bg-primary-bg dark:bg-dark-primary-bg border border-border-color dark:border-dark-border-color rounded-md p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"></select>
                     </div>
                     <div>
-                        <button id="pnl-clear-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
-                            Limpiar Filtros
+                        <button id="pnl-apply-filters-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200">
+                           Aplicar
                         </button>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg shadow-md">
+                <div class="lg:col-span-2 bg-secondary-bg dark:bg-dark-secondary-bg p-6 rounded-lg border border-border-color dark:border-dark-border-color">
                     <h3 class="text-xl font-semibold mb-4">Estado de Resultados Detallado</h3>
                     <div id="pnl-table-container" class="space-y-1 text-sm"></div>
                 </div>
 
                 <div class="space-y-6">
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md">
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color">
                         <div class="h-64"><canvas id="pnlDoughnutChart"></canvas></div>
                     </div>
-                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg shadow-md">
+                    <div class="bg-secondary-bg dark:bg-dark-secondary-bg p-4 rounded-lg border border-border-color dark:border-dark-border-color">
                         <div class="h-64"><canvas id="pnlBarChart"></canvas></div>
                     </div>
                 </div>
@@ -23308,7 +23331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pageDashboard.classList.toggle('hidden', pageToShow !== 'dashboard');
         pagePnl.classList.toggle('hidden', pageToShow !== 'pnl');
         navDashboardBtn.classList.toggle('nav-btn-active', pageToShow === 'dashboard');
-        navPnlBtn.classList.toggle('nav-btn-active', pageToShow === 'pnl');
+        navPnlBtn.classList.toggle('nav-btn-active', pageToShow !== 'dashboard');
     };
     navDashboardBtn.addEventListener('click', () => showPage('dashboard'));
     navPnlBtn.addEventListener('click', () => showPage('pnl'));
@@ -23443,38 +23466,53 @@ document.addEventListener('DOMContentLoaded', () => {
             month: document.getElementById('month-filter'),
             search: document.getElementById('table-search'),
         };
+        const applyBtn = document.getElementById('apply-filters-btn');
+        const clearBtn = document.getElementById('clear-filters-btn');
 
         populateSelect(filters.negocio, [...new Set(processedData.map(d => d.NEGOCIO))].sort(), 'Todos los Negocios');
         populateSelect(filters.categoria, [...new Set(processedData.map(d => d.CATEGORIA))].sort(), 'Todas las Categorías');
         populateSelect(filters.transaccion, [...new Set(processedData.map(d => d.TRANSACCION))].sort(), 'Todas las Transacciones');
         populateSelect(filters.proveedor, [...new Set(processedData.map(d => d.PROVEEDOR).filter(p => p !== 'No especificado'))].sort(), 'Todos los Proveedores');
         populateMonthSelect(filters.month, allMonths);
+        
+        // Default to the last month
+        if (allMonths.length > 0) {
+            filters.month.value = allMonths[allMonths.length - 1];
+        }
 
         function updateDashboard() {
-            const selectedMonthKey = filters.month.value;
-            const searchTerm = filters.search.value.toLowerCase();
+            // Add a visual indicator for loading
+            const kpiElements = document.querySelectorAll('[id^="kpi-"]');
+            kpiElements.forEach(el => el.classList.add('animate-pulse-fast'));
 
-            const baseFiltered = processedData.filter(d => {
-                let dateInRange = true;
-                if (selectedMonthKey !== 'all') {
-                    const [year, month] = selectedMonthKey.split('-').map(Number);
-                    dateInRange = d.FECHA_UTC.getUTCFullYear() === year && d.FECHA_UTC.getUTCMonth() === month;
-                }
-                return (filters.negocio.value === 'all' || d.NEGOCIO === filters.negocio.value) && dateInRange;
-            });
-            
-            const detailedFiltered = baseFiltered.filter(d => {
-                return (filters.categoria.value === 'all' || d.CATEGORIA === filters.categoria.value) &&
-                    (filters.transaccion.value === 'all' || d.TRANSACCION === filters.transaccion.value) &&
-                    (filters.proveedor.value === 'all' || d.PROVEEDOR === filters.proveedor.value) &&
-                    (searchTerm === '' || Object.values(d).join(' ').toLowerCase().includes(searchTerm));
-            });
+            setTimeout(() => {
+                const selectedMonthKey = filters.month.value;
+                const searchTerm = filters.search.value.toLowerCase();
 
-            const kpis = calculateKPIs(baseFiltered);
-            updateKPIs(kpis);
-            populateTable(detailedFiltered);
-            updateCharts(detailedFiltered);
-            updateNarrativeSummary(kpis, selectedMonthKey);
+                const baseFiltered = processedData.filter(d => {
+                    let dateInRange = true;
+                    if (selectedMonthKey !== 'all') {
+                        const [year, month] = selectedMonthKey.split('-').map(Number);
+                        dateInRange = d.FECHA_UTC.getUTCFullYear() === year && d.FECHA_UTC.getUTCMonth() === month;
+                    }
+                    return (filters.negocio.value === 'all' || d.NEGOCIO === filters.negocio.value) && dateInRange;
+                });
+                
+                const detailedFiltered = baseFiltered.filter(d => {
+                    return (filters.categoria.value === 'all' || d.CATEGORIA === filters.categoria.value) &&
+                        (filters.transaccion.value === 'all' || d.TRANSACCION === filters.transaccion.value) &&
+                        (filters.proveedor.value === 'all' || d.PROVEEDOR === filters.proveedor.value) &&
+                        (searchTerm === '' || Object.values(d).join(' ').toLowerCase().includes(searchTerm));
+                });
+
+                const kpis = calculateKPIs(baseFiltered);
+                updateKPIs(kpis);
+                populateTable(detailedFiltered);
+                updateCharts(detailedFiltered);
+                updateNarrativeSummary(kpis, selectedMonthKey);
+                
+                kpiElements.forEach(el => el.classList.remove('animate-pulse-fast'));
+            }, 500); // Simulate loading delay
         }
 
         function calculateKPIs(data) {
@@ -23513,7 +23551,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateNarrativeSummary(kpis, monthKey) {
             const summaryElement = document.getElementById('narrative-summary');
             if (monthKey === 'all') {
-                summaryElement.innerHTML = '<p>Seleccione un mes para generar el resumen.</p>';
+                summaryElement.innerHTML = '<p>Seleccione un periodo para generar el resumen.</p>';
                 return;
             }
 
@@ -23562,13 +23600,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return acc;
             }, {});
             const sortedDates = Object.keys(dailyData).sort();
+            const chartLabels = sortedDates.map(dateStr => {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+            });
+
             createChart('flowChart', 'line', {
-                labels: sortedDates,
+                labels: chartLabels,
                 datasets: [
                     { label: 'Ingresos', data: sortedDates.map(d => dailyData[d].ingresos), borderColor: getCssVar('--chart-green'), backgroundColor: getCssVar('--chart-green-bg'), fill: true, tension: 0.3 },
                     { label: 'Egresos', data: sortedDates.map(d => dailyData[d].egresos), borderColor: getCssVar('--chart-red'), backgroundColor: getCssVar('--chart-red-bg'), fill: true, tension: 0.3 }
                 ]
-            }, { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Flujo de Efectivo Diario' } } });
+            }, { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { title: { display: true, text: 'Flujo de Efectivo Diario' } },
+                scales: {
+                    x: {
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 20,
+                            maxRotation: 0,
+                            minRotation: 0
+                        }
+                    }
+                } 
+            });
             
             const businessData = data.reduce((acc, curr) => {
                 if (!acc[curr.NEGOCIO]) acc[curr.NEGOCIO] = { ingresos: 0, egresos: 0 };
@@ -23606,7 +23663,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Top 10 Proveedores por Costo de Venta' } } });
         }
 
-        document.getElementById('clear-filters-btn').addEventListener('click', () => {
+        clearBtn.addEventListener('click', () => {
             filters.negocio.value = 'all';
             filters.categoria.value = 'all';
             filters.transaccion.value = 'all';
@@ -23616,8 +23673,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateDashboard();
         });
 
-        Object.values(filters).forEach(filter => filter.addEventListener('change', updateDashboard));
+        applyBtn.addEventListener('click', updateDashboard);
         filters.search.addEventListener('input', updateDashboard);
+        
+        // Initial Load
         updateDashboard();
     };
 
@@ -23626,9 +23685,16 @@ document.addEventListener('DOMContentLoaded', () => {
             negocio: document.getElementById('pnl-negocio-filter'),
             month: document.getElementById('pnl-month-filter'),
         };
+        const applyBtn = document.getElementById('pnl-apply-filters-btn');
+        
         populateSelect(filters.negocio, [...new Set(processedData.map(d => d.NEGOCIO))].sort(), 'Todos los Negocios');
         populateMonthSelect(filters.month, allMonths);
         
+        // Default to the last month
+        if (allMonths.length > 0) {
+            filters.month.value = allMonths[allMonths.length - 1];
+        }
+
         function updatePnlView() {
             const selectedNegocio = filters.negocio.value;
             const selectedMonthKey = filters.month.value;
@@ -23746,16 +23812,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        document.getElementById('pnl-clear-filters-btn').addEventListener('click', () => {
-            filters.negocio.value = 'all';
-            filters.month.value = 'all';
-            updatePnlView();
-        });
-
-        Object.values(filters).forEach(filter => filter.addEventListener('change', updatePnlView));
+        applyBtn.addEventListener('click', updatePnlView);
         updatePnlView();
     };
 
+    showPage('dashboard');
     initDashboardPage();
     initPnlPage();
     setupTheme();
