@@ -359,7 +359,7 @@
 // ===================================================================================
 // INSTRUCTIONS: Paste the content of your '.json' file
 // inside the empty brackets of the 'jsonData' variable.
-// Example: 
+// Example: const jsonData = [ { "col": "val" }, { "col": "val" } ];
 // ===================================================================================
 
 const jsonData = [
@@ -36281,6 +36281,8 @@ const jsonData = [
 ]
 
 // ===================================================================================
+// END OF JSON INPUT AREA
+// ===================================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     try {
@@ -36327,7 +36329,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- DATA PROCESSING ---
         const initialData = jsonData.map(item => ({
             ...item,
-            ESTADO_DE_RESULTADOS: (item['ESTADO DE RESULTADOS'] || 'INDEFINIDO').trim(),
+            // --- FIX ---
+            // The original code was: (item['ESTADO DE RESULTADOS'] || 'INDEFINIDO').trim()
+            // The JSON key is 'ESTADO_DE_RESULTADOS' (no space).
+            ESTADO_DE_RESULTADOS: (item['ESTADO_DE_RESULTADOS'] || 'INDEFINIDO').trim(),
+            // --- END FIX ---
             TRANSACCION: (item.TRANSACCION || 'INDEFINIDO').trim(),
             NEGOCIO: (item['NEGOCIO'] || item.NEGOCIO || 'INDEFINIDO').trim(),
             CATEGORIA: normalizeCategory(item.CATEGORIA),
