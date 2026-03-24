@@ -3,244 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Financiero</title>
+  <title>Dashboard Financiero Moyuk</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prop-types/15.8.1/prop-types.min.js"></script>
-
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
   <script src="https://unpkg.com/recharts@2.10.4/umd/Recharts.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.30.0/date-fns.min.js"></script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-
   <style>
-    @media print {
-      .no-print { display: none !important; }
-    }
+    @media print { .no-print { display: none !important; } }
+    body { background-color: #F5F5F5; }
   </style>
 </head>
-<body class="bg-[#F5F5F5] text-gray-900 font-sans">
+<body>
   <div id="root"></div>
 
-  <script type="text/babel">
+  <script type="text/babel" data-presets="react">
     const { useState, useMemo, useEffect } = React;
-    const { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-            PieChart, Pie, Cell, BarChart, Bar, Legend } = Recharts;
+    const { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend } = Recharts;
     const { parse, isValid, format, subMonths } = dateFns;
 
     const COLORS = ['#0088FE','#00C49F','#FFBB28','#FF8042','#8884d8','#82ca9d','#ffc658','#a4de6c','#d0ed57'];
-
-    // URL RAW de tu repositorio
     const CSV_URL = "https://raw.githubusercontent.com/Cristthh/Moyuk/main/CONSOLIDADO_MOYUK_LIMPIO.csv";
 
-    const formatCurrency = (v) =>
-      new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(v);
-    const formatPercent = (v) =>
-      new Intl.NumberFormat('es-MX', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(v);
-    const cn = (...c) => c.filter(Boolean).join(' ');
+    const formatCurrency = (v) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(v || 0);
+    const formatPercent = (v) => new Intl.NumberFormat('es-MX', { style: 'percent', minimumFractionDigits: 1 }).format(v || 0);
 
     const parseDate = (s) => {
-      if (!s) return new Date(0);
+      if(!s) return new Date(0);
       const d = parse(s, 'dd/MM/yyyy', new Date());
       return isValid(d) ? d : new Date(0);
     };
 
-    function buildMonthlyData(transactions) {
-      const monthly = {};
-      const bizMonthly = {};
-
-      transactions.forEach((t) => {
-        const amount = Number(t.IMPORTE) || 0;
-        const isIngreso = t.TRANSACCION === 'Ingreso';
-        const d = parseDate(t.FECHA);
-        if (d.getTime() === 0) return;
-
-        const key = format(d, 'MMM yyyy');
-        const sort = format(d, 'yyyy-MM');
-        const biz = t.NEGOCIO || 'Otros';
-
-        if (!monthly[key]) monthly[key] = { sales: 0, expenses: 0, sort };
-        if (isIngreso) monthly[key].sales += amount;
-        else monthly[key].expenses += amount;
-
-        const bk = `${biz}||${key}`;
-        if (!bizMonthly[bk]) bizMonthly[bk] = { biz, key, sort, sales: 0, expenses: 0 };
-        if (isIngreso) bizMonthly[bk].sales += amount;
-        else bizMonthly[bk].expenses += amount;
-      });
-
-      const monthlyChart = Object.entries(monthly)
-        .sort((a, b) => a[1].sort.localeCompare(b[1].sort))
-        .map(([name, d]) => ({ name, sales: d.sales, expenses: d.expenses, profit: d.sales - d.expenses }));
-
-      return { monthlyChart, bizMonthly };
-    }
-
-    function processTransactions(transactions) {
-      let totalSales = 0, totalExpenses = 0, operatingExpenses = 0, costOfSales = 0;
-      const bizData = {};
-      const catData = {};
-
-      transactions.forEach((t) => {
-        const amount = Number(t.IMPORTE) || 0;
-        const isIngreso = t.TRANSACCION === 'Ingreso';
-        const biz = t.NEGOCIO || 'Otros';
-        const cat = t.CATEGORIA || 'Sin Categoría';
-        const type = t.ESTADO_DE_RESULTADOS;
-
-        if (isIngreso) { totalSales += amount; }
-        else {
-          totalExpenses += amount;
-          if (type === 'Gasto Operativo') operatingExpenses += amount;
-          if (type === 'Costo de Venta') costOfSales += amount;
-          catData[cat] = (catData[cat] || 0) + amount;
-        }
-        if (!bizData[biz]) bizData[biz] = { sales: 0, expenses: 0 };
-        if (isIngreso) bizData[biz].sales += amount;
-        else bizData[biz].expenses += amount;
-      });
-
-      const netProfit = totalSales - totalExpenses;
-      const margin = totalSales > 0 ? netProfit / totalSales : 0;
-
-      const { monthlyChart, bizMonthly } = buildMonthlyData(transactions);
-
-      const businessBreakdown = Object.entries(bizData)
-        .map(([name, d]) => ({ name, sales: d.sales, expenses: d.expenses }));
-
-      const categoryBreakdown = Object.entries(catData)
-        .map(([name, value]) => ({ name, value }))
-        .sort((a, b) => b.value - a.value);
-
-      const allBusinesses = [...new Set(Object.values(bizMonthly).map(d => d.biz))].sort();
-      const allMonths = [...new Set(Object.values(bizMonthly).map(d => d.key))]
-        .sort((a, b) => {
-          const as = Object.values(bizMonthly).find(d => d.key === a)?.sort || '';
-          const bs = Object.values(bizMonthly).find(d => d.key === b)?.sort || '';
-          return as.localeCompare(bs);
-        });
-
-      const businessByMonth = allMonths.map(month => {
-        const row = { month };
-        allBusinesses.forEach(biz => {
-          const e = bizMonthly[`${biz}||${month}`];
-          row[`${biz}_sales`]    = e ? e.sales : 0;
-          row[`${biz}_expenses`] = e ? e.expenses : 0;
-          row[`${biz}_profit`]   = e ? (e.sales - e.expenses) : 0;
-        });
-        return row;
-      });
-
-      return {
-        stats: { totalSales, totalExpenses, netProfit, operatingExpenses, costOfSales, margin },
-        monthlyChart, businessBreakdown, categoryBreakdown, businessByMonth, allBusinesses,
-      };
-    }
-
-    function KPICard({ title, value, iconClass, iconColor, trend, positive, label }) {
+    function KPICard({ title, value, iconClass, iconColor }) {
       return (
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center">
-              <i className={`fa-solid ${iconClass} ${iconColor} text-lg`}></i>
-            </div>
-            {trend && (
-              <div className={cn("flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-lg",
-                positive ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700")}>
-                <i className={`fa-solid ${positive ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'}`}></i>
-                {trend}
-              </div>
-            )}
+        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center mb-4">
+            <i className={`fa-solid ${iconClass} ${iconColor} text-lg`}></i>
           </div>
-          <div>
-            <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-            <h3 className="text-2xl font-bold tracking-tight truncate">{value}</h3>
-            {label && <p className="text-xs text-gray-400 mt-2">{label}</p>}
-          </div>
+          <p className="text-sm font-medium text-gray-500">{title}</p>
+          <h3 className="text-2xl font-bold">{value}</h3>
         </div>
       );
     }
 
     function Dashboard() {
       const [data, setData] = useState([]);
-      const [autoLoading, setAutoLoading] = useState(true);
-      const [autoError, setAutoError] = useState(false);
-      const [lastUpdated, setLastUpdated] = useState(null);
-      const [filters, setFilters] = useState({
-        ESTADO_DE_RESULTADOS:'', TRANSACCION:'', NEGOCIO:'',
-        PROVEEDOR:'', CATEGORIA:'', startDate:'', endDate:'',
-      });
+      const [loading, setLoading] = useState(true);
 
       useEffect(() => {
-        fetch(CSV_URL)
-          .then(res => {
-            if (!res.ok) throw new Error('Error al cargar');
-            return res.text();
-          })
-          .then(text => {
-            Papa.parse(text, {
-              header: true, skipEmptyLines: true,
-              complete: (r) => {
-                setData(r.data);
-                setAutoLoading(false);
-                setLastUpdated(new Date());
-              },
-            });
-          })
-          .catch(() => { setAutoLoading(false); setAutoError(true); });
+        Papa.parse(CSV_URL, {
+          download: true,
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            setData(results.data);
+            setLoading(false);
+          },
+          error: () => setLoading(false)
+        });
       }, []);
 
-      const filteredData = useMemo(() => {
-        return data.filter(t => {
-          return (
-            (!filters.ESTADO_DE_RESULTADOS || t.ESTADO_DE_RESULTADOS === filters.ESTADO_DE_RESULTADOS) &&
-            (!filters.TRANSACCION || t.TRANSACCION === filters.TRANSACCION) &&
-            (!filters.NEGOCIO || t.NEGOCIO === filters.NEGOCIO) &&
-            (!filters.CATEGORIA || t.CATEGORIA === filters.CATEGORIA)
-          );
+      const processed = useMemo(() => {
+        if (data.length === 0) return null;
+        
+        let sales = 0, expenses = 0;
+        const catMap = {};
+        const monthMap = {};
+
+        data.forEach(t => {
+          const amt = Number(t.IMPORTE) || 0;
+          const isIngreso = t.TRANSACCION === 'Ingreso';
+          const date = parseDate(t.FECHA);
+          const mKey = isValid(date) && date.getTime() !== 0 ? format(date, 'MMM yy') : 'S/F';
+
+          if (isIngreso) {
+            sales += amt;
+          } else {
+            expenses += amt;
+            catMap[t.CATEGORIA] = (catMap[t.CATEGORIA] || 0) + amt;
+          }
+
+          if(!monthMap[mKey]) monthMap[mKey] = { name: mKey, sales: 0, expenses: 0 };
+          if(isIngreso) monthMap[mKey].sales += amt;
+          else monthMap[mKey].expenses += amt;
         });
-      }, [data, filters]);
 
-      const processed = useMemo(() => filteredData.length > 0 ? processTransactions(filteredData) : null, [filteredData]);
+        return {
+          totalSales: sales,
+          totalExpenses: expenses,
+          margin: sales > 0 ? (sales - expenses) / sales : 0,
+          monthly: Object.values(monthMap),
+          categories: Object.entries(catMap).map(([name, value]) => ({ name, value }))
+        };
+      }, [data]);
 
-      if (autoLoading) return <div className="h-screen flex items-center justify-center"><p>Cargando Dashboard...</p></div>;
+      if (loading) return <div className="h-screen flex items-center justify-center font-sans">Cargando datos maestros...</div>;
 
-      const { stats, monthlyChart, categoryBreakdown } = processed || { stats:{}, monthlyChart:[], categoryBreakdown:[] };
+      const { totalSales, totalExpenses, margin, monthly, categories } = processed || {};
 
       return (
-        <div className="p-8 max-w-7xl mx-auto">
-          <header className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-bold">Dashboard Moyuk</h1>
-              <p className="text-gray-500">Análisis Financiero Consolidado</p>
-            </div>
-            {lastUpdated && <span className="text-xs text-gray-400">Actualizado: {lastUpdated.toLocaleTimeString()}</span>}
+        <div className="p-4 md:p-8 max-w-7xl mx-auto font-sans">
+          <header className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Análisis Consolidado Moyuk</h1>
+            <p className="text-gray-500 text-sm">Visualización en tiempo real desde GitHub CSV</p>
           </header>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-            <KPICard title="Ventas Totales" value={formatCurrency(stats.totalSales || 0)} iconClass="fa-sack-dollar" iconColor="text-emerald-500" />
-            <KPICard title="Gastos Totales" value={formatCurrency(stats.totalExpenses || 0)} iconClass="fa-money-bill-transfer" iconColor="text-rose-500" />
-            <KPICard title="Margen Neto" value={formatPercent(stats.margin || 0)} iconClass="fa-chart-line" iconColor="text-blue-500" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <KPICard title="Ingresos Totales" value={formatCurrency(totalSales)} iconClass="fa-sack-dollar" iconColor="text-emerald-500" />
+            <KPICard title="Egresos Totales" value={formatCurrency(totalExpenses)} iconClass="fa-money-bill-transfer" iconColor="text-rose-500" />
+            <KPICard title="Margen Neto" value={formatPercent(margin)} iconClass="fa-chart-pie" iconColor="text-blue-500" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-bold mb-4">Ingresos vs Egresos</h2>
-              <div className="h-80">
+              <h2 className="text-lg font-bold mb-6 text-gray-700">Flujo de Caja Mensual</h2>
+              <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyChart}>
+                  <AreaChart data={monthly}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis dataKey="name" />
                     <YAxis tickFormatter={(v) => `$${v/1000}k`} />
@@ -253,14 +139,14 @@
             </div>
 
             <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <h2 className="text-xl font-bold mb-4">Gastos por Categoría</h2>
-              <div className="h-80">
+              <h2 className="text-lg font-bold mb-6 text-gray-700">Gastos por Categoría</h2>
+              <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie data={categoryBreakdown} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} label>
-                      {categoryBreakdown.map((entry, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
+                    <Pie data={categories} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90}>
+                      {categories?.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip formatter={(v) => formatCurrency(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
