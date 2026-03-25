@@ -50,6 +50,10 @@
             --radius-lg:     1.25rem;
             --radius-xl:     1.75rem;
 
+            --transition-fast: 0.18s ease;
+            --transition-base: 0.25s ease;
+            --transition-slow: 0.35s ease;
+
             --font-display:  'Sora', sans-serif;
             --font-body:     'DM Sans', sans-serif;
         }
@@ -151,7 +155,7 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             padding: 1.5rem;
-            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+            transition: box-shadow var(--transition-base), border-color var(--transition-base);
         }
         .card:hover { box-shadow: var(--shadow-md); }
 
@@ -163,7 +167,7 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-sm);
             padding: 1.5rem;
-            transition: box-shadow 0.25s, transform 0.25s;
+            transition: box-shadow var(--transition-base), transform var(--transition-base);
         }
         .kpi-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
         .kpi-card::before {
@@ -255,7 +259,7 @@
             font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
             border-radius: var(--radius-sm); border: 1px solid transparent;
             padding: 0.5rem 0.875rem; cursor: pointer;
-            transition: all 0.18s; outline: none; white-space: nowrap;
+            transition: all var(--transition-fast); outline: none; white-space: nowrap;
         }
         .btn:focus-visible { box-shadow: var(--shadow-glow); }
         .btn-ghost {
@@ -575,6 +579,35 @@
             border-radius: 99px; padding: 0.3rem 1rem;
             font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.9);
         }
+
+        /* ============================================================
+           SKELETON LOADER
+        ============================================================ */
+        .skeleton {
+            background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: var(--radius-sm);
+            color: transparent !important;
+            pointer-events: none;
+            user-select: none;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ============================================================
+           KPI FLASH (microinteracción al actualizar valores)
+        ============================================================ */
+        @keyframes kpiFlash {
+            0%   { opacity: 0.35; transform: scale(0.96); }
+            100% { opacity: 1;    transform: scale(1); }
+        }
+        .kpi-value.updating {
+            animation: kpiFlash var(--transition-slow) ease forwards;
+        }
+
     </style>
 </head>
 <body>
@@ -721,7 +754,7 @@
                 <i class="ph ph-arrow-circle-up"></i>
             </div>
             <div class="kpi-label">Total Ingresos</div>
-            <div class="kpi-value" id="kpi-ingresos">$0.00</div>
+            <div class="kpi-value skeleton" id="kpi-ingresos" aria-live="polite" aria-atomic="true">$0.00</div>
             <div class="kpi-sub" id="kpi-ingresos-count">0 transacciones</div>
         </div>
 
@@ -730,7 +763,7 @@
                 <i class="ph ph-arrow-circle-down"></i>
             </div>
             <div class="kpi-label">Total Egresos</div>
-            <div class="kpi-value" id="kpi-egresos">$0.00</div>
+            <div class="kpi-value skeleton" id="kpi-egresos" aria-live="polite" aria-atomic="true">$0.00</div>
             <div class="kpi-sub" id="kpi-egresos-count">0 transacciones</div>
         </div>
 
@@ -739,7 +772,7 @@
                 <i class="ph ph-scales"></i>
             </div>
             <div class="kpi-label">Flujo Neto</div>
-            <div class="kpi-value" id="kpi-balance">$0.00</div>
+            <div class="kpi-value skeleton" id="kpi-balance" aria-live="polite" aria-atomic="true">$0.00</div>
             <div class="kpi-sub" id="kpi-balance-pct">— % margen</div>
         </div>
 
@@ -946,6 +979,13 @@
 'use strict';
 
 /* ------------------------------------------------------------------ */
+/* DOM HELPERS                                                         */
+/* ------------------------------------------------------------------ */
+const $  = id  => document.getElementById(id);
+const $q = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+
+/* ------------------------------------------------------------------ */
 /* CONFIG                                                              */
 /* ------------------------------------------------------------------ */
 const CSV_URL      = 'https://raw.githubusercontent.com/Cristthh/Moyuk/refs/heads/main/CONSOLIDADO_MOYUK_LIMPIO.csv';
@@ -1000,7 +1040,7 @@ function showToast(msg, type = 'info', duration = 3500) {
     const el = document.createElement('div');
     el.className = 'toast';
     el.innerHTML = `<i class="ph ${icons[type] || icons.info}" style="font-size:1.1rem; color:${colors[type] || colors.info}; flex-shrink:0;"></i><span>${msg}</span>`;
-    document.getElementById('toast-container').appendChild(el);
+    $('toast-container').appendChild(el);
     setTimeout(() => {
         el.classList.add('removing');
         setTimeout(() => el.remove(), 350);
@@ -1124,7 +1164,7 @@ function processData(raw) {
     if (validDates.length) {
         AppState.maxDate = new Date(Math.max(...validDates));
         const el = document.getElementById('data-info');
-        document.getElementById('data-info-text').textContent =
+        $('data-info-text').textContent =
             `Actualizado: ${AppState.maxDate.toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' })}`;
         el.style.display = 'block';
     }
@@ -1137,7 +1177,7 @@ function processData(raw) {
 }
 
 function hideLoader() {
-    const loader = document.getElementById('loader');
+    const loader = $('loader');
     if (!loader) return;
     loader.classList.add('hidden-loader');
     setTimeout(() => loader.remove(), 700);
@@ -1176,11 +1216,11 @@ const debouncedFilter = debounce(applyFilters, 280);
 function setupListeners() {
     document.getElementById('date-from').addEventListener('change', () => { clearActiveRange(); debouncedFilter(); });
     document.getElementById('date-to').addEventListener('change',   () => { clearActiveRange(); debouncedFilter(); });
-    document.getElementById('page-input').addEventListener('change', function() {
+    $('page-input').addEventListener('input', debounce(function() {
         const tp = Math.ceil(AppState.filtered.length / ROWS_PER_PAGE) || 1;
-        const v = parseInt(this.value) || 1;
+        const v  = parseInt(this.value) || 1;
         goToPage(Math.min(Math.max(v, 1), tp));
-    });
+    }, 400));
 }
 
 function clearActiveRange() {
@@ -1266,24 +1306,32 @@ function updateKPIs() {
     const neto = inT - egT;
     const pct  = egT > 0 ? ((inT / egT - 1) * 100).toFixed(1) : '∞';
 
-    document.getElementById('kpi-ingresos').textContent = fmt.format(inT);
-    document.getElementById('kpi-egresos').textContent  = fmt.format(egT);
-    document.getElementById('kpi-ingresos-count').textContent = `${inC.toLocaleString('es-MX')} transacciones`;
-    document.getElementById('kpi-egresos-count').textContent  = `${egC.toLocaleString('es-MX')} transacciones`;
+    function flashKPI(el, val) {
+        el.classList.remove('updating', 'skeleton');
+        void el.offsetWidth; // reflow trick
+        el.textContent = val;
+        el.classList.add('updating');
+    }
+    flashKPI($('kpi-ingresos'), fmt.format(inT));
+    flashKPI($('kpi-egresos'),  fmt.format(egT));
+    $('kpi-ingresos-count').textContent = `${inC.toLocaleString('es-MX')} transacciones`;
+    $('kpi-egresos-count').textContent  = `${egC.toLocaleString('es-MX')} transacciones`;
 
-    const elNeto = document.getElementById('kpi-balance');
+    const elNeto = $('kpi-balance');
+    elNeto.classList.remove('updating', 'skeleton');
+    void elNeto.offsetWidth;
     elNeto.textContent = fmt.format(neto);
+    elNeto.classList.add('updating');
     elNeto.style.color = neto >= 0 ? 'var(--teal)' : 'var(--rose)';
 
     const card = elNeto.closest('.kpi-card');
     card.classList.toggle('negative', neto < 0);
 
-    const icon = document.getElementById('kpi-balance-icon');
+    const icon = $('kpi-balance-icon');
     icon.style.background = neto >= 0 ? 'var(--teal-alpha)' : 'var(--rose-alpha)';
     icon.style.color       = neto >= 0 ? 'var(--teal)'       : 'var(--rose)';
 
-    document.getElementById('kpi-balance-pct').textContent =
-        inT > 0 ? `${pct}% vs egresos` : '—';
+    $('kpi-balance-pct').textContent = inT > 0 ? `${pct}% vs egresos` : '—';
 }
 
 /* ------------------------------------------------------------------ */
