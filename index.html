@@ -1,163 +1,1335 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard Financiero Moyuk</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Dashboard Financiero - Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. RFC: OCA2410151E0">
+    <title>Dashboard Financiero · Moyuk</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" defer></script>
+    <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
 
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
-  <script src="https://unpkg.com/recharts@2.10.4/umd/Recharts.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.30.0/date-fns.min.js"></script>
+    <style>
+        /* ============================================================
+           MOYUK DESIGN SYSTEM – Variables & Reset
+        ============================================================ */
+        :root {
+            --teal:          #0a4c5e;
+            --teal-light:    #0d6680;
+            --teal-alpha:    rgba(10,76,94,0.12);
+            --green:         #3fb875;
+            --green-alpha:   rgba(63,184,117,0.12);
+            --rose:          #f43f5e;
+            --rose-alpha:    rgba(244,63,94,0.12);
+            --amber:         #f59e0b;
 
-  <style>
-    @media print { .no-print { display: none !important; } }
-    body { background-color: #F5F5F5; }
-  </style>
+            --bg:            #f0f4f7;
+            --surface:       #ffffff;
+            --surface-2:     #f8fafc;
+            --border:        #e2e8f0;
+            --border-strong: #cbd5e1;
+
+            --text-1:        #0f172a;
+            --text-2:        #475569;
+            --text-3:        #94a3b8;
+
+            --shadow-sm:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md:     0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-lg:     0 12px 28px rgba(0,0,0,0.09), 0 4px 8px rgba(0,0,0,0.05);
+            --shadow-glow:   0 0 0 3px rgba(10,76,94,0.18);
+
+            --radius-sm:     0.5rem;
+            --radius-md:     0.875rem;
+            --radius-lg:     1.25rem;
+            --radius-xl:     1.75rem;
+
+            --font-display:  'Sora', sans-serif;
+            --font-body:     'DM Sans', sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --bg:            #0b1219;
+            --surface:       #111c26;
+            --surface-2:     #162130;
+            --border:        #1e3040;
+            --border-strong: #2a4257;
+
+            --text-1:        #f0f6ff;
+            --text-2:        #8faebf;
+            --text-3:        #4d6b7d;
+
+            --shadow-sm:     0 1px 3px rgba(0,0,0,0.3);
+            --shadow-md:     0 4px 12px rgba(0,0,0,0.4);
+            --shadow-lg:     0 12px 28px rgba(0,0,0,0.5);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text-1);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ============================================================
+           LOADER
+        ============================================================ */
+        #loader {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(145deg, #0a4c5e 0%, #062f3a 50%, #031e26 100%);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        #loader.hidden-loader { opacity: 0; transform: scale(1.04); pointer-events: none; }
+        .loader-ring {
+            width: 56px; height: 56px; border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.15);
+            border-top-color: #3fb875;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+        .loader-dots { display: flex; gap: 6px; margin-top: 1rem; }
+        .loader-dots span {
+            width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.4);
+            animation: dotPulse 1.4s ease-in-out infinite;
+        }
+        .loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes dotPulse { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+        /* ============================================================
+           ERROR STATE
+        ============================================================ */
+        #error-state {
+            display: none; position: fixed; inset: 0; z-index: 9998;
+            flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg); gap: 1rem; padding: 2rem; text-align: center;
+        }
+        #error-state.visible { display: flex; }
+
+        /* ============================================================
+           TOAST NOTIFICATIONS
+        ============================================================ */
+        #toast-container {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            z-index: 8000; display: flex; flex-direction: column; gap: 0.5rem;
+        }
+        .toast {
+            display: flex; align-items: center; gap: 0.75rem;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius-md); padding: 0.875rem 1.25rem;
+            box-shadow: var(--shadow-lg); font-size: 0.875rem;
+            font-family: var(--font-body); font-weight: 500; color: var(--text-1);
+            animation: slideInToast 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+            max-width: 320px;
+        }
+        .toast.removing { animation: slideOutToast 0.3s ease forwards; }
+        @keyframes slideInToast { from { opacity: 0; transform: translateY(12px) scale(0.95); } to { opacity: 1; transform: none; } }
+        @keyframes slideOutToast { to { opacity: 0; transform: translateX(20px); } }
+
+        /* ============================================================
+           CARDS
+        ============================================================ */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            transition: box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+        .card:hover { box-shadow: var(--shadow-md); }
+
+        /* KPI Cards */
+        .kpi-card {
+            position: relative; overflow: hidden;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            padding: 1.5rem;
+            transition: box-shadow 0.25s, transform 0.25s;
+        }
+        .kpi-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+        .kpi-card::before {
+            content: ''; position: absolute; inset: 0;
+            background: var(--kpi-gradient);
+            opacity: 0.04; pointer-events: none;
+        }
+        .kpi-card-ingreso  { --kpi-gradient: linear-gradient(135deg, #3fb875, #16a34a); border-left: 3px solid var(--green); }
+        .kpi-card-egreso   { --kpi-gradient: linear-gradient(135deg, #f43f5e, #dc2626); border-left: 3px solid var(--rose); }
+        .kpi-card-balance  { --kpi-gradient: linear-gradient(135deg, #0a4c5e, #0d6680); border-left: 3px solid var(--teal); }
+        .kpi-card-balance.negative { border-left-color: var(--rose); }
+
+        .kpi-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; margin-bottom: 1rem;
+        }
+        .kpi-value {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            font-weight: 800; letter-spacing: -0.02em;
+            line-height: 1.1; margin-bottom: 0.25rem;
+            color: var(--text-1);
+        }
+        .kpi-label {
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--text-3);
+        }
+        .kpi-sub {
+            font-size: 0.75rem; color: var(--text-3); margin-top: 0.5rem;
+        }
+
+        /* ============================================================
+           SECTION HEADERS
+        ============================================================ */
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1rem; font-weight: 700;
+            color: var(--text-1); letter-spacing: -0.01em;
+        }
+        .section-sub { font-size: 0.8rem; color: var(--text-2); margin-top: 0.2rem; }
+
+        /* ============================================================
+           FILTERS
+        ============================================================ */
+        .filter-label {
+            display: block;
+            font-size: 0.65rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--text-3); margin-bottom: 0.375rem;
+        }
+        .ts-control {
+            border-radius: var(--radius-sm) !important;
+            border-color: var(--border-strong) !important;
+            background: var(--surface) !important;
+            color: var(--text-1) !important;
+            font-family: var(--font-body) !important;
+            font-size: 0.8rem !important;
+            box-shadow: var(--shadow-sm) !important;
+            transition: all 0.2s !important;
+        }
+        .ts-control.focus {
+            border-color: var(--teal) !important;
+            box-shadow: var(--shadow-glow) !important;
+        }
+        .ts-dropdown { font-family: var(--font-body) !important; font-size: 0.8rem !important; }
+
+        /* ============================================================
+           DATE INPUTS
+        ============================================================ */
+        .date-input {
+            font-family: var(--font-body);
+            font-size: 0.78rem; font-weight: 500;
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 0.75rem;
+            background: var(--surface); color: var(--text-1);
+            outline: none; transition: all 0.2s;
+            box-shadow: var(--shadow-sm);
+        }
+        .date-input:focus { border-color: var(--teal); box-shadow: var(--shadow-glow); }
+
+        /* ============================================================
+           BUTTONS
+        ============================================================ */
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            font-family: var(--font-body); font-size: 0.78rem; font-weight: 600;
+            border-radius: var(--radius-sm); border: 1px solid transparent;
+            padding: 0.5rem 0.875rem; cursor: pointer;
+            transition: all 0.18s; outline: none; white-space: nowrap;
+        }
+        .btn:focus-visible { box-shadow: var(--shadow-glow); }
+        .btn-ghost {
+            background: var(--surface-2); color: var(--text-2);
+            border-color: var(--border);
+        }
+        .btn-ghost:hover { background: var(--surface); color: var(--teal); border-color: var(--border-strong); }
+        .btn-ghost.active { background: var(--teal); color: white; border-color: var(--teal); }
+        .btn-danger {
+            background: var(--rose-alpha); color: var(--rose);
+            border-color: rgba(244,63,94,0.2);
+        }
+        .btn-danger:hover { background: rgba(244,63,94,0.2); }
+        .btn-primary {
+            background: var(--teal); color: white; border-color: var(--teal);
+        }
+        .btn-primary:hover { background: var(--teal-light); }
+        .btn-export {
+            background: var(--green-alpha); color: #166534;
+            border-color: rgba(63,184,117,0.25);
+        }
+        .btn-export:hover { background: rgba(63,184,117,0.22); }
+
+        /* Theme toggle */
+        .theme-toggle {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--surface-2); border: 1px solid var(--border);
+            cursor: pointer; font-size: 1.1rem; transition: all 0.2s;
+            color: var(--text-2);
+        }
+        .theme-toggle:hover { background: var(--teal-alpha); color: var(--teal); }
+
+        /* ============================================================
+           TABLE
+        ============================================================ */
+        .table-wrapper {
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow: hidden; overflow-x: auto; overflow-y: auto;
+            height: 500px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-strong) transparent;
+        }
+        .table-wrapper::-webkit-scrollbar { width: 5px; height: 5px; }
+        .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .table-wrapper::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            position: sticky; top: 0; z-index: 10;
+            background: var(--surface-2);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.25rem;
+            text-align: left; white-space: nowrap;
+            font-family: var(--font-display);
+            font-size: 0.65rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--text-3);
+        }
+        thead th:last-child { text-align: right; }
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        tbody tr:last-child { border-bottom: none; }
+        tbody tr:hover { background: var(--surface-2); }
+        tbody td {
+            padding: 0.875rem 1.25rem;
+            font-size: 0.82rem; color: var(--text-2);
+            white-space: nowrap;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex; align-items: center;
+            padding: 0.2rem 0.6rem; border-radius: 99px;
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+        }
+        .badge-ingreso { background: var(--green-alpha); color: #166534; }
+        .badge-egreso  { background: var(--rose-alpha);  color: #991b1b; }
+
+        /* ============================================================
+           PAGINATION
+        ============================================================ */
+        .page-btn {
+            display: inline-flex; align-items: center; gap: 0.3rem;
+            padding: 0.45rem 0.875rem;
+            border-radius: var(--radius-sm); border: 1px solid var(--border);
+            background: var(--surface); color: var(--text-2);
+            font-family: var(--font-body); font-size: 0.75rem; font-weight: 600;
+            cursor: pointer; transition: all 0.18s;
+        }
+        .page-btn:hover:not(:disabled) { background: var(--teal-alpha); color: var(--teal); border-color: var(--teal); }
+        .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .page-info {
+            padding: 0.45rem 1rem;
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); font-size: 0.75rem;
+            font-weight: 600; color: var(--text-2);
+        }
+        .page-input {
+            width: 52px; text-align: center;
+            padding: 0.35rem 0.5rem;
+            border-radius: var(--radius-sm); border: 1px solid var(--border);
+            background: var(--surface); color: var(--text-1);
+            font-family: var(--font-body); font-size: 0.78rem;
+            outline: none; transition: all 0.2s;
+        }
+        .page-input:focus { border-color: var(--teal); box-shadow: var(--shadow-glow); }
+
+        /* ============================================================
+           ANIMATIONS
+        ============================================================ */
+        .fade-up {
+            opacity: 0; transform: translateY(16px);
+            animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+        }
+        @keyframes fadeUp { to { opacity: 1; transform: none; } }
+        .delay-1 { animation-delay: 0.08s; }
+        .delay-2 { animation-delay: 0.16s; }
+        .delay-3 { animation-delay: 0.24s; }
+        .delay-4 { animation-delay: 0.32s; }
+        .delay-5 { animation-delay: 0.40s; }
+        .delay-6 { animation-delay: 0.48s; }
+        .delay-7 { animation-delay: 0.56s; }
+
+        /* ============================================================
+           EMPTY STATE
+        ============================================================ */
+        .empty-state {
+            display: none; position: absolute; inset: 0;
+            flex-direction: column; align-items: center; justify-content: center;
+            background: var(--surface); gap: 0.5rem;
+        }
+        .empty-state.visible { display: flex; }
+
+        /* ============================================================
+           HEADER GRADIENT TEXT
+        ============================================================ */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--teal) 0%, var(--green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ============================================================
+           MOBILE TABLE CARDS (< 640px)
+        ============================================================ */
+        .mobile-card-list { display: none; }
+        @media (max-width: 639px) {
+            .table-wrapper table { display: none; }
+            .mobile-card-list { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem; }
+        }
+        .m-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.875rem 1rem;
+            display: flex; justify-content: space-between; align-items: flex-start;
+        }
+        .m-card-left { display: flex; flex-direction: column; gap: 0.2rem; }
+        .m-card-date { font-size: 0.7rem; color: var(--text-3); font-weight: 600; }
+        .m-card-neg { font-size: 0.85rem; font-weight: 700; color: var(--text-1); }
+        .m-card-cat { font-size: 0.72rem; color: var(--text-2); }
+        .m-card-amount { font-family: var(--font-display); font-size: 0.95rem; font-weight: 800; }
+
+        /* ============================================================
+           DARK MODE OVERRIDES
+        ============================================================ */
+        [data-theme="dark"] .ts-control { background: var(--surface-2) !important; border-color: var(--border-strong) !important; color: var(--text-1) !important; }
+        [data-theme="dark"] .ts-dropdown { background: var(--surface) !important; border-color: var(--border) !important; color: var(--text-1) !important; }
+        [data-theme="dark"] .ts-dropdown .option:hover, [data-theme="dark"] .ts-dropdown .option.active { background: var(--teal-alpha) !important; }
+
+        /* ============================================================
+           MISC
+        ============================================================ */
+        .divider { height: 1px; background: var(--border); margin: 0 -1.5rem; }
+        .chip {
+            display: inline-flex; align-items: center; gap: 0.35rem;
+            padding: 0.3rem 0.65rem; border-radius: 99px;
+            font-size: 0.7rem; font-weight: 700;
+            background: var(--teal-alpha); color: var(--teal);
+            border: 1px solid rgba(10,76,94,0.18);
+        }
+
+        /* Scrollbar global */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+        * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+    </style>
 </head>
 <body>
-  <div id="root"></div>
 
-  <script type="text/babel" data-presets="react">
-    const { useState, useMemo, useEffect } = React;
-    const { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, Legend } = Recharts;
-    const { parse, isValid, format, subMonths } = dateFns;
+<!-- ================================================================
+     LOADER
+================================================================ -->
+<div id="loader" role="status" aria-live="polite" aria-label="Cargando datos financieros">
+    <div class="loader-ring"></div>
+    <p style="font-family:'Sora',sans-serif; font-size:1.1rem; font-weight:700; color:white; letter-spacing:-0.01em;">Cargando Datos Financieros</p>
+    <p style="font-size:0.78rem; color:rgba(255,255,255,0.55); margin-top:0.35rem;">Operadora y Comercializadora de Alimentos Moyuk</p>
+    <div class="loader-dots"><span></span><span></span><span></span></div>
+</div>
 
-    const COLORS = ['#0088FE','#00C49F','#FFBB28','#FF8042','#8884d8','#82ca9d','#ffc658','#a4de6c','#d0ed57'];
-    const CSV_URL = "https://raw.githubusercontent.com/Cristthh/Moyuk/main/CONSOLIDADO_MOYUK_LIMPIO.csv";
+<!-- ================================================================
+     ERROR STATE
+================================================================ -->
+<div id="error-state" role="alert">
+    <div style="font-size:2.5rem; color:var(--rose);">⚠️</div>
+    <p style="font-family:var(--font-display); font-size:1.1rem; font-weight:700; color:var(--text-1);">Error al cargar los datos</p>
+    <p style="font-size:0.85rem; color:var(--text-2); max-width:340px; text-align:center;">No fue posible conectarse al origen de datos CSV. Verifica tu conexión e intenta de nuevo.</p>
+    <button class="btn btn-primary" onclick="location.reload()" style="margin-top:0.5rem;">Reintentar</button>
+</div>
 
-    const formatCurrency = (v) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(v || 0);
-    const formatPercent = (v) => new Intl.NumberFormat('es-MX', { style: 'percent', minimumFractionDigits: 1 }).format(v || 0);
+<!-- ================================================================
+     TOAST CONTAINER
+================================================================ -->
+<div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-    const parseDate = (s) => {
-      if(!s) return new Date(0);
-      const d = parse(s, 'dd/MM/yyyy', new Date());
-      return isValid(d) ? d : new Date(0);
-    };
+<!-- ================================================================
+     APP
+================================================================ -->
+<div id="app" style="max-width:1680px; margin:0 auto; padding:2rem 1.5rem 4rem;">
 
-    function KPICard({ title, value, iconClass, iconColor }) {
-      return (
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-          <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center mb-4">
-            <i className={`fa-solid ${iconClass} ${iconColor} text-lg`}></i>
-          </div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <h3 className="text-2xl font-bold">{value}</h3>
+    <!-- HEADER -->
+    <header class="card fade-up" style="margin-bottom:1.5rem;">
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem;">
+
+            <!-- Brand -->
+            <div style="display:flex; align-items:center; gap:1rem;">
+                <div style="width:48px; height:48px; background:linear-gradient(135deg,#0a4c5e,#3fb875); border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(10,76,94,0.3);">
+                    <i class="ph ph-chart-line-up" style="font-size:1.5rem; color:white;"></i>
+                </div>
+                <div>
+                    <h1 class="gradient-text" style="font-family:var(--font-display); font-size:clamp(1.1rem,3vw,1.5rem); font-weight:800; letter-spacing:-0.02em; line-height:1.1;">DASHBOARD FINANCIERO</h1>
+                    <p style="font-size:0.72rem; color:var(--text-3); margin-top:0.25rem; display:flex; align-items:center; gap:0.4rem;">
+                        <i class="ph ph-buildings"></i>
+                        Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. &nbsp;·&nbsp; RFC: OCA2410151E0
+                    </p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+
+                <!-- Data badge -->
+                <div id="data-info" style="display:none;">
+                    <span class="chip"><i class="ph ph-check-circle"></i> <span id="data-info-text">—</span></span>
+                </div>
+
+                <!-- Quick ranges -->
+                <div style="display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; gap:2px;">
+                    <button onclick="setDateRange(1)"  class="btn btn-ghost" id="range-1"  aria-label="Ver mes actual">Mes actual</button>
+                    <button onclick="setDateRange(3)"  class="btn btn-ghost" id="range-3"  aria-label="Ver 3 meses">3 meses</button>
+                    <button onclick="setDateRange(12)" class="btn btn-ghost" id="range-12" aria-label="Ver 1 año">1 año</button>
+                </div>
+
+                <!-- Date pickers -->
+                <div style="display:flex; align-items:center; gap:0.4rem;">
+                    <input type="date" id="date-from" class="date-input" aria-label="Fecha desde">
+                    <span style="font-size:0.75rem; color:var(--text-3); font-weight:600;">—</span>
+                    <input type="date" id="date-to"   class="date-input" aria-label="Fecha hasta">
+                </div>
+
+                <button onclick="clearDates()" class="btn btn-danger" aria-label="Limpiar rango de fechas">
+                    <i class="ph ph-x-circle"></i> Limpiar
+                </button>
+
+                <!-- Export -->
+                <button onclick="exportCSV()" class="btn btn-export" aria-label="Exportar datos filtrados a CSV">
+                    <i class="ph ph-download-simple"></i> Exportar
+                </button>
+
+                <!-- Theme -->
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema claro/oscuro">
+                    <i class="ph ph-moon" id="theme-icon"></i>
+                </button>
+            </div>
         </div>
-      );
+    </header>
+
+    <!-- FILTERS -->
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem;" class="fade-up delay-1">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+            <p style="font-family:var(--font-display); font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3);">
+                <i class="ph ph-funnel" style="margin-right:0.3rem;"></i> Filtros
+            </p>
+            <button onclick="clearAllFilters()" class="btn btn-ghost" style="font-size:0.7rem;" aria-label="Limpiar todos los filtros">
+                <i class="ph ph-eraser"></i> Limpiar todo
+            </button>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0.875rem;">
+            <div><label class="filter-label" for="filtro-estado">Edo. Resultados</label><select id="filtro-estado"><option value="">Todos</option></select></div>
+            <div><label class="filter-label" for="filtro-transaccion">Transacción</label><select id="filtro-transaccion"><option value="">Todos</option></select></div>
+            <div><label class="filter-label" for="filtro-negocio">Negocio</label><select id="filtro-negocio"><option value="">Todos</option></select></div>
+            <div><label class="filter-label" for="filtro-categoria">Categoría</label><select id="filtro-categoria"><option value="">Todos</option></select></div>
+            <div><label class="filter-label" for="filtro-proveedor">Proveedor</label><select id="filtro-proveedor"><option value="">Todos</option></select></div>
+        </div>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:1.5rem;" class="fade-up delay-2">
+
+        <div class="kpi-card kpi-card-ingreso" role="region" aria-label="Total ingresos">
+            <div class="kpi-icon" style="background:var(--green-alpha); color:var(--green);">
+                <i class="ph ph-arrow-circle-up"></i>
+            </div>
+            <div class="kpi-label">Total Ingresos</div>
+            <div class="kpi-value" id="kpi-ingresos">$0.00</div>
+            <div class="kpi-sub" id="kpi-ingresos-count">0 transacciones</div>
+        </div>
+
+        <div class="kpi-card kpi-card-egreso" role="region" aria-label="Total egresos">
+            <div class="kpi-icon" style="background:var(--rose-alpha); color:var(--rose);">
+                <i class="ph ph-arrow-circle-down"></i>
+            </div>
+            <div class="kpi-label">Total Egresos</div>
+            <div class="kpi-value" id="kpi-egresos">$0.00</div>
+            <div class="kpi-sub" id="kpi-egresos-count">0 transacciones</div>
+        </div>
+
+        <div class="kpi-card kpi-card-balance" role="region" aria-label="Flujo neto">
+            <div class="kpi-icon" style="background:var(--teal-alpha); color:var(--teal);" id="kpi-balance-icon">
+                <i class="ph ph-scales"></i>
+            </div>
+            <div class="kpi-label">Flujo Neto</div>
+            <div class="kpi-value" id="kpi-balance">$0.00</div>
+            <div class="kpi-sub" id="kpi-balance-pct">— % margen</div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS ROW 1 -->
+    <div style="display:grid; grid-template-columns:1fr; gap:1.5rem; margin-bottom:1.5rem;" class="fade-up delay-3">
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+                <div>
+                    <h2 class="section-title">Comportamiento Mensual Operativo</h2>
+                    <p class="section-sub">Histórico integral — Ingresos vs Egresos</p>
+                </div>
+                <div style="padding:0.4rem 0.6rem; background:var(--surface-2); border-radius:var(--radius-sm); color:var(--text-3);">
+                    <i class="ph ph-chart-line" style="font-size:1.1rem;"></i>
+                </div>
+            </div>
+            <div style="position:relative; height:300px;"><canvas id="chart-tendencia" aria-label="Gráfica de tendencia mensual de ingresos y egresos" role="img"></canvas></div>
+        </div>
+
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+                <div>
+                    <h2 class="section-title">Análisis de Flujo de Caja</h2>
+                    <p class="section-sub">Barras agrupadas por mes · Línea = balance neto</p>
+                </div>
+                <div style="padding:0.4rem 0.6rem; background:var(--surface-2); border-radius:var(--radius-sm); color:var(--text-3);">
+                    <i class="ph ph-chart-bar" style="font-size:1.1rem;"></i>
+                </div>
+            </div>
+            <div style="position:relative; height:300px;"><canvas id="chart-flujo" aria-label="Gráfica de flujo de caja mensual" role="img"></canvas></div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS ROW 2 -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1.5rem; margin-bottom:1.5rem;" class="fade-up delay-4">
+
+        <div class="card">
+            <h2 class="section-title" style="margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="ph ph-storefront" style="color:var(--teal);"></i> Rendimiento por Negocio
+            </h2>
+            <div style="position:relative; height:260px;"><canvas id="chart-negocios" aria-label="Gráfica de ingresos y egresos por negocio" role="img"></canvas></div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title" style="margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+                <i class="ph ph-pie-chart" style="color:var(--rose);"></i> Distribución de Gasto (Top 10)
+            </h2>
+            <div style="position:relative; height:260px;"><canvas id="chart-categorias" aria-label="Gráfica donut de distribución de gasto por categoría" role="img"></canvas></div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="card fade-up delay-5">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <h2 class="section-title">Registro de Transacciones</h2>
+                <p class="section-sub" id="pagination-info">Cargando registros...</p>
+            </div>
+
+            <!-- Pagination controls -->
+            <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
+                <button id="btn-first" class="page-btn" onclick="goToPage(1)" aria-label="Primera página">
+                    <i class="ph ph-caret-double-left"></i>
+                </button>
+                <button id="btn-prev" class="page-btn" onclick="changePage(-1)" aria-label="Página anterior">
+                    <i class="ph ph-caret-left"></i> Ant
+                </button>
+                <div class="page-info" style="display:flex; align-items:center; gap:0.4rem;">
+                    Pág
+                    <input type="number" id="page-input" class="page-input" min="1" value="1" aria-label="Ir a página">
+                    / <span id="total-pages">1</span>
+                </div>
+                <button id="btn-next" class="page-btn" onclick="changePage(1)" aria-label="Página siguiente">
+                    Sig <i class="ph ph-caret-right"></i>
+                </button>
+                <button id="btn-last" class="page-btn" onclick="goLastPage()" aria-label="Última página">
+                    <i class="ph ph-caret-double-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div style="position:relative;">
+            <!-- Desktop table -->
+            <div class="table-wrapper" role="region" aria-label="Tabla de transacciones">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Edo. Res.</th>
+                            <th scope="col">Negocio</th>
+                            <th scope="col">Tipo</th>
+                            <th scope="col">Categoría</th>
+                            <th scope="col" style="min-width:140px;">Proveedor</th>
+                            <th scope="col" style="text-align:right;">Importe</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+                <!-- Mobile cards -->
+                <div class="mobile-card-list" id="mobile-card-list"></div>
+                <!-- Empty state -->
+                <div class="empty-state" id="empty-state" role="status" aria-live="polite">
+                    <i class="ph ph-magnifying-glass" style="font-size:2.5rem; color:var(--teal); opacity:0.5;"></i>
+                    <p style="font-family:var(--font-display); font-weight:700; color:var(--text-1);">Sin resultados para estos filtros</p>
+                    <p style="font-size:0.78rem; color:var(--text-3);">Ajusta los filtros o el rango de fechas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer style="text-align:center; padding:2rem 1.5rem; border-top:1px solid var(--border); background:var(--surface); margin-top:3rem;" class="fade-up delay-7" role="contentinfo">
+    <p style="font-family:var(--font-display); font-size:0.9rem; font-weight:800; color:var(--teal); letter-spacing:-0.01em;">
+        OPERADORA Y COMERCIALIZADORA DE ALIMENTOS MOYUK S.A. DE C.V.
+    </p>
+    <p style="font-size:0.75rem; color:var(--text-3); margin-top:0.4rem;">RFC: OCA2410151E0</p>
+    <p style="font-size:0.7rem; color:var(--text-3); margin-top:0.75rem;">&copy; 2026 Moyuk · Todos los derechos reservados</p>
+</footer>
+
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+<script>
+'use strict';
+
+/* ------------------------------------------------------------------ */
+/* CONFIG                                                              */
+/* ------------------------------------------------------------------ */
+const CSV_URL      = 'https://raw.githubusercontent.com/Cristthh/Moyuk/refs/heads/main/CONSOLIDADO_MOYUK_LIMPIO.csv';
+const ROWS_PER_PAGE = 50;
+const CACHE_KEY    = 'moyuk_csv_cache';
+const CACHE_TTL    = 10 * 60 * 1000; // 10 min
+
+/* ------------------------------------------------------------------ */
+/* STATE                                                               */
+/* ------------------------------------------------------------------ */
+const AppState = {
+    raw:         [],
+    filtered:    [],
+    charts:      {},
+    tomSelects:  {},
+    page:        1,
+    maxDate:     null,
+    activeRange: null
+};
+
+/* ------------------------------------------------------------------ */
+/* FORMATTERS                                                          */
+/* ------------------------------------------------------------------ */
+const fmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
+
+function parseDateRobust(str) {
+    if (!str) return new Date(NaN);
+    str = str.trim();
+    // DD/MM/YYYY or D/M/YYYY
+    const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (slashMatch) return new Date(+slashMatch[3], +slashMatch[2] - 1, +slashMatch[1]);
+    // YYYY-MM-DD
+    const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) return new Date(+isoMatch[1], +isoMatch[2] - 1, +isoMatch[3]);
+    const d = new Date(str);
+    return isNaN(d.getTime()) ? new Date(NaN) : d;
+}
+
+function fmtDateForInput(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+/* ------------------------------------------------------------------ */
+/* TOAST                                                               */
+/* ------------------------------------------------------------------ */
+function showToast(msg, type = 'info', duration = 3500) {
+    const icons = { info: 'ph-info', success: 'ph-check-circle', warn: 'ph-warning' };
+    const colors = { info: 'var(--teal)', success: 'var(--green)', warn: 'var(--amber)' };
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `<i class="ph ${icons[type] || icons.info}" style="font-size:1.1rem; color:${colors[type] || colors.info}; flex-shrink:0;"></i><span>${msg}</span>`;
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(() => {
+        el.classList.add('removing');
+        setTimeout(() => el.remove(), 350);
+    }, duration);
+}
+
+/* ------------------------------------------------------------------ */
+/* THEME                                                               */
+/* ------------------------------------------------------------------ */
+function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('theme-icon').className = isDark ? 'ph ph-moon' : 'ph ph-sun';
+    updateChartTheme();
+    localStorage.setItem('moyuk_theme', isDark ? 'light' : 'dark');
+}
+
+function applyStoredTheme() {
+    const saved = localStorage.getItem('moyuk_theme');
+    if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        document.getElementById('theme-icon').className = saved === 'dark' ? 'ph ph-sun' : 'ph ph-moon';
+    }
+}
+
+function getChartTextColor() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? '#8faebf' : '#64748b';
+}
+function getChartGridColor() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? '#1e3040' : '#f1f5f9';
+}
+
+function updateChartTheme() {
+    Chart.defaults.color = getChartTextColor();
+    Object.values(AppState.charts).forEach(c => {
+        if (!c) return;
+        if (c.options.scales?.y) c.options.scales.y.grid.color = getChartGridColor();
+        c.update();
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/* DEBOUNCE                                                            */
+/* ------------------------------------------------------------------ */
+function debounce(fn, delay) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+}
+
+/* ------------------------------------------------------------------ */
+/* CACHE                                                               */
+/* ------------------------------------------------------------------ */
+function getCachedCSV() {
+    try {
+        const entry = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+        if (entry && Date.now() - entry.ts < CACHE_TTL) return entry.data;
+    } catch (_) {}
+    return null;
+}
+function setCachedCSV(data) {
+    try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch (_) {}
+}
+
+/* ------------------------------------------------------------------ */
+/* INIT                                                                */
+/* ------------------------------------------------------------------ */
+function initDashboard() {
+    applyStoredTheme();
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
+    Chart.defaults.color = getChartTextColor();
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.92)';
+    Chart.defaults.plugins.tooltip.padding = 12;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: 'bold', family: "'Sora',sans-serif" };
+    Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+
+    const cached = getCachedCSV();
+    if (cached) {
+        processData(cached);
+        return;
     }
 
-    function Dashboard() {
-      const [data, setData] = useState([]);
-      const [loading, setLoading] = useState(true);
+    Papa.parse(CSV_URL, {
+        download: true, header: true, skipEmptyLines: true,
+        complete(results) {
+            setCachedCSV(results.data);
+            processData(results.data);
+        },
+        error() {
+            hideLoader();
+            document.getElementById('error-state').classList.add('visible');
+        }
+    });
+}
 
-      useEffect(() => {
-        Papa.parse(CSV_URL, {
-          download: true,
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            setData(results.data);
-            setLoading(false);
-          },
-          error: () => setLoading(false)
-        });
-      }, []);
-
-      const processed = useMemo(() => {
-        if (data.length === 0) return null;
-        
-        let sales = 0, expenses = 0;
-        const catMap = {};
-        const monthMap = {};
-
-        data.forEach(t => {
-          const amt = Number(t.IMPORTE) || 0;
-          const isIngreso = t.TRANSACCION === 'Ingreso';
-          const date = parseDate(t.FECHA);
-          const mKey = isValid(date) && date.getTime() !== 0 ? format(date, 'MMM yy') : 'S/F';
-
-          if (isIngreso) {
-            sales += amt;
-          } else {
-            expenses += amt;
-            catMap[t.CATEGORIA] = (catMap[t.CATEGORIA] || 0) + amt;
-          }
-
-          if(!monthMap[mKey]) monthMap[mKey] = { name: mKey, sales: 0, expenses: 0 };
-          if(isIngreso) monthMap[mKey].sales += amt;
-          else monthMap[mKey].expenses += amt;
-        });
-
+function processData(raw) {
+    AppState.raw = raw.map(row => {
+        const dateObj = parseDateRobust(row.FECHA);
+        const importe = parseFloat((row.IMPORTE || '').toString().replace(/,/g, '')) || 0;
         return {
-          totalSales: sales,
-          totalExpenses: expenses,
-          margin: sales > 0 ? (sales - expenses) / sales : 0,
-          monthly: Object.values(monthMap),
-          categories: Object.entries(catMap).map(([name, value]) => ({ name, value }))
+            ...row,
+            IMPORTE:    importe,
+            PROVEEDOR:  (row.PROVEEDOR || '').trim() || '-',
+            CATEGORIA:  (row.CATEGORIA || '').trim() || '-',
+            NEGOCIO:    (row.NEGOCIO   || '').trim() || '-',
+            TRANSACCION:(row.TRANSACCION || '').trim().toUpperCase(),
+            fechaObj:   isNaN(dateObj.getTime()) ? null : dateObj,
+            mesAnio:    isNaN(dateObj.getTime()) ? 'Sin Fecha' : `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`
         };
-      }, [data]);
+    }).sort((a, b) => {
+        if (!a.fechaObj) return 1;
+        if (!b.fechaObj) return -1;
+        return b.fechaObj - a.fechaObj;
+    });
 
-      if (loading) return <div className="h-screen flex items-center justify-center font-sans">Cargando datos maestros...</div>;
+    AppState.filtered = [...AppState.raw];
 
-      const { totalSales, totalExpenses, margin, monthly, categories } = processed || {};
-
-      return (
-        <div className="p-4 md:p-8 max-w-7xl mx-auto font-sans">
-          <header className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Análisis Consolidado Moyuk</h1>
-            <p className="text-gray-500 text-sm">Visualización en tiempo real desde GitHub CSV</p>
-          </header>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <KPICard title="Ingresos Totales" value={formatCurrency(totalSales)} iconClass="fa-sack-dollar" iconColor="text-emerald-500" />
-            <KPICard title="Egresos Totales" value={formatCurrency(totalExpenses)} iconClass="fa-money-bill-transfer" iconColor="text-rose-500" />
-            <KPICard title="Margen Neto" value={formatPercent(margin)} iconClass="fa-chart-pie" iconColor="text-blue-500" />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold mb-6 text-gray-700">Flujo de Caja Mensual</h2>
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthly}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis tickFormatter={(v) => `$${v/1000}k`} />
-                    <Tooltip formatter={(v) => formatCurrency(v)} />
-                    <Area type="monotone" dataKey="sales" stroke="#10b981" fill="#10b98122" />
-                    <Area type="monotone" dataKey="expenses" stroke="#ef4444" fill="#ef444422" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-              <h2 className="text-lg font-bold mb-6 text-gray-700">Gastos por Categoría</h2>
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={categories} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={90}>
-                      {categories?.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                    </Pie>
-                    <Tooltip formatter={(v) => formatCurrency(v)} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+    const validDates = AppState.raw.map(d => d.fechaObj).filter(Boolean);
+    if (validDates.length) {
+        AppState.maxDate = new Date(Math.max(...validDates));
+        const el = document.getElementById('data-info');
+        document.getElementById('data-info-text').textContent =
+            `Actualizado: ${AppState.maxDate.toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' })}`;
+        el.style.display = 'block';
     }
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<Dashboard />);
-  </script>
+    initFilters();
+    setupListeners();
+    applyFilters();
+    hideLoader();
+}
+
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    if (!loader) return;
+    loader.classList.add('hidden-loader');
+    setTimeout(() => loader.remove(), 700);
+}
+
+/* ------------------------------------------------------------------ */
+/* FILTERS                                                             */
+/* ------------------------------------------------------------------ */
+const FILTER_FIELDS = [
+    { id: 'filtro-estado',      field: 'ESTADO_DE_RESULTADOS' },
+    { id: 'filtro-transaccion', field: 'TRANSACCION' },
+    { id: 'filtro-negocio',     field: 'NEGOCIO' },
+    { id: 'filtro-categoria',   field: 'CATEGORIA' },
+    { id: 'filtro-proveedor',   field: 'PROVEEDOR' }
+];
+
+function initFilters() {
+    FILTER_FIELDS.forEach(col => {
+        const sel = document.getElementById(col.id);
+        const unique = [...new Set(AppState.raw.map(d => d[col.field]).filter(v => v && v !== '-'))].sort();
+        unique.forEach(val => {
+            const opt = document.createElement('option');
+            opt.value = val; opt.textContent = val;
+            sel.appendChild(opt);
+        });
+        AppState.tomSelects[col.id] = new TomSelect(`#${col.id}`, {
+            create: false, placeholder: 'Buscar...', maxOptions: null,
+            sortField: { field: 'text', direction: 'asc' }
+        });
+        AppState.tomSelects[col.id].on('change', applyFilters);
+    });
+}
+
+const debouncedFilter = debounce(applyFilters, 280);
+
+function setupListeners() {
+    document.getElementById('date-from').addEventListener('change', () => { clearActiveRange(); debouncedFilter(); });
+    document.getElementById('date-to').addEventListener('change',   () => { clearActiveRange(); debouncedFilter(); });
+    document.getElementById('page-input').addEventListener('change', function() {
+        const tp = Math.ceil(AppState.filtered.length / ROWS_PER_PAGE) || 1;
+        const v = parseInt(this.value) || 1;
+        goToPage(Math.min(Math.max(v, 1), tp));
+    });
+}
+
+function clearActiveRange() {
+    AppState.activeRange = null;
+    ['range-1','range-3','range-12'].forEach(id => {
+        document.getElementById(id)?.classList.remove('active');
+    });
+}
+
+function setDateRange(months) {
+    if (!AppState.maxDate) { showToast('Datos no cargados aún', 'warn'); return; }
+    clearActiveRange();
+    AppState.activeRange = months;
+    document.getElementById(`range-${months}`)?.classList.add('active');
+
+    const to   = new Date(AppState.maxDate.getFullYear(), AppState.maxDate.getMonth() + 1, 0);
+    const from = new Date(AppState.maxDate.getFullYear(), AppState.maxDate.getMonth() - (months - 1), 1);
+    document.getElementById('date-to').value   = fmtDateForInput(to);
+    document.getElementById('date-from').value = fmtDateForInput(from);
+    applyFilters();
+}
+
+function clearDates() {
+    document.getElementById('date-from').value = '';
+    document.getElementById('date-to').value   = '';
+    clearActiveRange();
+    applyFilters();
+}
+
+function clearAllFilters() {
+    clearDates();
+    FILTER_FIELDS.forEach(col => AppState.tomSelects[col.id]?.clear());
+    showToast('Filtros eliminados', 'info', 2000);
+}
+
+function applyFilters() {
+    const vals = {};
+    FILTER_FIELDS.forEach(col => { vals[col.field] = document.getElementById(col.id).value; });
+
+    const dfStr = document.getElementById('date-from').value;
+    const dtStr = document.getElementById('date-to').value;
+    const dateFrom = dfStr ? new Date(dfStr + 'T00:00:00') : null;
+    const dateTo   = dtStr ? new Date(dtStr + 'T23:59:59') : null;
+
+    AppState.filtered = AppState.raw.filter(d => {
+        for (const col of FILTER_FIELDS) {
+            if (vals[col.field] && d[col.field] !== vals[col.field]) return false;
+        }
+        if (dateFrom && (!d.fechaObj || d.fechaObj < dateFrom)) return false;
+        if (dateTo   && (!d.fechaObj || d.fechaObj > dateTo))   return false;
+        return true;
+    });
+
+    AppState.page = 1;
+    updateDashboard();
+}
+
+/* ------------------------------------------------------------------ */
+/* DASHBOARD UPDATE                                                    */
+/* ------------------------------------------------------------------ */
+function updateDashboard() {
+    updateKPIs();
+    renderChartTendencia();
+    renderChartFlujoCaja();
+    renderChartNegocios();
+    renderChartCategorias();
+    renderTable();
+}
+
+/* ------------------------------------------------------------------ */
+/* KPIs                                                                */
+/* ------------------------------------------------------------------ */
+function updateKPIs() {
+    let inT = 0, egT = 0, inC = 0, egC = 0;
+    AppState.filtered.forEach(d => {
+        if (d.TRANSACCION === 'INGRESO') { inT += d.IMPORTE; inC++; }
+        else if (d.TRANSACCION === 'EGRESO') { egT += d.IMPORTE; egC++; }
+    });
+    const neto = inT - egT;
+    const pct  = egT > 0 ? ((inT / egT - 1) * 100).toFixed(1) : '∞';
+
+    document.getElementById('kpi-ingresos').textContent = fmt.format(inT);
+    document.getElementById('kpi-egresos').textContent  = fmt.format(egT);
+    document.getElementById('kpi-ingresos-count').textContent = `${inC.toLocaleString('es-MX')} transacciones`;
+    document.getElementById('kpi-egresos-count').textContent  = `${egC.toLocaleString('es-MX')} transacciones`;
+
+    const elNeto = document.getElementById('kpi-balance');
+    elNeto.textContent = fmt.format(neto);
+    elNeto.style.color = neto >= 0 ? 'var(--teal)' : 'var(--rose)';
+
+    const card = elNeto.closest('.kpi-card');
+    card.classList.toggle('negative', neto < 0);
+
+    const icon = document.getElementById('kpi-balance-icon');
+    icon.style.background = neto >= 0 ? 'var(--teal-alpha)' : 'var(--rose-alpha)';
+    icon.style.color       = neto >= 0 ? 'var(--teal)'       : 'var(--rose)';
+
+    document.getElementById('kpi-balance-pct').textContent =
+        inT > 0 ? `${pct}% vs egresos` : '—';
+}
+
+/* ------------------------------------------------------------------ */
+/* CHART HELPERS                                                       */
+/* ------------------------------------------------------------------ */
+function groupBy(data, key, sumKey, filterFn) {
+    return data.reduce((acc, row) => {
+        if (filterFn && !filterFn(row)) return acc;
+        const g = (row[key] || 'Otros').trim() || 'Otros';
+        acc[g] = (acc[g] || 0) + row[sumKey];
+        return acc;
+    }, {});
+}
+
+function updateOrCreateChart(id, config) {
+    const ctx = document.getElementById(id).getContext('2d');
+    const existing = AppState.charts[id];
+    if (existing) {
+        // Prefer update over destroy+create for performance
+        existing.data.labels   = config.data.labels;
+        existing.data.datasets = config.data.datasets;
+        existing.options       = config.options;
+        existing.update('active');
+        return;
+    }
+    AppState.charts[id] = new Chart(ctx, config);
+}
+
+const PALETTE = ['#0a4c5e','#3fb875','#ec4899','#f43f5e','#f97316','#eab308','#84cc16','#14b8a6','#0ea5e9','#38bdf8'];
+
+/* ------------------------------------------------------------------ */
+/* CHART: TENDENCIA                                                    */
+/* ------------------------------------------------------------------ */
+function renderChartTendencia() {
+    const igM = groupBy(AppState.filtered, 'mesAnio', 'IMPORTE', r => r.TRANSACCION === 'INGRESO');
+    const egM = groupBy(AppState.filtered, 'mesAnio', 'IMPORTE', r => r.TRANSACCION === 'EGRESO');
+    const labels = [...new Set([...Object.keys(igM),...Object.keys(egM)])].filter(l => l !== 'NaN-NaN' && l !== 'Sin Fecha').sort();
+
+    updateOrCreateChart('chart-tendencia', {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                { label:'Ingresos', data: labels.map(l => igM[l]||0), borderColor:'#3fb875', backgroundColor:'rgba(63,184,117,0.08)', fill:true, tension:0.4, borderWidth:2.5, pointRadius:3, pointHoverRadius:5 },
+                { label:'Egresos',  data: labels.map(l => egM[l]||0), borderColor:'#f43f5e', backgroundColor:'rgba(244,63,94,0.08)',  fill:true, tension:0.4, borderWidth:2.5, pointRadius:3, pointHoverRadius:5 }
+            ]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            interaction:{ mode:'index', intersect:false },
+            plugins:{ legend:{ position:'top', labels:{ usePointStyle:true, padding:20, font:{ family:"'DM Sans',sans-serif", weight:'600' } } } },
+            scales:{
+                y:{ grid:{ color:getChartGridColor(), borderDash:[4,4] }, ticks:{ callback: v => fmt.format(v) } },
+                x:{ grid:{ display:false } }
+            }
+        }
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/* CHART: FLUJO DE CAJA                                                */
+/* ------------------------------------------------------------------ */
+function renderChartFlujoCaja() {
+    const flow = {};
+    AppState.filtered.forEach(d => {
+        const m = d.mesAnio;
+        if (m === 'Sin Fecha') return;
+        if (!flow[m]) flow[m] = { i:0, e:0 };
+        if (d.TRANSACCION === 'INGRESO') flow[m].i += d.IMPORTE;
+        else if (d.TRANSACCION === 'EGRESO') flow[m].e += d.IMPORTE;
+    });
+    const labels = Object.keys(flow).filter(l => l !== 'NaN-NaN').sort();
+    const dI = labels.map(l => flow[l].i);
+    const dE = labels.map(l => -flow[l].e);
+    const dN = labels.map(l => flow[l].i - flow[l].e);
+
+    updateOrCreateChart('chart-flujo', {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                { type:'line', label:'Flujo Neto', data:dN, borderColor:'#0a4c5e', backgroundColor:'#0a4c5e', borderWidth:2.5, pointRadius:4, tension:0.3, fill:false, pointStyle:'circle', z:10 },
+                { type:'bar',  label:'Ingresos',   data:dI, backgroundColor:'rgba(63,184,117,0.8)', borderRadius:{topLeft:5,topRight:5} },
+                { type:'bar',  label:'Egresos',    data:dE, backgroundColor:'rgba(244,63,94,0.75)',  borderRadius:{bottomLeft:5,bottomRight:5} }
+            ]
+        },
+        options: {
+            responsive:true, maintainAspectRatio:false,
+            interaction:{ mode:'index', intersect:false },
+            plugins:{
+                legend:{ position:'top', labels:{ usePointStyle:true, padding:20, font:{ family:"'DM Sans',sans-serif", weight:'600' } } },
+                tooltip:{ callbacks:{ label: c => `${c.dataset.label}: ${fmt.format(Math.abs(c.raw))}` } }
+            },
+            scales:{
+                y:{ beginAtZero:true, grid:{ color:getChartGridColor(), borderDash:[4,4] }, ticks:{ callback: v => fmt.format(Math.abs(v)) } },
+                x:{ grid:{ display:false } }
+            }
+        }
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/* CHART: NEGOCIOS                                                     */
+/* ------------------------------------------------------------------ */
+function renderChartNegocios() {
+    const ig = groupBy(AppState.filtered, 'NEGOCIO', 'IMPORTE', r => r.TRANSACCION === 'INGRESO');
+    const eg = groupBy(AppState.filtered, 'NEGOCIO', 'IMPORTE', r => r.TRANSACCION === 'EGRESO');
+    const labels = [...new Set([...Object.keys(ig),...Object.keys(eg)])];
+
+    updateOrCreateChart('chart-negocios', {
+        type:'bar',
+        data:{
+            labels,
+            datasets:[
+                { label:'Ingresos', data:labels.map(l=>ig[l]||0), backgroundColor:'rgba(63,184,117,0.85)', borderRadius:4 },
+                { label:'Egresos',  data:labels.map(l=>eg[l]||0), backgroundColor:'rgba(244,63,94,0.8)',   borderRadius:4 }
+            ]
+        },
+        options:{
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true } } },
+            scales:{
+                x:{ grid:{ display:false } },
+                y:{ grid:{ color:getChartGridColor(), borderDash:[4,4] }, ticks:{ callback: v => fmt.format(v) } }
+            }
+        }
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/* CHART: CATEGORÍAS                                                   */
+/* ------------------------------------------------------------------ */
+function renderChartCategorias() {
+    const eg = groupBy(AppState.filtered, 'CATEGORIA', 'IMPORTE', r => r.TRANSACCION === 'EGRESO');
+    const sorted = Object.keys(eg).sort((a,b) => eg[b]-eg[a]).slice(0,10);
+
+    updateOrCreateChart('chart-categorias', {
+        type:'doughnut',
+        data:{
+            labels: sorted,
+            datasets:[{ data:sorted.map(k=>eg[k]), backgroundColor:PALETTE, borderWidth:2, borderColor:'var(--surface)', hoverOffset:6 }]
+        },
+        options:{
+            responsive:true, maintainAspectRatio:false, cutout:'68%',
+            plugins:{
+                legend:{ position:'right', labels:{ usePointStyle:true, boxWidth:8, font:{ size:11 }, padding:10 } },
+                tooltip:{ callbacks:{ label: c => ` ${c.label}: ${fmt.format(c.raw)}` } }
+            }
+        }
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/* TABLE                                                               */
+/* ------------------------------------------------------------------ */
+function renderTable() {
+    const tbody   = document.getElementById('table-body');
+    const mList   = document.getElementById('mobile-card-list');
+    const empty   = document.getElementById('empty-state');
+    const total   = AppState.filtered.length;
+
+    if (total === 0) {
+        tbody.innerHTML = ''; mList.innerHTML = '';
+        empty.classList.add('visible');
+        document.getElementById('pagination-info').textContent = '0 registros';
+        updatePaginationControls(0);
+        return;
+    }
+    empty.classList.remove('visible');
+
+    const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
+    if (AppState.page > totalPages) AppState.page = totalPages;
+
+    updatePaginationControls(totalPages);
+
+    const start   = (AppState.page - 1) * ROWS_PER_PAGE;
+    const pageData = AppState.filtered.slice(start, start + ROWS_PER_PAGE);
+    const end      = Math.min(start + ROWS_PER_PAGE, total);
+
+    document.getElementById('pagination-info').textContent =
+        `Mostrando ${(start+1).toLocaleString('es-MX')} – ${end.toLocaleString('es-MX')} de ${total.toLocaleString('es-MX')} registros`;
+
+    // Desktop rows via DocumentFragment
+    const frag = document.createDocumentFragment();
+    pageData.forEach(row => {
+        const isIng = row.TRANSACCION === 'INGRESO';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight:600; color:var(--text-1);">${row.FECHA||'—'}</td>
+            <td style="font-size:0.75rem; font-weight:600;">${row.ESTADO_DE_RESULTADOS||'—'}</td>
+            <td style="font-weight:700; font-family:var(--font-display); color:var(--text-1);">${row.NEGOCIO||'—'}</td>
+            <td><span class="badge ${isIng?'badge-ingreso':'badge-egreso'}">${row.TRANSACCION||'—'}</span></td>
+            <td>${row.CATEGORIA||'—'}</td>
+            <td title="${row.PROVEEDOR}" style="max-width:150px; overflow:hidden; text-overflow:ellipsis;">${row.PROVEEDOR||'—'}</td>
+            <td style="text-align:right; font-family:var(--font-display); font-weight:800; color:${isIng?'var(--green)':'var(--rose)'};">${isIng?'+':'−'}${fmt.format(Math.abs(row.IMPORTE))}</td>
+        `;
+        frag.appendChild(tr);
+    });
+    tbody.innerHTML = '';
+    tbody.appendChild(frag);
+
+    // Mobile cards
+    const mFrag = document.createDocumentFragment();
+    pageData.forEach(row => {
+        const isIng = row.TRANSACCION === 'INGRESO';
+        const card = document.createElement('div');
+        card.className = 'm-card';
+        card.innerHTML = `
+            <div class="m-card-left">
+                <span class="m-card-date">${row.FECHA||'—'} · ${row.NEGOCIO||'—'}</span>
+                <span class="m-card-neg">${row.CATEGORIA||'—'}</span>
+                <span class="m-card-cat">${row.PROVEEDOR||'—'}</span>
+            </div>
+            <div>
+                <div class="m-card-amount" style="color:${isIng?'var(--green)':'var(--rose)'}; text-align:right;">${isIng?'+':'−'}${fmt.format(Math.abs(row.IMPORTE))}</div>
+                <div style="margin-top:0.3rem; text-align:right;"><span class="badge ${isIng?'badge-ingreso':'badge-egreso'}">${row.TRANSACCION}</span></div>
+            </div>
+        `;
+        mFrag.appendChild(card);
+    });
+    mList.innerHTML = '';
+    mList.appendChild(mFrag);
+}
+
+function updatePaginationControls(totalPages) {
+    document.getElementById('total-pages').textContent = totalPages;
+    const pi = document.getElementById('page-input');
+    if (pi) pi.value = AppState.page;
+    pi.max = totalPages;
+    document.getElementById('btn-prev').disabled  = AppState.page <= 1;
+    document.getElementById('btn-next').disabled  = AppState.page >= totalPages;
+    document.getElementById('btn-first').disabled = AppState.page <= 1;
+    document.getElementById('btn-last').disabled  = AppState.page >= totalPages;
+}
+
+function changePage(delta) {
+    const tp = Math.ceil(AppState.filtered.length / ROWS_PER_PAGE) || 1;
+    AppState.page = Math.min(Math.max(AppState.page + delta, 1), tp);
+    renderTable();
+    document.querySelector('.table-wrapper')?.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToPage(p) {
+    const tp = Math.ceil(AppState.filtered.length / ROWS_PER_PAGE) || 1;
+    AppState.page = Math.min(Math.max(p, 1), tp);
+    renderTable();
+}
+
+function goLastPage() {
+    goToPage(Math.ceil(AppState.filtered.length / ROWS_PER_PAGE) || 1);
+}
+
+/* ------------------------------------------------------------------ */
+/* EXPORT CSV                                                          */
+/* ------------------------------------------------------------------ */
+function exportCSV() {
+    if (!AppState.filtered.length) { showToast('Sin datos para exportar', 'warn'); return; }
+    const fields = ['FECHA','ESTADO_DE_RESULTADOS','NEGOCIO','TRANSACCION','CATEGORIA','PROVEEDOR','IMPORTE'];
+    const header = fields.join(',');
+    const rows = AppState.filtered.map(r =>
+        fields.map(f => {
+            const v = String(r[f] ?? '').replace(/"/g, '""');
+            return v.includes(',') ? `"${v}"` : v;
+        }).join(',')
+    );
+    const csv  = [header, ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = `moyuk_export_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`${AppState.filtered.length.toLocaleString('es-MX')} registros exportados`, 'success');
+}
+
+/* ------------------------------------------------------------------ */
+/* BOOT                                                                */
+/* ------------------------------------------------------------------ */
+document.addEventListener('DOMContentLoaded', initDashboard);
+</script>
 </body>
 </html>
