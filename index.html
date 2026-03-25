@@ -449,6 +449,132 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
         * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+        /* ============================================================
+           TAB NAVIGATION
+        ============================================================ */
+        .tab-nav {
+            display: flex;
+            gap: 0.25rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 0.375rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .tab-btn {
+            flex: 1;
+            display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            font-family: var(--font-display); font-size: 0.82rem; font-weight: 700;
+            letter-spacing: -0.01em;
+            border-radius: calc(var(--radius-lg) - 4px);
+            border: none; padding: 0.65rem 1.25rem;
+            cursor: pointer; transition: all 0.22s;
+            color: var(--text-2); background: transparent;
+        }
+        .tab-btn:hover { color: var(--teal); background: var(--teal-alpha); }
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--teal), var(--teal-light));
+            color: white;
+            box-shadow: 0 2px 8px rgba(10,76,94,0.35);
+        }
+
+        /* Filter context badge */
+        #filter-context-label {
+            font-size: 0.65rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--teal);
+            background: var(--teal-alpha);
+            border: 1px solid rgba(10,76,94,0.18);
+            border-radius: 99px;
+            padding: 0.2rem 0.65rem;
+            transition: all 0.2s;
+        }
+
+        /* ER-only filter row: hidden on dashboard, shown on ER */
+        #er-only-filters { display: none; }
+        .vista-resultados-active #er-only-filters { display: flex; }
+        /* Dashboard-only filters: shown on dashboard, hidden on ER */
+        #dash-only-filters { display: grid; }
+        .vista-resultados-active #dash-only-filters { display: none; }
+
+        /* ============================================================
+           ESTADO DE RESULTADOS
+        ============================================================ */
+        .er-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        .er-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+        }
+        .er-section-header {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 1rem 1.25rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .er-section-icon {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .er-section-title {
+            font-family: var(--font-display); font-size: 0.82rem;
+            font-weight: 700; color: var(--text-1);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .er-section-total {
+            margin-left: auto;
+            font-family: var(--font-display); font-size: 1rem;
+            font-weight: 800; letter-spacing: -0.02em;
+        }
+        .er-rows { padding: 0.5rem 0; }
+        .er-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.5rem 1.25rem;
+            font-size: 0.78rem; color: var(--text-2);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        .er-row:last-child { border-bottom: none; }
+        .er-row:hover { background: var(--surface-2); }
+        .er-row-label { font-weight: 500; }
+        .er-row-amount { font-family: var(--font-display); font-weight: 700; color: var(--text-1); }
+        .er-neta {
+            background: linear-gradient(135deg, var(--teal) 0%, var(--teal-light) 100%);
+            border-radius: var(--radius-lg);
+            padding: 2rem 1.75rem;
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(10,76,94,0.25);
+            margin-bottom: 1.5rem;
+        }
+        .er-neta.negativa {
+            background: linear-gradient(135deg, var(--rose) 0%, #c0283e 100%);
+            box-shadow: 0 8px 24px rgba(244,63,94,0.25);
+        }
+        .er-neta-label {
+            font-family: var(--font-display); font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.12em;
+            color: rgba(255,255,255,0.7); margin-bottom: 0.5rem;
+        }
+        .er-neta-value {
+            font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800; color: white; letter-spacing: -0.03em; line-height: 1;
+        }
+        .er-neta-formula { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem; }
+        .er-neta-margen {
+            margin-top: 0.75rem;
+            background: rgba(255,255,255,0.15);
+            border-radius: 99px; padding: 0.3rem 1rem;
+            font-size: 0.75rem; font-weight: 700; color: rgba(255,255,255,0.9);
+        }
     </style>
 </head>
 <body>
@@ -511,7 +637,7 @@
 
                 <!-- Quick ranges -->
                 <div style="display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; gap:2px;">
-                    <button onclick="setDateRange(1)"  class="btn btn-ghost" id="range-1"  aria-label="Ver mes actual">Mes actual</button>
+                    <button onclick="setDateRange(1)"  class="btn btn-ghost" id="range-1"  aria-label="Ver mes actual">Último mes</button>
                     <button onclick="setDateRange(3)"  class="btn btn-ghost" id="range-3"  aria-label="Ver 3 meses">3 meses</button>
                     <button onclick="setDateRange(12)" class="btn btn-ghost" id="range-12" aria-label="Ver 1 año">1 año</button>
                 </div>
@@ -540,25 +666,53 @@
         </div>
     </header>
 
+
+    <!-- TAB NAVIGATION -->
+    <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;" class="fade-up">
+        <nav class="tab-nav" role="tablist" aria-label="Navegación de vistas" style="flex:1; min-width:260px;">
+            <button class="tab-btn active" id="tab-dashboard"  onclick="cambiarPestana('dashboard')"  role="tab" aria-selected="true"  aria-controls="vista-dashboard">
+                <i class="ph ph-squares-four"></i> Dashboard General
+            </button>
+            <button class="tab-btn"        id="tab-resultados" onclick="cambiarPestana('resultados')" role="tab" aria-selected="false" aria-controls="vista-resultados">
+                <i class="ph ph-file-text"></i> Estado de Resultados
+            </button>
+        </nav>
+    </div>
+
     <!-- FILTERS -->
     <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem;" class="fade-up delay-1">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
             <p style="font-family:var(--font-display); font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3);">
-                <i class="ph ph-funnel" style="margin-right:0.3rem;"></i> Filtros
+                <i class="ph ph-funnel" style="margin-right:0.3rem;"></i> Filtros &nbsp;<span id="filter-context-label">Dashboard General</span>
             </p>
             <button onclick="clearAllFilters()" class="btn btn-ghost" style="font-size:0.7rem;" aria-label="Limpiar todos los filtros">
                 <i class="ph ph-eraser"></i> Limpiar todo
             </button>
         </div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0.875rem;">
+        <div id="dash-only-filters" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:0.875rem;">
             <div><label class="filter-label" for="filtro-estado">Edo. Resultados</label><select id="filtro-estado"><option value="">Todos</option></select></div>
             <div><label class="filter-label" for="filtro-transaccion">Transacción</label><select id="filtro-transaccion"><option value="">Todos</option></select></div>
             <div><label class="filter-label" for="filtro-negocio">Negocio</label><select id="filtro-negocio"><option value="">Todos</option></select></div>
             <div><label class="filter-label" for="filtro-categoria">Categoría</label><select id="filtro-categoria"><option value="">Todos</option></select></div>
             <div><label class="filter-label" for="filtro-proveedor">Proveedor</label><select id="filtro-proveedor"><option value="">Todos</option></select></div>
         </div>
+        <!-- ER-only extra filter: only negocio is needed (dates come from header) -->
+        <div id="er-only-filters" style="align-items:flex-end; gap:0.875rem; flex-wrap:wrap; margin-top:0.25rem;">
+            <div style="min-width:220px;">
+                <label class="filter-label" for="er-filtro-negocio">Negocio</label>
+                <select id="er-filtro-negocio"><option value="">Todos los negocios</option></select>
+            </div>
+            <p style="font-size:0.72rem; color:var(--text-3); padding-bottom:0.5rem;">
+                <i class="ph ph-info"></i>&nbsp; Usa los controles de fecha del encabezado para filtrar el período.
+            </p>
+        </div>
     </div>
 
+
+    <!-- ================================================================
+         VISTA: DASHBOARD GENERAL
+    ================================================================ -->
+    <div id="vista-dashboard">
     <!-- KPIs -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:1.5rem;" class="fade-up delay-2">
 
@@ -699,6 +853,79 @@
             </div>
         </div>
     </div>
+
+    </div><!-- /vista-dashboard -->
+
+    <!-- ================================================================
+         VISTA: ESTADO DE RESULTADOS
+    ================================================================ -->
+    <div id="vista-resultados" style="display:none;" role="tabpanel" aria-labelledby="tab-resultados">
+
+        <!-- ER Cards Grid -->
+        <div class="er-grid" id="er-grid">
+
+            <!-- Ventas / Ingresos -->
+            <div class="er-section">
+                <div class="er-section-header">
+                    <div class="er-section-icon" style="background:var(--green-alpha); color:var(--green);">
+                        <i class="ph ph-arrow-circle-up"></i>
+                    </div>
+                    <div>
+                        <div class="er-section-title">Ventas / Ingresos</div>
+                        <div style="font-size:0.7rem; color:var(--text-3);">Por método de pago</div>
+                    </div>
+                    <div class="er-section-total" style="color:var(--green);" id="er-total-ventas">$0.00</div>
+                </div>
+                <div class="er-rows" id="er-rows-ventas">
+                    <div class="er-row"><span class="er-row-label" style="color:var(--text-3);">Sin datos</span></div>
+                </div>
+            </div>
+
+            <!-- Costos de Venta -->
+            <div class="er-section">
+                <div class="er-section-header">
+                    <div class="er-section-icon" style="background:var(--rose-alpha); color:var(--rose);">
+                        <i class="ph ph-package"></i>
+                    </div>
+                    <div>
+                        <div class="er-section-title">Costos de Venta</div>
+                        <div style="font-size:0.7rem; color:var(--text-3);">Por categoría</div>
+                    </div>
+                    <div class="er-section-total" style="color:var(--rose);" id="er-total-costos">$0.00</div>
+                </div>
+                <div class="er-rows" id="er-rows-costos">
+                    <div class="er-row"><span class="er-row-label" style="color:var(--text-3);">Sin datos</span></div>
+                </div>
+            </div>
+
+            <!-- Gastos Operativos -->
+            <div class="er-section">
+                <div class="er-section-header">
+                    <div class="er-section-icon" style="background:rgba(245,158,11,0.12); color:var(--amber);">
+                        <i class="ph ph-receipt"></i>
+                    </div>
+                    <div>
+                        <div class="er-section-title">Gastos Operativos</div>
+                        <div style="font-size:0.7rem; color:var(--text-3);">Por categoría</div>
+                    </div>
+                    <div class="er-section-total" style="color:var(--amber);" id="er-total-gastos">$0.00</div>
+                </div>
+                <div class="er-rows" id="er-rows-gastos">
+                    <div class="er-row"><span class="er-row-label" style="color:var(--text-3);">Sin datos</span></div>
+                </div>
+            </div>
+
+        </div><!-- /er-grid -->
+
+        <!-- Utilidad Neta -->
+        <div class="er-neta" id="er-neta-card">
+            <div class="er-neta-label"><i class="ph ph-trend-up"></i> &nbsp;Utilidad Neta</div>
+            <div class="er-neta-value" id="er-neta-value">$0.00</div>
+            <div class="er-neta-formula" id="er-neta-formula">Ventas − Costos de Venta − Gastos Operativos</div>
+            <div class="er-neta-margen" id="er-neta-margen">— % margen</div>
+        </div>
+
+    </div><!-- /vista-resultados -->
 
 </div>
 
@@ -881,6 +1108,7 @@ function processData(raw) {
             CATEGORIA:  (row.CATEGORIA || '').trim() || '-',
             NEGOCIO:    (row.NEGOCIO   || '').trim() || '-',
             TRANSACCION:(row.TRANSACCION || '').trim().toUpperCase(),
+            METODO_PAGO: (row.METODO_PAGO   || '').trim() || 'Sin método',
             fechaObj:   isNaN(dateObj.getTime()) ? null : dateObj,
             mesAnio:    isNaN(dateObj.getTime()) ? 'Sin Fecha' : `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`
         };
@@ -902,6 +1130,7 @@ function processData(raw) {
     }
 
     initFilters();
+    initERNegocioFilter();
     setupListeners();
     applyFilters();
     hideLoader();
@@ -1007,6 +1236,10 @@ function applyFilters() {
 
     AppState.page = 1;
     updateDashboard();
+    // If ER tab is visible, keep it in sync with date changes
+    if (document.getElementById('vista-resultados').style.display !== 'none') {
+        calcularEstadoResultados();
+    }
 }
 
 /* ------------------------------------------------------------------ */
@@ -1324,6 +1557,138 @@ function exportCSV() {
     a.click();
     URL.revokeObjectURL(url);
     showToast(`${AppState.filtered.length.toLocaleString('es-MX')} registros exportados`, 'success');
+}
+
+
+/* ------------------------------------------------------------------ */
+/* TAB SWITCH – shared filters approach                                */
+/* ------------------------------------------------------------------ */
+function cambiarPestana(id) {
+    const appEl = document.getElementById('app');
+
+    // Toggle views
+    document.getElementById('vista-dashboard').style.display  = (id === 'dashboard')  ? '' : 'none';
+    document.getElementById('vista-resultados').style.display = (id === 'resultados') ? '' : 'none';
+
+    // Toggle tab button styles
+    ['dashboard','resultados'].forEach(v => {
+        const btn = document.getElementById('tab-' + v);
+        btn.classList.toggle('active', v === id);
+        btn.setAttribute('aria-selected', v === id ? 'true' : 'false');
+    });
+
+    // Toggle filter context: show/hide filter rows & update label
+    const label = document.getElementById('filter-context-label');
+    if (id === 'resultados') {
+        appEl.classList.add('vista-resultados-active');
+        label.textContent = 'Estado de Resultados';
+    } else {
+        appEl.classList.remove('vista-resultados-active');
+        label.textContent = 'Dashboard General';
+    }
+
+    // Recompute the active view with current filters
+    if (id === 'resultados') calcularEstadoResultados();
+    else applyFilters();
+}
+
+/* ------------------------------------------------------------------ */
+/* ER NEGOCIO FILTER INIT (separate TomSelect from dash one)           */
+/* ------------------------------------------------------------------ */
+function initERNegocioFilter() {
+    const sel = document.getElementById('er-filtro-negocio');
+    const negocios = [...new Set(AppState.raw.map(d => d.NEGOCIO).filter(v => v && v !== '-'))].sort();
+    negocios.forEach(n => {
+        const opt = document.createElement('option');
+        opt.value = n; opt.textContent = n;
+        sel.appendChild(opt);
+    });
+    if (!AppState.tomSelects['er-filtro-negocio']) {
+        AppState.tomSelects['er-filtro-negocio'] = new TomSelect('#er-filtro-negocio', {
+            create: false, placeholder: 'Todos los negocios', maxOptions: null,
+            sortField: { field: 'text', direction: 'asc' }
+        });
+        AppState.tomSelects['er-filtro-negocio'].on('change', calcularEstadoResultados);
+    }
+}
+
+/* ------------------------------------------------------------------ */
+/* ER – MAIN CALCULATION (reads shared header date pickers)            */
+/* ------------------------------------------------------------------ */
+function calcularEstadoResultados() {
+    // Reuse the SAME date inputs from the header
+    const dfStr   = document.getElementById('date-from').value;
+    const dtStr   = document.getElementById('date-to').value;
+    // ER has its own negocio filter (more specific than the dashboard one)
+    const negocio = document.getElementById('er-filtro-negocio').value;
+
+    const dateFrom = dfStr ? new Date(dfStr + 'T00:00:00') : null;
+    const dateTo   = dtStr ? new Date(dtStr + 'T23:59:59') : null;
+
+    const datos = AppState.raw.filter(d => {
+        if (negocio && d.NEGOCIO !== negocio) return false;
+        if (dateFrom && (!d.fechaObj || d.fechaObj < dateFrom)) return false;
+        if (dateTo   && (!d.fechaObj || d.fechaObj > dateTo))   return false;
+        return true;
+    });
+
+    // Ventas por METODO_PAGO
+    const ventasMap = {};
+    let totalVentas = 0;
+    datos.filter(d => d.TRANSACCION === 'INGRESO').forEach(d => {
+        const k = (d.METODO_PAGO || 'Sin método').trim() || 'Sin método';
+        ventasMap[k] = (ventasMap[k] || 0) + d.IMPORTE;
+        totalVentas += d.IMPORTE;
+    });
+
+    // Costos de Venta
+    const costosMap = {};
+    let totalCostos = 0;
+    datos.filter(d => d.TRANSACCION === 'EGRESO' && /costo/i.test(d.ESTADO_DE_RESULTADOS || '')).forEach(d => {
+        const k = (d.CATEGORIA || 'Sin categoría').trim() || 'Sin categoría';
+        costosMap[k] = (costosMap[k] || 0) + d.IMPORTE;
+        totalCostos += d.IMPORTE;
+    });
+
+    // Gastos Operativos
+    const gastosMap = {};
+    let totalGastos = 0;
+    datos.filter(d => d.TRANSACCION === 'EGRESO' && /gasto/i.test(d.ESTADO_DE_RESULTADOS || '')).forEach(d => {
+        const k = (d.CATEGORIA || 'Sin categoría').trim() || 'Sin categoría';
+        gastosMap[k] = (gastosMap[k] || 0) + d.IMPORTE;
+        totalGastos += d.IMPORTE;
+    });
+
+    const utilidad = totalVentas - totalCostos - totalGastos;
+    const margen   = totalVentas > 0 ? ((utilidad / totalVentas) * 100).toFixed(1) : null;
+
+    renderERSection('er-total-ventas', 'er-rows-ventas', ventasMap, totalVentas, 'var(--green)');
+    renderERSection('er-total-costos', 'er-rows-costos', costosMap, totalCostos, 'var(--rose)');
+    renderERSection('er-total-gastos', 'er-rows-gastos', gastosMap, totalGastos, 'var(--amber)');
+
+    document.getElementById('er-neta-value').textContent = fmt.format(utilidad);
+    document.getElementById('er-neta-formula').textContent =
+        fmt.format(totalVentas) + ' − ' + fmt.format(totalCostos) + ' − ' + fmt.format(totalGastos);
+    document.getElementById('er-neta-margen').textContent =
+        margen !== null ? margen + '% margen neto' : '—';
+    document.getElementById('er-neta-card').classList.toggle('negativa', utilidad < 0);
+}
+
+function renderERSection(totalId, rowsId, map, total, color) {
+    document.getElementById(totalId).textContent = fmt.format(total);
+    document.getElementById(totalId).style.color = color;
+    const container = document.getElementById(rowsId);
+    const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]);
+    if (!sorted.length) {
+        container.innerHTML = '<div class="er-row"><span class="er-row-label" style="color:var(--text-3);">Sin datos en este período</span></div>';
+        return;
+    }
+    container.innerHTML = sorted.map(([label, amount]) => `
+        <div class="er-row">
+            <span class="er-row-label">${label}</span>
+            <span class="er-row-amount">${fmt.format(amount)}</span>
+        </div>
+    `).join('');
 }
 
 /* ------------------------------------------------------------------ */
