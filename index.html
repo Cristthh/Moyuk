@@ -234,7 +234,12 @@
             border-color: var(--teal) !important;
             box-shadow: var(--shadow-glow) !important;
         }
-        .ts-dropdown { font-family: var(--font-body) !important; font-size: 0.8rem !important; }
+        .ts-dropdown {
+            font-family: var(--font-body) !important;
+            font-size: 0.8rem !important;
+            z-index: 9000 !important;
+            position: absolute !important;
+        }
 
         /* ============================================================
            DATE INPUTS
@@ -507,9 +512,17 @@
         ============================================================ */
         .er-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 1.25rem;
             margin-bottom: 1.5rem;
+        }
+        /* Gastos Operativos siempre ocupa todo el ancho para evitar hueco */
+        .er-grid > .er-section:last-of-type {
+            grid-column: 1 / -1;
+        }
+        @media (max-width: 700px) {
+            .er-grid { grid-template-columns: 1fr; }
+            .er-grid > .er-section:last-of-type { grid-column: 1; }
         }
         .er-section {
             background: var(--surface);
@@ -605,8 +618,50 @@
             100% { opacity: 1;    transform: scale(1); }
         }
         .kpi-value.updating {
-            animation: kpiFlash var(--transition-slow) ease forwards;
+            animation: kpiFlash var(--transition-slow, 0.35s) ease forwards;
         }
+
+
+        /* ============================================================
+           UTILIDAD BRUTA
+        ============================================================ */
+        .er-bruta {
+            background: linear-gradient(135deg, rgba(10,76,94,0.07) 0%, rgba(63,184,117,0.08) 100%);
+            border: 2px solid var(--teal);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 1.5rem;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .er-bruta-left { display: flex; align-items: center; gap: 0.75rem; }
+        .er-bruta-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: var(--teal-alpha); color: var(--teal);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; flex-shrink: 0;
+        }
+        .er-bruta-label {
+            font-family: var(--font-display); font-size: 0.78rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em; color: var(--teal);
+        }
+        .er-bruta-formula { font-size: 0.68rem; color: var(--text-3); margin-top: 0.15rem; }
+        .er-bruta-value {
+            font-family: var(--font-display); font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+            font-weight: 800; letter-spacing: -0.02em; color: var(--teal);
+        }
+        .er-bruta-margen {
+            background: var(--teal-alpha); border-radius: 99px;
+            padding: 0.2rem 0.75rem; font-size: 0.7rem; font-weight: 700;
+            color: var(--teal); border: 1px solid rgba(10,76,94,0.2);
+            white-space: nowrap;
+        }
+        .er-bruta.negativa { border-color: var(--rose); background: rgba(244,63,94,0.05); }
+        .er-bruta.negativa .er-bruta-icon  { background: var(--rose-alpha); color: var(--rose); }
+        .er-bruta.negativa .er-bruta-label { color: var(--rose); }
+        .er-bruta.negativa .er-bruta-value { color: var(--rose); }
+        .er-bruta.negativa .er-bruta-margen { background: var(--rose-alpha); color: var(--rose); border-color: rgba(244,63,94,0.2); }
 
     </style>
 </head>
@@ -713,7 +768,7 @@
     </div>
 
     <!-- FILTERS -->
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem;" class="fade-up delay-1">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem; position:relative; z-index:100;" class="fade-up delay-1">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
             <p style="font-family:var(--font-display); font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3);">
                 <i class="ph ph-funnel" style="margin-right:0.3rem;"></i> Filtros &nbsp;<span id="filter-context-label">Dashboard General</span>
@@ -905,7 +960,7 @@
                     </div>
                     <div>
                         <div class="er-section-title">Ventas / Ingresos</div>
-                        <div style="font-size:0.7rem; color:var(--text-3);">Por método de pago</div>
+                        <div style="font-size:0.7rem; color:var(--text-3);">Efectivo · Tarjeta · Transferencia</div>
                     </div>
                     <div class="er-section-total" style="color:var(--green);" id="er-total-ventas">$0.00</div>
                 </div>
@@ -928,6 +983,21 @@
                 </div>
                 <div class="er-rows" id="er-rows-costos">
                     <div class="er-row"><span class="er-row-label" style="color:var(--text-3);">Sin datos</span></div>
+                </div>
+            </div>
+
+            <!-- ✦ Utilidad Bruta ✦ -->
+            <div class="er-bruta" id="er-bruta-card" style="grid-column: 1 / -1;">
+                <div class="er-bruta-left">
+                    <div class="er-bruta-icon"><i class="ph ph-trending-up"></i></div>
+                    <div>
+                        <div class="er-bruta-label">Utilidad Bruta</div>
+                        <div class="er-bruta-formula" id="er-bruta-formula">Ventas − Costos de Venta</div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; justify-content:flex-end;">
+                    <div class="er-bruta-value" id="er-bruta-value">$0.00</div>
+                    <div class="er-bruta-margen" id="er-bruta-margen">— % margen bruto</div>
                 </div>
             </div>
 
@@ -1040,7 +1110,7 @@ function showToast(msg, type = 'info', duration = 3500) {
     const el = document.createElement('div');
     el.className = 'toast';
     el.innerHTML = `<i class="ph ${icons[type] || icons.info}" style="font-size:1.1rem; color:${colors[type] || colors.info}; flex-shrink:0;"></i><span>${msg}</span>`;
-    $('toast-container').appendChild(el);
+    document.getElementById('toast-container').appendChild(el);
     setTimeout(() => {
         el.classList.add('removing');
         setTimeout(() => el.remove(), 350);
@@ -1164,7 +1234,7 @@ function processData(raw) {
     if (validDates.length) {
         AppState.maxDate = new Date(Math.max(...validDates));
         const el = document.getElementById('data-info');
-        $('data-info-text').textContent =
+        document.getElementById('data-info-text').textContent =
             `Actualizado: ${AppState.maxDate.toLocaleDateString('es-MX', { day:'numeric', month:'short', year:'numeric' })}`;
         el.style.display = 'block';
     }
@@ -1177,7 +1247,7 @@ function processData(raw) {
 }
 
 function hideLoader() {
-    const loader = $('loader');
+    const loader = document.getElementById('loader');
     if (!loader) return;
     loader.classList.add('hidden-loader');
     setTimeout(() => loader.remove(), 700);
@@ -1308,7 +1378,7 @@ function updateKPIs() {
 
     function flashKPI(el, val) {
         el.classList.remove('updating', 'skeleton');
-        void el.offsetWidth; // reflow trick
+        void el.offsetWidth;
         el.textContent = val;
         el.classList.add('updating');
     }
@@ -1680,11 +1750,18 @@ function calcularEstadoResultados() {
         return true;
     });
 
-    // Ventas por METODO_PAGO
+    // Ventas / Ingresos — agrupados por CATEGORIA (PAGO EFECTIVO, PAGO CON TARJETA, TRANSFERENCIAS)
+    const METODOS_INGRESO = ['PAGO EFECTIVO', 'PAGO CON TARJETA', 'TRANSFERENCIAS'];
     const ventasMap = {};
     let totalVentas = 0;
     datos.filter(d => d.TRANSACCION === 'INGRESO').forEach(d => {
-        const k = (d.METODO_PAGO || 'Sin método').trim() || 'Sin método';
+        const raw = (d.CATEGORIA || '').trim().toUpperCase();
+        // Normalizar etiquetas de método de pago
+        let k;
+        if (raw.includes('EFECTIVO'))     k = 'Efectivo';
+        else if (raw.includes('TARJETA')) k = 'Tarjeta';
+        else if (raw.includes('TRANSFER')) k = 'Transferencia';
+        else                               k = raw || 'Sin método';
         ventasMap[k] = (ventasMap[k] || 0) + d.IMPORTE;
         totalVentas += d.IMPORTE;
     });
@@ -1706,6 +1783,17 @@ function calcularEstadoResultados() {
         gastosMap[k] = (gastosMap[k] || 0) + d.IMPORTE;
         totalGastos += d.IMPORTE;
     });
+
+    const utilidadBruta  = totalVentas - totalCostos;
+    const margenBruto    = totalVentas > 0 ? ((utilidadBruta / totalVentas) * 100).toFixed(1) : null;
+
+    const elBruta = document.getElementById('er-bruta-value');
+    elBruta.textContent = fmt.format(utilidadBruta);
+    document.getElementById('er-bruta-formula').textContent =
+        fmt.format(totalVentas) + ' − ' + fmt.format(totalCostos);
+    document.getElementById('er-bruta-margen').textContent =
+        margenBruto !== null ? margenBruto + '% margen bruto' : '—';
+    document.getElementById('er-bruta-card').classList.toggle('negativa', utilidadBruta < 0);
 
     const utilidad = totalVentas - totalCostos - totalGastos;
     const margen   = totalVentas > 0 ? ((utilidad / totalVentas) * 100).toFixed(1) : null;
