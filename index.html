@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard Financiero - Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. RFC: OCA2410151E0">
-    <title>Dashboard Financiero · Moyuk</title>
+    <title>Dashboard Financiero · Moyuk v10</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -131,7 +131,7 @@
         ============================================================ */
         #toast-container {
             position: fixed; bottom: 1.5rem; right: 1.5rem;
-            z-index: 8000; display: flex; flex-direction: column; gap: 0.5rem;
+            z-index: 9500; display: flex; flex-direction: column; gap: 0.5rem;
         }
         .toast {
             display: flex; align-items: center; gap: 0.75rem;
@@ -663,13 +663,171 @@
         .er-bruta.negativa .er-bruta-value { color: var(--rose); }
         .er-bruta.negativa .er-bruta-margen { background: var(--rose-alpha); color: var(--rose); border-color: rgba(244,63,94,0.2); }
 
+
+        /* ============================================================
+           GESTIÓN — Modal, Tabla, Formulario, Catálogos
+        ============================================================ */
+        .modal-overlay {
+            position:fixed; inset:0; z-index:8500;
+            background:rgba(0,0,0,0.5); backdrop-filter:blur(4px);
+            display:flex; align-items:center; justify-content:center; padding:1rem;
+            opacity:0; pointer-events:none; transition:opacity 0.22s ease;
+        }
+        .modal-overlay.open { opacity:1; pointer-events:all; }
+        .modal-box {
+            background:var(--surface); border-radius:var(--radius-xl);
+            border:1px solid var(--border); box-shadow:var(--shadow-lg);
+            width:100%; max-width:740px; max-height:90vh; overflow-y:auto; padding:2rem;
+            transform:translateY(24px) scale(0.97);
+            transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .modal-overlay.open .modal-box { transform:none; }
+        .modal-title {
+            font-family:var(--font-display); font-size:1.1rem; font-weight:800;
+            color:var(--text-1); margin-bottom:1.5rem;
+            display:flex; align-items:center; gap:0.6rem;
+        }
+        .modal-grid {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(195px,1fr));
+            gap:1rem; margin-bottom:1.5rem;
+        }
+        .form-group { display:flex; flex-direction:column; gap:0.35rem; }
+        .form-group label {
+            font-size:0.63rem; font-weight:700; text-transform:uppercase;
+            letter-spacing:0.1em; color:var(--text-3);
+        }
+        .form-input, .form-select {
+            font-family:var(--font-body); font-size:0.82rem; font-weight:500;
+            border:1px solid var(--border-strong); border-radius:var(--radius-sm);
+            padding:0.5rem 0.75rem; background:var(--surface); color:var(--text-1);
+            outline:none; transition:all 0.2s; box-shadow:var(--shadow-sm);
+        }
+        .form-input:focus, .form-select:focus {
+            border-color:var(--teal); box-shadow:var(--shadow-glow);
+        }
+        .tipo-badge {
+            display:inline-flex; align-items:center; padding:0.35rem 1rem;
+            border-radius:99px; font-size:0.75rem; font-weight:700; letter-spacing:0.06em;
+        }
+        .tipo-ingreso { background:var(--green-alpha); color:#166534; border:1px solid rgba(63,184,117,0.3); }
+        .tipo-egreso  { background:var(--rose-alpha);  color:#991b1b; border:1px solid rgba(244,63,94,0.25); }
+        .gestion-table-wrapper {
+            border-radius:var(--radius-md); border:1px solid var(--border);
+            overflow:auto; max-height:560px;
+            scrollbar-width:thin; scrollbar-color:var(--border-strong) transparent;
+        }
+        .cat-section { margin-bottom:1.25rem; }
+        .cat-section-title {
+            font-family:var(--font-display); font-size:0.75rem; font-weight:700;
+            text-transform:uppercase; letter-spacing:0.08em; color:var(--teal);
+            margin-bottom:0.6rem; display:flex; align-items:center; gap:0.4rem;
+        }
+        .cat-chips { display:flex; flex-wrap:wrap; gap:0.35rem; margin-bottom:0.4rem; }
+        .cat-chip {
+            display:inline-flex; align-items:center; gap:0.3rem;
+            padding:0.2rem 0.55rem 0.2rem 0.7rem; border-radius:99px;
+            font-size:0.68rem; font-weight:600;
+            background:var(--surface-2); border:1px solid var(--border); color:var(--text-2);
+        }
+        .cat-chip-del {
+            cursor:pointer; color:var(--rose); font-size:0.9rem; line-height:1;
+            border-radius:50%; padding:0 2px;
+        }
+        .cat-chip-del:hover { background:var(--rose-alpha); }
+        .cat-add-row { display:flex; gap:0.4rem; }
+        .cat-add-row input {
+            flex:1; font-family:var(--font-body); font-size:0.78rem;
+            border:1px solid var(--border); border-radius:var(--radius-sm);
+            padding:0.38rem 0.65rem; background:var(--surface); color:var(--text-1);
+            outline:none; transition:all 0.2s;
+        }
+        .cat-add-row input:focus { border-color:var(--teal); box-shadow:var(--shadow-glow); }
+        .btn-danger {
+            background:var(--rose); color:#fff; border:none;
+            border-radius:var(--radius-sm); padding:0.5rem 1rem;
+            font-family:var(--font-display); font-size:0.78rem; font-weight:700;
+            cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem;
+            transition:all var(--transition-fast);
+        }
+        .btn-danger:hover { background:#e11d48; }
+        .saving-spinner {
+            display:none; width:14px; height:14px; border-radius:50%;
+            border:2px solid rgba(255,255,255,0.3); border-top-color:#fff;
+            animation:spin 0.7s linear infinite;
+        }
+        .saving-spinner.active { display:inline-block; }
+
+        /* ── Overlay de carga para catálogos ── */
+        .cat-busy-overlay {
+            display:none; position:fixed;
+            top:50%; left:50%; transform:translate(-50%,-50%);
+            z-index:9600;
+            background:var(--surface);
+            border:1px solid var(--border);
+            box-shadow:var(--shadow-lg);
+            flex-direction:column; align-items:center; justify-content:center;
+            gap:0.875rem; border-radius:var(--radius-xl);
+            padding:2rem 2.5rem; min-width:240px; text-align:center;
+        }
+        .cat-busy-overlay.active { display:flex; }
+        .cat-busy-ring {
+            width:36px; height:36px; border-radius:50%;
+            border:3px solid var(--teal-alpha); border-top-color:var(--teal);
+            animation:spin 0.8s linear infinite;
+        }
+        .cat-busy-msg {
+            font-family:var(--font-display); font-size:0.8rem; font-weight:700;
+            color:var(--teal); letter-spacing:0.02em;
+        }
+        .cat-busy-bar-wrap {
+            width:160px; height:4px; background:var(--border);
+            border-radius:99px; overflow:hidden;
+        }
+        .cat-busy-bar {
+            height:100%; width:0%;
+            background:linear-gradient(90deg, var(--teal), var(--green));
+            border-radius:99px;
+            animation:catBarFill 2s ease-in-out forwards;
+        }
+        @keyframes catBarFill {
+            0%   { width:0%; }
+            40%  { width:55%; }
+            80%  { width:85%; }
+            100% { width:95%; }
+        }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* ══════════════════════════════════════
+           V9: CAMPOS BLOQUEADOS Y AUTO-LLENADOS
+        ══════════════════════════════════════ */
+        .form-input.field-locked,
+        .form-select.field-locked {
+            opacity:0.4; pointer-events:none; cursor:not-allowed;
+            background:var(--surface-2) !important;
+            border-color:var(--border) !important;
+        }
+        .form-input.field-suggested,
+        .form-select.field-suggested {
+            border-color:var(--teal) !important;
+            background:rgba(10,76,94,0.05) !important;
+            transition:border-color 0.2s, background 0.2s;
+        }
+        .caja-hint {
+            font-size:0.68rem; color:var(--teal); margin-top:0.35rem;
+            font-weight:600; display:flex; align-items:center; gap:0.3rem;
+        }
+        .autofill-tag {
+            display:inline-block; font-size:0.55rem; font-weight:800;
+            text-transform:uppercase; letter-spacing:0.08em;
+            background:var(--teal); color:#fff;
+            padding:0.1rem 0.4rem; border-radius:99px;
+            margin-left:0.4rem; vertical-align:middle;
+        }
+
     </style>
 </head>
 <body>
 
-<!-- ================================================================
-     LOADER
-================================================================ -->
 <div id="loader" role="status" aria-live="polite" aria-label="Cargando datos financieros">
     <div class="loader-ring"></div>
     <p style="font-family:'Sora',sans-serif; font-size:1.1rem; font-weight:700; color:white; letter-spacing:-0.01em;">Cargando Datos Financieros</p>
@@ -677,9 +835,6 @@
     <div class="loader-dots"><span></span><span></span><span></span></div>
 </div>
 
-<!-- ================================================================
-     ERROR STATE
-================================================================ -->
 <div id="error-state" role="alert">
     <div style="font-size:2.5rem; color:var(--rose);">⚠️</div>
     <p style="font-family:var(--font-display); font-size:1.1rem; font-weight:700; color:var(--text-1);">Error al cargar los datos</p>
@@ -687,21 +842,13 @@
     <button class="btn btn-primary" onclick="location.reload()" style="margin-top:0.5rem;">Reintentar</button>
 </div>
 
-<!-- ================================================================
-     TOAST CONTAINER
-================================================================ -->
 <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-<!-- ================================================================
-     APP
-================================================================ -->
 <div id="app" style="max-width:1680px; margin:0 auto; padding:2rem 1.5rem 4rem;">
 
-    <!-- HEADER -->
     <header class="card fade-up" style="margin-bottom:1.5rem;">
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem;">
 
-            <!-- Brand -->
             <div style="display:flex; align-items:center; gap:1rem;">
                 <div style="width:48px; height:48px; background:linear-gradient(135deg,#0a4c5e,#3fb875); border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(10,76,94,0.3);">
                     <i class="ph ph-chart-line-up" style="font-size:1.5rem; color:white;"></i>
@@ -715,22 +862,18 @@
                 </div>
             </div>
 
-            <!-- Controls -->
             <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
 
-                <!-- Data badge -->
                 <div id="data-info" style="display:none;">
                     <span class="chip"><i class="ph ph-check-circle"></i> <span id="data-info-text">—</span></span>
                 </div>
 
-                <!-- Quick ranges -->
                 <div style="display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; gap:2px;">
                     <button onclick="setDateRange(1)"  class="btn btn-ghost" id="range-1"  aria-label="Ver mes actual">Último mes</button>
                     <button onclick="setDateRange(3)"  class="btn btn-ghost" id="range-3"  aria-label="Ver 3 meses">3 meses</button>
                     <button onclick="setDateRange(12)" class="btn btn-ghost" id="range-12" aria-label="Ver 1 año">1 año</button>
                 </div>
 
-                <!-- Date pickers -->
                 <div style="display:flex; align-items:center; gap:0.4rem;">
                     <input type="date" id="date-from" class="date-input" aria-label="Fecha desde">
                     <span style="font-size:0.75rem; color:var(--text-3); font-weight:600;">—</span>
@@ -741,12 +884,10 @@
                     <i class="ph ph-x-circle"></i> Limpiar
                 </button>
 
-                <!-- Export -->
                 <button onclick="exportCSV()" class="btn btn-export" aria-label="Exportar datos filtrados a CSV">
                     <i class="ph ph-download-simple"></i> Exportar
                 </button>
 
-                <!-- Theme -->
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema claro/oscuro">
                     <i class="ph ph-moon" id="theme-icon"></i>
                 </button>
@@ -755,7 +896,6 @@
     </header>
 
 
-    <!-- TAB NAVIGATION -->
     <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;" class="fade-up">
         <nav class="tab-nav" role="tablist" aria-label="Navegación de vistas" style="flex:1; min-width:260px;">
             <button class="tab-btn active" id="tab-dashboard"  onclick="cambiarPestana('dashboard')"  role="tab" aria-selected="true"  aria-controls="vista-dashboard">
@@ -764,10 +904,12 @@
             <button class="tab-btn"        id="tab-resultados" onclick="cambiarPestana('resultados')" role="tab" aria-selected="false" aria-controls="vista-resultados">
                 <i class="ph ph-file-text"></i> Estado de Resultados
             </button>
+            <button class="tab-btn"        id="tab-gestion"    onclick="cambiarPestana('gestion')"    role="tab" aria-selected="false" aria-controls="vista-gestion">
+                <i class="ph ph-database"></i> Gestión
+            </button>
         </nav>
     </div>
 
-    <!-- FILTERS -->
     <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem; position:relative; z-index:100;" class="fade-up delay-1">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
             <p style="font-family:var(--font-display); font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3);">
@@ -784,7 +926,6 @@
             <div><label class="filter-label" for="filtro-categoria">Categoría</label><select id="filtro-categoria"><option value="">Todos</option></select></div>
             <div><label class="filter-label" for="filtro-proveedor">Proveedor</label><select id="filtro-proveedor"><option value="">Todos</option></select></div>
         </div>
-        <!-- ER-only extra filter: only negocio is needed (dates come from header) -->
         <div id="er-only-filters" style="align-items:flex-end; gap:0.875rem; flex-wrap:wrap; margin-top:0.25rem;">
             <div style="min-width:220px;">
                 <label class="filter-label" for="er-filtro-negocio">Negocio</label>
@@ -797,11 +938,7 @@
     </div>
 
 
-    <!-- ================================================================
-         VISTA: DASHBOARD GENERAL
-    ================================================================ -->
     <div id="vista-dashboard">
-    <!-- KPIs -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-bottom:1.5rem;" class="fade-up delay-2">
 
         <div class="kpi-card kpi-card-ingreso" role="region" aria-label="Total ingresos">
@@ -833,7 +970,6 @@
 
     </div>
 
-    <!-- CHARTS ROW 1 -->
     <div style="display:grid; grid-template-columns:1fr; gap:1.5rem; margin-bottom:1.5rem;" class="fade-up delay-3">
 
         <div class="card">
@@ -864,7 +1000,6 @@
 
     </div>
 
-    <!-- CHARTS ROW 2 -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:1.5rem; margin-bottom:1.5rem;" class="fade-up delay-4">
 
         <div class="card">
@@ -883,7 +1018,6 @@
 
     </div>
 
-    <!-- TABLE -->
     <div class="card fade-up delay-5">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; gap:1rem;">
             <div>
@@ -891,7 +1025,6 @@
                 <p class="section-sub" id="pagination-info">Cargando registros...</p>
             </div>
 
-            <!-- Pagination controls -->
             <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
                 <button id="btn-first" class="page-btn" onclick="goToPage(1)" aria-label="Primera página">
                     <i class="ph ph-caret-double-left"></i>
@@ -914,25 +1047,27 @@
         </div>
 
         <div style="position:relative;">
-            <!-- Desktop table -->
             <div class="table-wrapper" role="region" aria-label="Tabla de transacciones">
                 <table>
                     <thead>
                         <tr>
                             <th scope="col">Fecha</th>
-                            <th scope="col">Edo. Res.</th>
                             <th scope="col">Negocio</th>
                             <th scope="col">Tipo</th>
+                            <th scope="col">Cuenta Mayor</th>
+                            <th scope="col">Subcuenta</th>
                             <th scope="col">Categoría</th>
-                            <th scope="col" style="min-width:140px;">Proveedor</th>
+                            <th scope="col">Proveedor</th>
+                            <th scope="col">Nombre / Producto</th>
+                            <th scope="col">Marca</th>
+                            <th scope="col">Método Pago</th>
+                            <th scope="col">Factura</th>
                             <th scope="col" style="text-align:right;">Importe</th>
                         </tr>
                     </thead>
                     <tbody id="table-body"></tbody>
                 </table>
-                <!-- Mobile cards -->
                 <div class="mobile-card-list" id="mobile-card-list"></div>
-                <!-- Empty state -->
                 <div class="empty-state" id="empty-state" role="status" aria-live="polite">
                     <i class="ph ph-magnifying-glass" style="font-size:2.5rem; color:var(--teal); opacity:0.5;"></i>
                     <p style="font-family:var(--font-display); font-weight:700; color:var(--text-1);">Sin resultados para estos filtros</p>
@@ -942,17 +1077,10 @@
         </div>
     </div>
 
-    </div><!-- /vista-dashboard -->
+    </div><div id="vista-resultados" style="display:none;" role="tabpanel" aria-labelledby="tab-resultados">
 
-    <!-- ================================================================
-         VISTA: ESTADO DE RESULTADOS
-    ================================================================ -->
-    <div id="vista-resultados" style="display:none;" role="tabpanel" aria-labelledby="tab-resultados">
-
-        <!-- ER Cards Grid -->
         <div class="er-grid" id="er-grid">
 
-            <!-- Ventas / Ingresos -->
             <div class="er-section">
                 <div class="er-section-header">
                     <div class="er-section-icon" style="background:var(--green-alpha); color:var(--green);">
@@ -969,7 +1097,6 @@
                 </div>
             </div>
 
-            <!-- Costos de Venta -->
             <div class="er-section">
                 <div class="er-section-header">
                     <div class="er-section-icon" style="background:var(--rose-alpha); color:var(--rose);">
@@ -986,7 +1113,6 @@
                 </div>
             </div>
 
-            <!-- ✦ Utilidad Bruta ✦ -->
             <div class="er-bruta" id="er-bruta-card" style="grid-column: 1 / -1;">
                 <div class="er-bruta-left">
                     <div class="er-bruta-icon"><i class="ph ph-trending-up"></i></div>
@@ -1001,7 +1127,6 @@
                 </div>
             </div>
 
-            <!-- Gastos Operativos -->
             <div class="er-section">
                 <div class="er-section-header">
                     <div class="er-section-icon" style="background:rgba(245,158,11,0.12); color:var(--amber);">
@@ -1018,21 +1143,157 @@
                 </div>
             </div>
 
-        </div><!-- /er-grid -->
-
-        <!-- Utilidad Neta -->
-        <div class="er-neta" id="er-neta-card">
+        </div><div class="er-neta" id="er-neta-card">
             <div class="er-neta-label"><i class="ph ph-trend-up"></i> &nbsp;Utilidad Neta</div>
             <div class="er-neta-value" id="er-neta-value">$0.00</div>
             <div class="er-neta-formula" id="er-neta-formula">Ventas − Costos de Venta − Gastos Operativos</div>
             <div class="er-neta-margen" id="er-neta-margen">— % margen</div>
         </div>
 
-    </div><!-- /vista-resultados -->
+    </div><div id="vista-gestion" style="display:none;" role="tabpanel" aria-labelledby="tab-gestion">
+        <div class="card fade-up" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
+            <div>
+                <h2 class="section-title" style="display:flex;align-items:center;gap:0.5rem;">
+                    <i class="ph ph-database" style="color:var(--teal);"></i> Registros
+                </h2>
+                <p class="section-sub" id="gestion-count">Cargando...</p>
+            </div>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button class="btn btn-ghost" onclick="abrirModalCatalogos()"><i class="ph ph-gear"></i> Catálogos</button>
+                <button class="btn btn-primary" onclick="abrirModalRegistro()"><i class="ph ph-plus"></i> Nuevo Registro</button>
+            </div>
+        </div>
+        <div class="card fade-up delay-1" style="margin-bottom:1.25rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+            <i class="ph ph-magnifying-glass" style="color:var(--text-3);flex-shrink:0;"></i>
+            <input type="text" id="gestion-search" class="form-input" style="flex:1;min-width:200px;border:none;box-shadow:none;padding:0.25rem 0;"
+                placeholder="Buscar por negocio, categoría, proveedor, producto, folio..." oninput="filtrarGestion()">
+            <select id="gestion-filtro-negocio" class="form-select" style="max-width:180px;" onchange="filtrarGestion()">
+                <option value="">Todos los negocios</option>
+            </select>
+            <select id="gestion-filtro-tipo" class="form-select" style="max-width:145px;" onchange="filtrarGestion()">
+                <option value="">Ingreso / Egreso</option>
+                <option value="INGRESO">Ingreso</option>
+                <option value="EGRESO">Egreso</option>
+            </select>
+        </div>
+        <div class="card fade-up delay-2" style="padding:0;overflow:hidden;">
+            <div class="gestion-table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th><th>Negocio</th><th>Tipo</th>
+                            <th>Cuenta Mayor</th><th>Subcuenta</th><th>Proveedor</th>
+                            <th>Nombre / Producto</th><th>Marca</th>
+                            <th>Método Pago</th><th>Factura</th><th># Folio</th>
+                            <th style="text-align:right;">Importe</th>
+                            <th style="text-align:center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="gestion-tbody"></tbody>
+                </table>
+            </div>
+            <div style="padding:0.75rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;border-top:1px solid var(--border);">
+                <span style="font-size:0.75rem;color:var(--text-3);" id="gestion-pag-info">—</span>
+                <div style="display:flex;gap:0.4rem;align-items:center;">
+                    <button class="page-btn" id="gprev" onclick="gestionChangePage(-1)"><i class="ph ph-caret-left"></i></button>
+                    <span class="page-info" id="gpag-label" style="min-width:60px;text-align:center;">1 / 1</span>
+                    <button class="page-btn" id="gnext" onclick="gestionChangePage(1)"><i class="ph ph-caret-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-registro" role="dialog" aria-modal="true">
+        <div class="modal-box">
+            <div class="modal-title">
+                <i class="ph ph-note-pencil" style="color:var(--teal);"></i>
+                <span id="modal-titulo">Nuevo Registro</span>
+                <button onclick="cerrarModalRegistro()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.5rem;color:var(--text-3);line-height:1;">×</button>
+            </div>
+            <div style="margin-bottom:1.25rem;display:flex;align-items:center;gap:0.75rem;">
+                <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-3);">Tipo detectado:</span>
+                <span id="modal-tipo-badge" class="tipo-badge tipo-egreso">EGRESO</span>
+            </div>
+            <div class="modal-grid">
+                <div class="form-group"><label>Fecha *</label><input type="date" id="f-fecha" class="form-input" required></div>
+                <div class="form-group"><label>Negocio *</label>
+                    <select id="f-negocio" class="form-select" required><option value="">— Selecciona —</option></select></div>
+                <div class="form-group"><label>Cuenta de Mayor *</label>
+                    <select id="f-cuenta" class="form-select" required onchange="actualizarTipoBadge()"><option value="">— Selecciona —</option></select></div>
+                <div class="form-group"><label>Subcuenta</label>
+                    <select id="f-subcuenta" class="form-select"><option value="">— Selecciona —</option></select></div>
+                <div class="form-group"><label>Proveedor</label>
+                    <input type="text" id="f-proveedor" class="form-input" placeholder="Nombre del proveedor" oninput="doAutoFill('f-proveedor',this.value)" autocomplete="off"></div>
+                <div class="form-group"><label>Razón Social</label>
+                    <input type="text" id="f-razon" class="form-input" placeholder="Razón social"></div>
+                <div class="form-group"><label>Nombre / Producto</label>
+                    <input type="text" id="f-nombre" class="form-input" placeholder="Producto o descripción" oninput="doAutoFill('f-nombre',this.value)" autocomplete="off"></div>
+                <div class="form-group"><label>Marca</label>
+                    <input type="text" id="f-marca" class="form-input" placeholder="Marca" oninput="doAutoFill('f-marca',this.value)" autocomplete="off"></div>
+                <div class="form-group"><label>Importe * (MXN)</label>
+                    <input type="number" id="f-importe" class="form-input" placeholder="0.00" min="0" step="0.01" required></div>
+                <div class="form-group"><label>Método de Pago</label>
+                    <select id="f-metodo" class="form-select"><option value="">— Selecciona —</option></select></div>
+                <div class="form-group"><label>Factura</label>
+                    <select id="f-factura" class="form-select">
+                        <option value="">— Selecciona —</option>
+                        <option>FACTURADO</option><option>NO FACTURADO</option>
+                    </select></div>
+                <div class="form-group"><label># Folio / Ticket</label>
+                    <input type="text" id="f-folio" class="form-input" placeholder="Número de folio"></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:0.75rem;padding-top:1rem;border-top:1px solid var(--border);">
+                <button class="btn btn-ghost" onclick="cerrarModalRegistro()">Cancelar</button>
+                <button class="btn btn-primary" id="btn-guardar-registro" onclick="guardarRegistro()">
+                    <div class="saving-spinner" id="spinner-registro"></div>
+                    <i class="ph ph-floppy-disk" id="icon-guardar"></i>
+                    <span id="label-guardar">Guardar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-catalogos" role="dialog" aria-modal="true">
+        <div class="modal-box" style="max-width:880px;">
+            <div class="modal-title">
+                <i class="ph ph-gear" style="color:var(--teal);"></i> Configurar Catálogos
+                <button onclick="cerrarModalCatalogos()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.5rem;color:var(--text-3);line-height:1;">×</button>
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-2);margin-bottom:1.5rem;">Administra los valores de los dropdowns. Los cambios se guardan directamente en Google Sheets.</p>
+            <div style="position:relative;">
+            <div class="cat-busy-overlay" id="cat-busy-overlay">
+                <div class="cat-busy-ring"></div>
+                <div class="cat-busy-msg" id="cat-busy-msg">Guardando en Google Sheets…</div>
+                <div class="cat-busy-bar-wrap"><div class="cat-busy-bar" id="cat-busy-bar"></div></div>
+            </div>
+            <div id="catalogos-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;">
+                <p style="color:var(--text-3);font-size:0.78rem;">Cargando catálogos...</p>
+            </div>
+            </div><!-- /position:relative wrapper -->
+            <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
+                <button class="btn btn-ghost" onclick="cerrarModalCatalogos()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-confirm" role="dialog" aria-modal="true">
+        <div class="modal-box" style="max-width:400px;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:1rem;">🗑️</div>
+            <p style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text-1);margin-bottom:0.5rem;">¿Eliminar este registro?</p>
+            <p style="font-size:0.82rem;color:var(--text-2);margin-bottom:1.5rem;" id="confirm-desc">Esta acción no se puede deshacer.</p>
+            <div style="display:flex;gap:0.75rem;justify-content:center;">
+                <button class="btn btn-ghost" onclick="cerrarConfirm()">Cancelar</button>
+                <button class="btn btn-danger" id="btn-confirm-del" onclick="confirmarEliminar()">
+                    <div class="saving-spinner" id="spinner-del"></div>
+                    <i class="ph ph-trash"></i> Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
 
 </div>
 
-<!-- FOOTER -->
 <footer style="text-align:center; padding:2rem 1.5rem; border-top:1px solid var(--border); background:var(--surface); margin-top:3rem;" class="fade-up delay-7" role="contentinfo">
     <p style="font-family:var(--font-display); font-size:0.9rem; font-weight:800; color:var(--teal); letter-spacing:-0.01em;">
         OPERADORA Y COMERCIALIZADORA DE ALIMENTOS MOYUK S.A. DE C.V.
@@ -1042,9 +1303,6 @@
 </footer>
 
 
-<!-- ================================================================
-     JAVASCRIPT
-================================================================ -->
 <script>
 'use strict';
 
@@ -1058,7 +1316,7 @@ const $$ = sel => document.querySelectorAll(sel);
 /* ------------------------------------------------------------------ */
 /* CONFIG                                                              */
 /* ------------------------------------------------------------------ */
-const CSV_URL      = 'https://raw.githubusercontent.com/Cristthh/Moyuk/refs/heads/main/CONSOLIDADO_MOYUK_LIMPIO.csv';
+const API_URL      = 'https://script.google.com/macros/s/AKfycbyqLRs0C04nI1gF9MjXR-qGgIdulsvTDvKPntxiuBcDYErYydEGfGTCH-oMmRDvDdYApg/exec';
 const ROWS_PER_PAGE = 50;
 const CACHE_KEY    = 'moyuk_csv_cache';
 const CACHE_TTL    = 10 * 60 * 1000; // 10 min
@@ -1194,33 +1452,88 @@ function initDashboard() {
         return;
     }
 
-    Papa.parse(CSV_URL, {
-        download: true, header: true, skipEmptyLines: true,
-        complete(results) {
-            setCachedCSV(results.data);
-            processData(results.data);
-        },
-        error() {
-            hideLoader();
-            document.getElementById('error-state').classList.add('visible');
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', API_URL + '?action=getData', true);
+    xhr.timeout = 20000;
+
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                const json = JSON.parse(xhr.responseText);
+                if (json.error) throw new Error(json.error);
+                const rows = Array.isArray(json) ? json : (json.rows || json.data || []);
+                if (!rows.length) throw new Error('La hoja DATOS está vacía o sin registros.');
+                setCachedCSV(rows);
+                processData(rows);
+            } catch(e) {
+                showAPIError('Error al leer datos: ' + e.message);
+            }
+        } else {
+            showAPIError('Error HTTP ' + xhr.status);
         }
-    });
+    };
+
+    xhr.onerror   = function() { showAPIError('Sin conexión al API. Verifica tu internet.'); };
+    xhr.ontimeout = function() { showAPIError('Tiempo de espera agotado (20s). Reintenta.'); };
+    xhr.send();
+}
+
+function showAPIError(msg) {
+    hideLoader();
+    const errEl = document.getElementById('error-state');
+    if (!errEl) return;
+    errEl.innerHTML = `
+        <div style="text-align:center;padding:2rem 1rem;">
+            <div style="font-size:2.5rem;margin-bottom:1rem;">⚠️</div>
+            <p style="font-family:var(--font-display);font-size:1rem;font-weight:800;margin-bottom:0.5rem;color:#fff;">
+                No se pudo cargar el API
+            </p>
+            <p style="font-size:0.82rem;color:rgba(255,255,255,0.7);margin-bottom:1.25rem;max-width:36ch;margin-inline:auto;">
+                ${msg}
+            </p>
+            <button onclick="location.reload()"
+                style="padding:0.6rem 1.5rem;background:rgba(255,255,255,0.15);color:#fff;
+                       border:1px solid rgba(255,255,255,0.3);border-radius:99px;
+                       cursor:pointer;font-weight:600;font-size:0.85rem;letter-spacing:0.03em;">
+                🔄 Reintentar
+            </button>
+        </div>`;
+    errEl.classList.add('visible');
 }
 
 function processData(raw) {
-    AppState.raw = raw.map(row => {
-        const dateObj = parseDateRobust(row.FECHA);
-        const importe = parseFloat((row.IMPORTE || '').toString().replace(/,/g, '')) || 0;
+    AppState.raw = raw.map((row, idx) => {
+        const dateObj  = parseDateRobust(row['FECHA'] || row.FECHA || '');
+        const importeRaw = (row[' IMPORTE '] || row['IMPORTE'] || row.IMPORTE || '')
+            .toString().replace(/\$/g,'').replace(/,/g,'').trim();
+        const importe  = parseFloat(importeRaw) || 0;
+
+        const cuentaMayor = (row['CUENTA DE MAYOR'] || '').trim().toUpperCase();
+        const rawTrans    = (row.TRANSACCION || row['TRANSACCION'] || '').trim().toUpperCase();
+        const transaccion = rawTrans || (cuentaMayor === 'CAJA' ? 'INGRESO' : (cuentaMayor ? 'EGRESO' : ''));
+
+        const subcuenta   = (row['SUBCUENTA'] || row.SUBCUENTA || '').trim().toUpperCase();
+        const categoria   = (row['CATEGORIA'] || row.CATEGORIA || '').trim().toUpperCase() || '-';
+
         return {
             ...row,
-            IMPORTE:    importe,
-            PROVEEDOR:  (row.PROVEEDOR || '').trim() || '-',
-            CATEGORIA:  (row.CATEGORIA || '').trim() || '-',
-            NEGOCIO:    (row.NEGOCIO   || '').trim() || '-',
-            TRANSACCION:(row.TRANSACCION || '').trim().toUpperCase(),
-            METODO_PAGO: (row.METODO_PAGO   || '').trim() || 'Sin método',
-            fechaObj:   isNaN(dateObj.getTime()) ? null : dateObj,
-            mesAnio:    isNaN(dateObj.getTime()) ? 'Sin Fecha' : `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`
+            IMPORTE:              importe,
+            PROVEEDOR:            (row.PROVEEDOR || '').trim() || '-',
+            CATEGORIA:            categoria,
+            NEGOCIO:              (row.NEGOCIO || '').trim().toUpperCase() || '-',
+            TRANSACCION:          transaccion,
+            ESTADO_DE_RESULTADOS: (row.ESTADO_DE_RESULTADOS || row['ESTADO_DE_RESULTADOS'] || '').trim(),
+            'CUENTA DE MAYOR':    cuentaMayor,
+            SUBCUENTA:            subcuenta,
+            'RAZON SOCIAL':       (row['RAZON SOCIAL'] || '').trim(),
+            NOMBRE:               (row['NOMBRE'] || row.NOMBRE || '').trim(),
+            MARCA:                (row['MARCA']  || row.MARCA  || '').trim(),
+            'METODO DE PAGO':     (row['METODO DE PAGO'] || row.METODO_PAGO || '').trim(),
+            FACTURA:              (row['FACTURA'] || '').trim().toUpperCase(),
+            '# FOLIO':            (row['# FOLIO'] || '').trim(),
+            fechaObj:  isNaN(dateObj.getTime()) ? null : dateObj,
+            mesAnio:   isNaN(dateObj.getTime()) ? 'Sin Fecha'
+                       : `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`
         };
     }).sort((a, b) => {
         if (!a.fechaObj) return 1;
@@ -1239,6 +1552,7 @@ function processData(raw) {
         el.style.display = 'block';
     }
 
+    AutoFillIndex = null; // V9: reconstruir índice con datos frescos
     initFilters();
     initERNegocioFilter();
     setupListeners();
@@ -1420,7 +1734,6 @@ function updateOrCreateChart(id, config) {
     const ctx = document.getElementById(id).getContext('2d');
     const existing = AppState.charts[id];
     if (existing) {
-        // Prefer update over destroy+create for performance
         existing.data.labels   = config.data.labels;
         existing.data.datasets = config.data.datasets;
         existing.options       = config.options;
@@ -1584,26 +1897,29 @@ function renderTable() {
     document.getElementById('pagination-info').textContent =
         `Mostrando ${(start+1).toLocaleString('es-MX')} – ${end.toLocaleString('es-MX')} de ${total.toLocaleString('es-MX')} registros`;
 
-    // Desktop rows via DocumentFragment
     const frag = document.createDocumentFragment();
     pageData.forEach(row => {
         const isIng = row.TRANSACCION === 'INGRESO';
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td style="font-weight:600; color:var(--text-1);">${row.FECHA||'—'}</td>
-            <td style="font-size:0.75rem; font-weight:600;">${row.ESTADO_DE_RESULTADOS||'—'}</td>
-            <td style="font-weight:700; font-family:var(--font-display); color:var(--text-1);">${row.NEGOCIO||'—'}</td>
+            <td style="font-weight:600;color:var(--text-1);white-space:nowrap;">${formatFechaDisplay(row.FECHA)}</td>
+            <td style="font-weight:700;font-family:var(--font-display);">${row.NEGOCIO||'—'}</td>
             <td><span class="badge ${isIng?'badge-ingreso':'badge-egreso'}">${row.TRANSACCION||'—'}</span></td>
-            <td>${row.CATEGORIA||'—'}</td>
-            <td title="${row.PROVEEDOR}" style="max-width:150px; overflow:hidden; text-overflow:ellipsis;">${row.PROVEEDOR||'—'}</td>
-            <td style="text-align:right; font-family:var(--font-display); font-weight:800; color:${isIng?'var(--green)':'var(--rose)'};">${isIng?'+':'−'}${fmt.format(Math.abs(row.IMPORTE))}</td>
+            <td style="font-size:0.75rem;">${row['CUENTA DE MAYOR']||'—'}</td>
+            <td style="font-size:0.75rem;color:var(--text-3);">${row['SUBCUENTA']||'—'}</td>
+            <td style="font-size:0.75rem;">${row.CATEGORIA||'—'}</td>
+            <td style="font-size:0.75rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="${row.PROVEEDOR||''}">${row.PROVEEDOR||'—'}</td>
+            <td style="font-size:0.75rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;" title="${row['NOMBRE']||''}">${row['NOMBRE']||'—'}</td>
+            <td style="font-size:0.72rem;color:var(--text-3);">${row['MARCA']||'—'}</td>
+            <td style="font-size:0.72rem;">${row['METODO DE PAGO']||'—'}</td>
+            <td style="font-size:0.72rem;">${row['FACTURA'] ? '<span class="badge" style="background:var(--teal-alpha);color:var(--teal);padding:0.1rem 0.45rem;">'+row['FACTURA']+'</span>' : '—'}</td>
+            <td style="text-align:right;font-family:var(--font-display);font-weight:800;white-space:nowrap;color:${isIng?'var(--green)':'var(--rose)'};">${isIng?'+':'−'}${fmt.format(Math.abs(row.IMPORTE))}</td>
         `;
         frag.appendChild(tr);
     });
     tbody.innerHTML = '';
     tbody.appendChild(frag);
 
-    // Mobile cards
     const mFrag = document.createDocumentFragment();
     pageData.forEach(row => {
         const isIng = row.TRANSACCION === 'INGRESO';
@@ -1611,9 +1927,9 @@ function renderTable() {
         card.className = 'm-card';
         card.innerHTML = `
             <div class="m-card-left">
-                <span class="m-card-date">${row.FECHA||'—'} · ${row.NEGOCIO||'—'}</span>
-                <span class="m-card-neg">${row.CATEGORIA||'—'}</span>
-                <span class="m-card-cat">${row.PROVEEDOR||'—'}</span>
+                <span class="m-card-date">${formatFechaDisplay(row.FECHA)} · ${row.NEGOCIO||'—'}</span>
+                <span class="m-card-neg">${row['CUENTA DE MAYOR']||row.CATEGORIA||'—'}</span>
+                <span class="m-card-cat">${row['SUBCUENTA']||row.PROVEEDOR||'—'}${row['NOMBRE']?' · '+row['NOMBRE']:''}</span>
             </div>
             <div>
                 <div class="m-card-amount" style="color:${isIng?'var(--green)':'var(--rose)'}; text-align:right;">${isIng?'+':'−'}${fmt.format(Math.abs(row.IMPORTE))}</div>
@@ -1677,41 +1993,8 @@ function exportCSV() {
     showToast(`${AppState.filtered.length.toLocaleString('es-MX')} registros exportados`, 'success');
 }
 
-
 /* ------------------------------------------------------------------ */
-/* TAB SWITCH – shared filters approach                                */
-/* ------------------------------------------------------------------ */
-function cambiarPestana(id) {
-    const appEl = document.getElementById('app');
-
-    // Toggle views
-    document.getElementById('vista-dashboard').style.display  = (id === 'dashboard')  ? '' : 'none';
-    document.getElementById('vista-resultados').style.display = (id === 'resultados') ? '' : 'none';
-
-    // Toggle tab button styles
-    ['dashboard','resultados'].forEach(v => {
-        const btn = document.getElementById('tab-' + v);
-        btn.classList.toggle('active', v === id);
-        btn.setAttribute('aria-selected', v === id ? 'true' : 'false');
-    });
-
-    // Toggle filter context: show/hide filter rows & update label
-    const label = document.getElementById('filter-context-label');
-    if (id === 'resultados') {
-        appEl.classList.add('vista-resultados-active');
-        label.textContent = 'Estado de Resultados';
-    } else {
-        appEl.classList.remove('vista-resultados-active');
-        label.textContent = 'Dashboard General';
-    }
-
-    // Recompute the active view with current filters
-    if (id === 'resultados') calcularEstadoResultados();
-    else applyFilters();
-}
-
-/* ------------------------------------------------------------------ */
-/* ER NEGOCIO FILTER INIT (separate TomSelect from dash one)           */
+/* ER NEGOCIO FILTER INIT                                              */
 /* ------------------------------------------------------------------ */
 function initERNegocioFilter() {
     const sel = document.getElementById('er-filtro-negocio');
@@ -1731,13 +2014,11 @@ function initERNegocioFilter() {
 }
 
 /* ------------------------------------------------------------------ */
-/* ER – MAIN CALCULATION (reads shared header date pickers)            */
+/* ER – MAIN CALCULATION                                               */
 /* ------------------------------------------------------------------ */
 function calcularEstadoResultados() {
-    // Reuse the SAME date inputs from the header
     const dfStr   = document.getElementById('date-from').value;
     const dtStr   = document.getElementById('date-to').value;
-    // ER has its own negocio filter (more specific than the dashboard one)
     const negocio = document.getElementById('er-filtro-negocio').value;
 
     const dateFrom = dfStr ? new Date(dfStr + 'T00:00:00') : null;
@@ -1750,23 +2031,21 @@ function calcularEstadoResultados() {
         return true;
     });
 
-    // Ventas / Ingresos — agrupados por CATEGORIA (PAGO EFECTIVO, PAGO CON TARJETA, TRANSFERENCIAS)
-    const METODOS_INGRESO = ['PAGO EFECTIVO', 'PAGO CON TARJETA', 'TRANSFERENCIAS'];
     const ventasMap = {};
     let totalVentas = 0;
     datos.filter(d => d.TRANSACCION === 'INGRESO').forEach(d => {
-        const raw = (d.CATEGORIA || '').trim().toUpperCase();
-        // Normalizar etiquetas de método de pago
+        const subcuenta = (d.SUBCUENTA || '').trim().toUpperCase();
+        const categoria = (d.CATEGORIA || '').trim().toUpperCase();
+        const fuente    = subcuenta || categoria;
         let k;
-        if (raw.includes('EFECTIVO'))     k = 'Efectivo';
-        else if (raw.includes('TARJETA')) k = 'Tarjeta';
-        else if (raw.includes('TRANSFER')) k = 'Transferencia';
-        else                               k = raw || 'Sin método';
-        ventasMap[k] = (ventasMap[k] || 0) + d.IMPORTE;
-        totalVentas += d.IMPORTE;
+        if      (fuente.includes('EFECTIVO'))   k = 'Efectivo';
+        else if (fuente.includes('TARJETA'))    k = 'Tarjeta';
+        else if (fuente.includes('TRANSFER'))   k = 'Transferencia';
+        else                                    k = fuente || 'Sin método';
+        ventasMap[k]  = (ventasMap[k] || 0) + d.IMPORTE;
+        totalVentas  += d.IMPORTE;
     });
 
-    // Costos de Venta
     const costosMap = {};
     let totalCostos = 0;
     datos.filter(d => d.TRANSACCION === 'EGRESO' && /costo/i.test(d.ESTADO_DE_RESULTADOS || '')).forEach(d => {
@@ -1775,7 +2054,6 @@ function calcularEstadoResultados() {
         totalCostos += d.IMPORTE;
     });
 
-    // Gastos Operativos
     const gastosMap = {};
     let totalGastos = 0;
     datos.filter(d => d.TRANSACCION === 'EGRESO' && /gasto/i.test(d.ESTADO_DE_RESULTADOS || '')).forEach(d => {
@@ -1831,6 +2109,750 @@ function renderERSection(totalId, rowsId, map, total, color) {
 /* BOOT                                                                */
 /* ------------------------------------------------------------------ */
 document.addEventListener('DOMContentLoaded', initDashboard);
+
+    /* ================================================================
+       GESTIÓN — Estado global
+    ================================================================ */
+    const GestionState = {
+        filtered: [], page: 1, rowsPerPage: 50,
+        editIndex: null, deleteIndex: null, catalogos: {}
+    };
+
+    /* ================================================================
+       INIT GESTIÓN
+    ================================================================ */
+    async function initGestion() {
+        const sel = document.getElementById('gestion-filtro-negocio');
+        if (sel && sel.options.length === 1) {
+            [...new Set(AppState.raw.map(r => r.NEGOCIO).filter(Boolean))].sort()
+                .forEach(n => sel.appendChild(new Option(n, n)));
+        }
+        filtrarGestion();
+        await cargarCatalogos();
+    }
+
+    /* ================================================================
+       CARGAR CATÁLOGOS desde Apps Script
+    ================================================================ */
+    async function cargarCatalogos() {
+        try {
+            const data = await xhrPost({ action: 'getCatalogos' });
+            GestionState.catalogos = data;
+            poblarSelectsFormulario(data);
+            refreshTomSelectFromCatalogos(data);
+        } catch(e) { showToast('No se pudieron cargar los catálogos', 'warn'); }
+    }
+
+    /* Actualiza las opciones de los TomSelect del dashboard con los catálogos */
+    function refreshTomSelectFromCatalogos(cats) {
+        const mapCatalogoToFilter = {
+            'filtro-negocio':   (cats['NEGOCIOS'] || []),
+            'filtro-categoria': (cats['CATEGORIAS'] || cats['CATEGORIA'] || []),
+            'er-filtro-negocio':(cats['NEGOCIOS'] || [])
+        };
+        Object.entries(mapCatalogoToFilter).forEach(([filterId, vals]) => {
+            const ts = AppState.tomSelects[filterId];
+            if (!ts || !vals.length) return;
+            vals.forEach(v => {
+                if (v && !ts.options[v]) {
+                    ts.addOption({ value: v, text: v });
+                }
+            });
+            ts.refreshOptions(false);
+        });
+        // Actualizar también el select nativo de gestión (gestion-filtro-negocio)
+        const negSel = document.getElementById('gestion-filtro-negocio');
+        if (negSel && cats['NEGOCIOS']) {
+            const existing = [...negSel.options].map(o => o.value);
+            (cats['NEGOCIOS'] || []).forEach(n => {
+                if (n && !existing.includes(n)) {
+                    negSel.appendChild(new Option(n, n));
+                }
+            });
+        }
+    }
+
+    function poblarSelectsFormulario(cats) {
+        const map = {
+            'f-negocio':   cats['NEGOCIOS']        || [],
+            'f-cuenta':    cats['CUENTA MAYOR']    || [],
+            'f-subcuenta': cats['SUBCUENTAS']       || [],
+            'f-metodo':    cats['METODOS DE PAGO']  || [],
+            'f-factura':   cats['FACTURA']           || cats['FACTURAS'] || []
+        };
+        Object.entries(map).forEach(([id, vals]) => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            const cur = sel.value;
+            sel.innerHTML = '<option value="">— Selecciona —</option>';
+            [...new Set(vals)].sort().forEach(v => sel.appendChild(new Option(v, v)));
+            if (cur) sel.value = cur;
+        });
+    }
+
+    /* ================================================================
+       FILTRAR GESTIÓN
+    ================================================================ */
+    function filtrarGestion() {
+        const q    = ($('gestion-search')?.value || '').toLowerCase().trim();
+        const neg  = $('gestion-filtro-negocio')?.value || '';
+        const tipo = $('gestion-filtro-tipo')?.value    || '';
+
+        GestionState.filtered = AppState.raw.filter(r => {
+            if (neg  && r.NEGOCIO     !== neg)  return false;
+            if (tipo && r.TRANSACCION !== tipo)  return false;
+            if (q) {
+                const hay = [r.NEGOCIO, r.CATEGORIA, r.PROVEEDOR,
+                    r['CUENTA DE MAYOR'], r['SUBCUENTA'], r['NOMBRE'],
+                    r['MARCA'], r['RAZON SOCIAL'], r['# FOLIO'], r.FECHA
+                ].join(' ').toLowerCase();
+                if (!hay.includes(q)) return false;
+            }
+            return true;
+        });
+        GestionState.page = 1;
+        renderGestion();
+    }
+
+    /* ================================================================
+       RENDER TABLA GESTIÓN
+    ================================================================ */
+    /* Formatea la fecha de forma legible, limpiando timezone o formatos inesperados */
+    function formatFechaDisplay(fecha) {
+        if (!fecha) return '—';
+        const s = String(fecha).trim();
+        // ISO con timezone ej: "2025-06-01T00:00:00.000-06:00" o "Sat Jun 01 2025..."
+        if (s.includes('T') || s.length > 15) {
+            try {
+                // Intentar parsear como fecha
+                const d = new Date(s);
+                if (!isNaN(d.getTime())) {
+                    return d.toLocaleDateString('es-MX', {
+                        day:'2-digit', month:'2-digit', year:'numeric', timeZone:'America/Mexico_City'
+                    });
+                }
+            } catch(e) {}
+        }
+        // Ya es DD/MM/YYYY
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) return s;
+        // YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+            const [y,m,d] = s.split('-');
+            return `${d}/${m}/${y}`;
+        }
+        // Fallback: devolver sólo primeros 10 caracteres para evitar basura
+        return s.length > 12 ? s.substring(0,10) : s;
+    }
+
+    function renderGestion() {
+        const tbody = $('gestion-tbody');
+        if (!tbody) return;
+        const total = GestionState.filtered.length;
+        const pages = Math.ceil(total / GestionState.rowsPerPage) || 1;
+        if (GestionState.page > pages) GestionState.page = pages;
+
+        const start    = (GestionState.page - 1) * GestionState.rowsPerPage;
+        const pageData = GestionState.filtered.slice(start, start + GestionState.rowsPerPage);
+        const end      = Math.min(start + GestionState.rowsPerPage, total);
+
+        $('gestion-count').textContent    = total.toLocaleString('es-MX') + ' registros encontrados';
+        $('gestion-pag-info').textContent = `Mostrando ${(start+1).toLocaleString('es-MX')} – ${end.toLocaleString('es-MX')} de ${total.toLocaleString('es-MX')}`;
+        $('gpag-label').textContent       = GestionState.page + ' / ' + pages;
+        $('gprev').disabled = GestionState.page <= 1;
+        $('gnext').disabled = GestionState.page >= pages;
+
+        const frag = document.createDocumentFragment();
+        pageData.forEach(row => {
+            const globalIdx = AppState.raw.indexOf(row);
+            const isIng     = row.TRANSACCION === 'INGRESO';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="white-space:nowrap;font-weight:600;color:var(--text-1);">${formatFechaDisplay(row.FECHA)}</td>
+                <td style="font-weight:700;font-family:var(--font-display);">${row.NEGOCIO||'—'}</td>
+                <td><span class="badge ${isIng?'badge-ingreso':'badge-egreso'}">${row.TRANSACCION||'—'}</span></td>
+                <td style="font-size:0.75rem;">${row['CUENTA DE MAYOR']||'—'}</td>
+                <td style="font-size:0.75rem;color:var(--text-3);">${row['SUBCUENTA']||'—'}</td>
+                <td style="font-size:0.75rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="${row.PROVEEDOR||''}">${row.PROVEEDOR||'—'}</td>
+                <td style="font-size:0.75rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;" title="${row['NOMBRE']||''}">${row['NOMBRE']||'—'}</td>
+                <td style="font-size:0.72rem;color:var(--text-3);">${row['MARCA']||'—'}</td>
+                <td style="font-size:0.72rem;">${row['METODO DE PAGO']||'—'}</td>
+                <td style="font-size:0.72rem;">${row['FACTURA']||'—'}</td>
+                <td style="font-size:0.72rem;color:var(--text-3);">${row['# FOLIO']||'—'}</td>
+                <td style="text-align:right;font-family:var(--font-display);font-weight:800;white-space:nowrap;color:${isIng?'var(--green)':'var(--rose)'};">
+                    ${isIng?'+':'−'}${fmt.format(Math.abs(row.IMPORTE))}</td>
+                <td style="text-align:center;white-space:nowrap;">
+                    <button class="btn btn-ghost" style="padding:0.3rem 0.5rem;font-size:0.72rem;"
+                        onclick="abrirModalEditar(${globalIdx})" title="Editar"><i class="ph ph-pencil"></i></button>
+                    <button class="btn btn-danger" style="padding:0.3rem 0.5rem;font-size:0.72rem;"
+                        onclick="abrirConfirmEliminar(${globalIdx})" title="Eliminar"><i class="ph ph-trash"></i></button>
+                </td>`;
+            frag.appendChild(tr);
+        });
+        tbody.innerHTML = '';
+        tbody.appendChild(frag);
+    }
+
+    function gestionChangePage(dir) {
+        const pages = Math.ceil(GestionState.filtered.length / GestionState.rowsPerPage) || 1;
+        GestionState.page = Math.min(Math.max(GestionState.page + dir, 1), pages);
+        renderGestion();
+    }
+
+    /* ================================================================
+       MODAL NUEVO REGISTRO
+    ================================================================ */
+    function abrirModalRegistro() {
+        GestionState.editIndex = null;
+        $('modal-titulo').textContent  = 'Nuevo Registro';
+        $('label-guardar').textContent = 'Guardar';
+        limpiarFormulario();
+        const hoy = new Date();
+        $('f-fecha').value = hoy.getFullYear() + '-' +
+            String(hoy.getMonth()+1).padStart(2,'0') + '-' +
+            String(hoy.getDate()).padStart(2,'0');
+        actualizarTipoBadge();
+        $('modal-registro').classList.add('open');
+    }
+
+    function abrirModalEditar(idx) {
+        GestionState.editIndex = idx;
+        const row = AppState.raw[idx];
+        $('modal-titulo').textContent  = 'Editar Registro';
+        $('label-guardar').textContent = 'Actualizar';
+
+        let fechaInput = '';
+        const fs = row.FECHA || '';
+        if (fs.includes('/')) {
+            const [d,m,y] = fs.split('/');
+            if (y && y.length === 4) fechaInput = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        } else if (fs.includes('-')) {
+            fechaInput = fs.substring(0,10);
+        }
+
+        $('f-fecha').value     = fechaInput;
+        $('f-negocio').value   = row.NEGOCIO || '';
+        $('f-cuenta').value    = row['CUENTA DE MAYOR'] || '';
+        $('f-subcuenta').value = row['SUBCUENTA'] || '';
+        $('f-proveedor').value = (row.PROVEEDOR !== '-') ? (row.PROVEEDOR||'') : '';
+        $('f-razon').value     = row['RAZON SOCIAL'] || '';
+        $('f-nombre').value    = row['NOMBRE'] || '';
+        $('f-marca').value     = row['MARCA']  || '';
+        $('f-importe').value   = row.IMPORTE   || '';
+        $('f-metodo').value    = row['METODO DE PAGO'] || '';
+        $('f-factura').value   = row['FACTURA'] || '';
+        $('f-folio').value     = row['# FOLIO'] || '';
+        actualizarTipoBadge();
+        $('modal-registro').classList.add('open');
+    }
+
+    function cerrarModalRegistro() { $('modal-registro').classList.remove('open'); }
+
+    /* ================================================================
+       V9: MOTOR DE AUTO-LLENADO DESDE HISTORIAL
+    ================================================================ */
+    let AutoFillIndex = null;
+
+    function buildAutoFillIndex() {
+        const records = AppState.raw.filter(r =>
+            (r.PROVEEDOR && r.PROVEEDOR !== '-') ||
+            (r.NOMBRE    && r.NOMBRE    !== '')  ||
+            (r.MARCA     && r.MARCA     !== '')
+        );
+        const map = {};
+        const addEntry = (key, row) => {
+            key = (key || '').toString().trim().toUpperCase();
+            if (!key || key.length < 3 || key === '-') return;
+            if (!map[key]) map[key] = { proveedor:{}, razon:{}, nombre:{}, marca:{}, cuenta:{}, subcuenta:{}, total:0 };
+            const f = map[key];
+            f.total++;
+            const inc = (obj, val) => { val = (val||'').trim(); if (val && val !== '-') obj[val] = (obj[val]||0)+1; };
+            inc(f.proveedor,  row.PROVEEDOR);
+            inc(f.razon,      row['RAZON SOCIAL']);
+            inc(f.nombre,     row.NOMBRE);
+            inc(f.marca,      row.MARCA);
+            inc(f.cuenta,     row['CUENTA DE MAYOR']);
+            inc(f.subcuenta,  row.SUBCUENTA);
+        };
+        records.forEach(r => {
+            addEntry(r.PROVEEDOR,       r);
+            addEntry(r['RAZON SOCIAL'], r);
+            addEntry(r.NOMBRE,          r);
+            addEntry(r.MARCA,           r);
+        });
+        const pick = obj => { const e = Object.entries(obj); return e.length ? e.sort((a,b)=>b[1]-a[1])[0][0] : ''; };
+        AutoFillIndex = {};
+        Object.entries(map).forEach(([key, f]) => {
+            AutoFillIndex[key] = {
+                proveedor: pick(f.proveedor), razon:     pick(f.razon),
+                nombre:    pick(f.nombre),    marca:     pick(f.marca),
+                cuenta:    pick(f.cuenta),    subcuenta: pick(f.subcuenta),
+                total:     f.total
+            };
+        });
+        return AutoFillIndex;
+    }
+
+    function getAutoFillSuggestion(query) {
+        if (!AutoFillIndex) buildAutoFillIndex();
+        if (!query || query.length < 3) return null;
+        const q = query.trim().toUpperCase();
+        if (AutoFillIndex[q]) return AutoFillIndex[q];
+        const keyStart = Object.keys(AutoFillIndex).find(k => k.startsWith(q) && AutoFillIndex[k].total >= 2);
+        if (keyStart) return AutoFillIndex[keyStart];
+        const keyInc = Object.keys(AutoFillIndex).find(k => k.includes(q) && AutoFillIndex[k].total >= 3);
+        if (keyInc) return AutoFillIndex[keyInc];
+        return null;
+    }
+
+    function lockField(id, lock) {
+        const el = $(id);
+        if (!el) return;
+        el.disabled = lock;
+        el.classList.toggle('field-locked', lock);
+        if (lock) { el.classList.remove('field-suggested'); el.dataset.suggested = ''; }
+        const label = el.closest('.form-group')?.querySelector('label');
+        if (!label) return;
+        if (!label.dataset.base) label.dataset.base = label.textContent.replace(/\s*🔒.*$/,'').trim();
+        if (lock) {
+            const tag = label.querySelector('.autofill-tag'); if (tag) tag.remove();
+            if (!label.querySelector('.lock-icon')) {
+                const ico = document.createElement('span');
+                ico.className = 'lock-icon'; ico.textContent = ' 🔒'; ico.style.fontSize='0.72rem';
+                label.appendChild(ico);
+            }
+        } else {
+            label.querySelector('.lock-icon')?.remove();
+            label.textContent = label.dataset.base;
+        }
+    }
+
+    function suggestField(id, value) {
+        if (!value || value === '-') return;
+        const el = $(id);
+        if (!el || el.disabled) return;
+        el.value = value;
+        el.classList.add('field-suggested');
+        el.dataset.suggested = 'true';
+        const label = el.closest('.form-group')?.querySelector('label');
+        if (!label) return;
+        if (!label.dataset.base) label.dataset.base = label.textContent.replace(/\s*✨.*$/,'').trim();
+        if (!label.querySelector('.autofill-tag')) {
+            const tag = document.createElement('span');
+            tag.className = 'autofill-tag'; tag.textContent = 'auto';
+            label.appendChild(tag);
+        }
+    }
+
+    function clearFieldSuggest(id) {
+        const el = $(id);
+        if (!el || el.dataset.suggested !== 'true') return;
+        el.classList.remove('field-suggested');
+        el.dataset.suggested = '';
+        const label = el.closest('.form-group')?.querySelector('label');
+        if (label) { label.querySelector('.autofill-tag')?.remove(); }
+    }
+
+    function doAutoFill(triggerFieldId, triggerValue) {
+        if (!triggerValue || triggerValue.length < 3) {
+            ['f-proveedor','f-razon','f-nombre','f-marca','f-cuenta','f-subcuenta']
+                .filter(id => id !== triggerFieldId).forEach(clearFieldSuggest);
+            return;
+        }
+        const s = getAutoFillSuggestion(triggerValue);
+        if (!s) return;
+        const fill = (id, val) => {
+            if (!val || id === triggerFieldId) return;
+            const el = $(id);
+            if (!el || el.disabled) return;
+            if (el.value === '' || el.dataset.suggested === 'true') suggestField(id, val);
+        };
+        fill('f-proveedor', s.proveedor);
+        fill('f-razon',     s.razon);
+        fill('f-nombre',    s.nombre);
+        fill('f-marca',     s.marca);
+        fill('f-cuenta',    s.cuenta);
+        fill('f-subcuenta', s.subcuenta);
+        if (s.cuenta) {
+            actualizarTipoBadge();
+            applyBlockRules(s.cuenta.trim().toUpperCase());
+        }
+    }
+
+    /* ================================================================
+       V9: REGLAS DE BLOQUEO POR CUENTA DE MAYOR (CAJA)
+    ================================================================ */
+    const CAJA_METODOS = ['PAGO EFECTIVO','PAGO CON TARJETA','TRANSFERENCIAS'];
+
+    function applyBlockRules(cuenta) {
+        const esCaja = (cuenta || '').toUpperCase() === 'CAJA';
+        ['f-proveedor','f-razon','f-nombre','f-marca'].forEach(id => lockField(id, esCaja));
+        const subcSel = $('f-subcuenta');
+        if (subcSel) {
+            if (esCaja) {
+                const cur = subcSel.value;
+                subcSel.innerHTML = '<option value="">— Selecciona —</option>';
+                CAJA_METODOS.forEach(m => subcSel.appendChild(new Option(m, m)));
+                if (CAJA_METODOS.includes(cur)) subcSel.value = cur;
+            } else if (GestionState.catalogos) {
+                poblarSelectsFormulario(GestionState.catalogos);
+            }
+        }
+        const cuentaEl = $('f-cuenta');
+        if (cuentaEl) {
+            const fg = cuentaEl.closest('.form-group');
+            if (fg) {
+                fg.querySelector('.caja-hint')?.remove();
+                if (esCaja) {
+                    const hint = document.createElement('p');
+                    hint.className = 'caja-hint';
+                    hint.innerHTML = '⚡ Modo CAJA &mdash; solo métodos de pago permitidos';
+                    fg.appendChild(hint);
+                }
+            }
+        }
+    }
+
+    /* ── FIN V9 ── */
+
+    function limpiarFormulario() {
+        ['f-fecha','f-negocio','f-cuenta','f-subcuenta','f-proveedor',
+         'f-razon','f-nombre','f-marca','f-importe','f-metodo','f-factura','f-folio']
+        .forEach(id => {
+            const el = $(id);
+            if (!el) return;
+            el.value = '';
+            el.disabled = false;
+            el.classList.remove('field-locked','field-suggested');
+            el.dataset.suggested = '';
+        });
+        ['f-proveedor','f-razon','f-nombre','f-marca','f-cuenta','f-subcuenta'].forEach(id => {
+            const el = $(id);
+            if (!el) return;
+            const label = el.closest('.form-group')?.querySelector('label');
+            if (label) {
+                const tag = label.querySelector('.autofill-tag');
+                if (tag) tag.remove();
+                if (label.dataset.base) label.textContent = label.dataset.base;
+            }
+        });
+        document.querySelectorAll('.caja-hint').forEach(el => el.remove());
+    }
+
+    function actualizarTipoBadge() {
+        const cuenta = ($('f-cuenta')?.value || '').trim().toUpperCase();
+        const esIng  = cuenta === 'CAJA';
+        const badge  = $('modal-tipo-badge');
+        if (!badge) return;
+        badge.textContent = esIng ? 'INGRESO' : 'EGRESO';
+        badge.className   = 'tipo-badge ' + (esIng ? 'tipo-ingreso' : 'tipo-egreso');
+        applyBlockRules(cuenta); // V9
+    }
+
+    /* ================================================================
+       GUARDAR REGISTRO (Corregido con __rowIndex)
+    ================================================================ */
+    async function guardarRegistro() {
+        const fecha   = $('f-fecha').value;
+        const negocio = $('f-negocio').value;
+        const cuenta  = $('f-cuenta').value;
+        const importe = $('f-importe').value;
+
+        if (!fecha || !negocio || !cuenta || !importe) {
+            showToast('Completa los campos obligatorios (*)', 'warn'); return;
+        }
+        const [y,m,d] = fecha.split('-');
+        const fechaFmt = `${d}/${m}/${y}`;
+
+        const data = {
+            FECHA: fechaFmt, NEGOCIO: negocio,
+            'CUENTA DE MAYOR': cuenta,
+            SUBCUENTA:         $('f-subcuenta').value,
+            PROVEEDOR:         $('f-proveedor').value,
+            'RAZON SOCIAL':    $('f-razon').value,
+            NOMBRE:            $('f-nombre').value,
+            MARCA:             $('f-marca').value,
+            IMPORTE:           parseFloat(importe) || 0,
+            'METODO DE PAGO':  $('f-metodo').value,
+            FACTURA:           $('f-factura').value,
+            '# FOLIO':         $('f-folio').value,
+        };
+
+        // ══ V9: Validación de reglas de negocio ══
+        const cuentaUpper = cuenta.trim().toUpperCase();
+        if (cuentaUpper === 'CAJA') {
+            const prov  = ($('f-proveedor').value || '').trim();
+            const razon = ($('f-razon').value     || '').trim();
+            const nomb  = ($('f-nombre').value    || '').trim();
+            const marc  = ($('f-marca').value     || '').trim();
+            if (prov || razon || nomb || marc) {
+                showToast('⛔ Registros de CAJA no pueden llevar Proveedor, Producto ni Marca', 'warn');
+                return;
+            }
+            const metodosValidos = ['PAGO EFECTIVO','PAGO CON TARJETA','TRANSFERENCIAS'];
+            const sub = ($('f-subcuenta').value || '').trim().toUpperCase();
+            if (sub && !metodosValidos.includes(sub)) {
+                showToast('⛔ Para CAJA la Subcuenta debe ser un método de pago de venta', 'warn');
+                return;
+            }
+        }
+
+        const isEdit  = GestionState.editIndex !== null;
+        const originalRow = isEdit ? AppState.raw[GestionState.editIndex] : null;
+
+        // Utilizamos originalRow.__rowIndex en lugar de GestionState.editIndex
+        const payload = isEdit
+            ? { action:'update', rowIndex: originalRow.__rowIndex, data }
+            : { action:'insert', data };
+
+        $('spinner-registro').classList.add('active');
+        $('icon-guardar').style.display = 'none';
+        $('label-guardar').textContent  = isEdit ? 'Actualizando...' : 'Guardando...';
+        $('btn-guardar-registro').disabled = true;
+
+        try {
+            const json = await xhrPost(payload);
+            if (json.error) throw new Error(json.error);
+            showToast(isEdit ? '✓ Registro actualizado' : '✓ Registro guardado', 'success');
+            cerrarModalRegistro();
+            await recargarDatos();
+        } catch(e) {
+            showToast('Error: ' + e.message, 'warn');
+        } finally {
+            $('spinner-registro').classList.remove('active');
+            $('icon-guardar').style.display = '';
+            $('label-guardar').textContent  = isEdit ? 'Actualizar' : 'Guardar';
+            $('btn-guardar-registro').disabled = false;
+        }
+    }
+
+    /* ================================================================
+       ELIMINAR REGISTRO (Corregido con __rowIndex)
+    ================================================================ */
+    function abrirConfirmEliminar(idx) {
+        GestionState.deleteIndex = idx;
+        const row = AppState.raw[idx];
+        $('confirm-desc').textContent =
+            `${row.FECHA||''} · ${row.NEGOCIO||''} · ${fmt.format(row.IMPORTE||0)}`;
+        $('modal-confirm').classList.add('open');
+    }
+
+    function cerrarConfirm() {
+        $('modal-confirm').classList.remove('open');
+        GestionState.deleteIndex = null;
+    }
+
+    async function confirmarEliminar() {
+        const idx = GestionState.deleteIndex;
+        if (idx === null) return;
+        const row = AppState.raw[idx];
+        
+        $('spinner-del').classList.add('active');
+        $('btn-confirm-del').disabled = true;
+        try {
+            // Utilizamos row.__rowIndex en lugar de idx
+            const json = await xhrPost({ action:'delete', rowIndex: row.__rowIndex });
+            if (json.error) throw new Error(json.error);
+            showToast('Registro eliminado', 'info');
+            cerrarConfirm();
+            await recargarDatos();
+        } catch(e) {
+            showToast('Error: ' + e.message, 'warn');
+        } finally {
+            $('spinner-del').classList.remove('active');
+            $('btn-confirm-del').disabled = false;
+        }
+    }
+
+    /* ================================================================
+       RECARGAR DATOS COMPLETOS DESDE API
+    ================================================================ */
+    function recargarDatos() {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', API_URL + '?action=getData', true);
+            xhr.timeout = 20000;
+            xhr.onload = function() {
+                try {
+                    const json = JSON.parse(xhr.responseText);
+                    if (json.error) throw new Error(json.error);
+                    const rows = Array.isArray(json) ? json : (json.rows || json.data || []);
+                    processData(rows);
+                    filtrarGestion();
+                    applyFilters();
+                    resolve();
+                } catch(e) { showToast('Error al recargar: ' + e.message, 'warn'); reject(e); }
+            };
+            xhr.onerror   = () => { showToast('Error de red al recargar', 'warn'); reject(); };
+            xhr.ontimeout = () => { showToast('Timeout al recargar', 'warn'); reject(); };
+            xhr.send();
+        });
+    }
+
+    /* ================================================================
+       MODAL CATÁLOGOS
+    ================================================================ */
+    async function abrirModalCatalogos() {
+        $('modal-catalogos').classList.add('open');
+        await cargarCatalogos();
+        renderCatalogos();
+    }
+    function cerrarModalCatalogos() { $('modal-catalogos').classList.remove('open'); }
+
+    function renderCatalogos() {
+        const cats      = GestionState.catalogos;
+        const container = $('catalogos-container');
+        if (!cats || !Object.keys(cats).length) {
+            container.innerHTML = '<p style="color:var(--text-3);font-size:0.78rem;">Sin catálogos.</p>'; return;
+        }
+        container.innerHTML = '';
+        Object.entries(cats).forEach(([col, vals]) => {
+            const key = col.replace(/\s/g,'_');
+            const sec = document.createElement('div');
+            sec.className = 'cat-section';
+            sec.innerHTML = `
+                <div class="cat-section-title"><i class="ph ph-tag"></i> ${col}</div>
+                <div class="cat-chips" id="cat-chips-${key}">
+                    ${(vals||[]).map(v => `
+                        <span class="cat-chip">${v}
+                            <span class="cat-chip-del" onclick="eliminarCatalogo('${col}','${v.replace(/'/g,"\\'")}')">×</span>
+                        </span>`).join('')}
+                </div>
+                <div class="cat-add-row">
+                    <input type="text" id="cat-input-${key}" placeholder="Nuevo valor..."
+                        onkeydown="if(event.key==='Enter') agregarCatalogo('${col}')">
+                    <button class="btn btn-primary" style="padding:0.38rem 0.7rem;"
+                        onclick="agregarCatalogo('${col}')"><i class="ph ph-plus"></i></button>
+                </div>`;
+            container.appendChild(sec);
+        });
+    }
+
+    /* Helper: muestra/oculta el overlay de carga del modal catálogos */
+    function setCatBusy(active, msg) {
+        const overlay = document.getElementById('cat-busy-overlay');
+        const msgEl   = document.getElementById('cat-busy-msg');
+        const bar     = document.getElementById('cat-busy-bar');
+        if (!overlay) return;
+        if (active) {
+            if (msgEl) msgEl.textContent = msg || 'Guardando en Google Sheets…';
+            if (bar)   { bar.style.width = '0%'; requestAnimationFrame(() => bar.style.width = '95%'); }
+            overlay.classList.add('active');
+        } else {
+            if (bar) bar.style.width = '100%';
+            setTimeout(() => { overlay.classList.remove('active'); if (bar) bar.style.width = '0%'; }, 350);
+        }
+    }
+
+    async function agregarCatalogo(col) {
+        const key   = col.replace(/\s/g,'_');
+        const input = document.getElementById('cat-input-' + key);
+        const val   = (input?.value || '').trim().toUpperCase();
+        if (!val) return;
+        setCatBusy(true, `Agregando "${val}"…`);
+        try {
+            const json = await xhrPost({ action:'addCatalogo', column:col, value:val });
+            if (json.error) throw new Error(json.error);
+            if (input) input.value = '';
+            showToast(`"${val}" agregado`, 'success');
+            await cargarCatalogos(); renderCatalogos();
+        } catch(e) { showToast('Error: ' + e.message, 'warn'); }
+        finally    { setCatBusy(false); }
+    }
+
+    async function eliminarCatalogo(col, val) {
+        // V9: Protección referencial
+        const fieldMap = {
+            'NEGOCIOS':        'NEGOCIO',
+            'CUENTA MAYOR':    'CUENTA DE MAYOR',
+            'SUBCUENTAS':      'SUBCUENTA',
+            'METODOS DE PAGO': 'METODO DE PAGO',
+            'FACTURA':         'FACTURA',
+            'FACTURAS':        'FACTURA',
+        };
+        const dataField = fieldMap[col];
+        if (dataField && AppState.raw.length > 0) {
+            const count = AppState.raw.filter(r =>
+                (r[dataField]||'').toString().trim().toUpperCase() === val.trim().toUpperCase()
+            ).length;
+            if (count > 0) {
+                showToast(`⛔ "${val}" aparece en ${count.toLocaleString('es-MX')} registros. Elimina esos registros primero.`, 'warn');
+                return;
+            }
+        }
+        if (!confirm(`¿Eliminar "${val}" de ${col}?`)) return;
+        setCatBusy(true, `Eliminando "${val}"…`);
+        try {
+            const json = await xhrPost({ action:'delCatalogo', column:col, value:val });
+            if (json.error) throw new Error(json.error);
+            showToast(`"${val}" eliminado`, 'info');
+            await cargarCatalogos(); renderCatalogos();
+        } catch(e) { showToast('Error: ' + e.message, 'warn'); }
+        finally    { setCatBusy(false); }
+    }
+
+    /* ================================================================
+       CAMBIAR PESTAÑA
+    ================================================================ */
+    function cambiarPestana(tab) {
+        ['dashboard','resultados','gestion'].forEach(t => {
+            const v = document.getElementById('vista-' + t);
+            const b = document.getElementById('tab-' + t);
+            if (v) v.style.display = (t === tab) ? 'block' : 'none';
+            if (b) { b.classList.toggle('active', t === tab); b.setAttribute('aria-selected', t === tab); }
+        });
+        const lbl = $('filter-context-label');
+        if (lbl) lbl.textContent =
+            tab === 'dashboard'  ? 'Dashboard General' :
+            tab === 'resultados' ? 'Estado de Resultados' : 'Gestión de Datos';
+        if (tab === 'resultados') calcularEstadoResultados();
+        if (tab === 'gestion')    initGestion();
+    }
+
+    /* Cerrar modales con ESC o click en overlay */
+    document.addEventListener('keydown', e => {
+        if (e.key !== 'Escape') return;
+        cerrarModalRegistro(); cerrarModalCatalogos(); cerrarConfirm();
+    });
+    ['modal-registro','modal-catalogos','modal-confirm'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('click', e => {
+            if (e.target === el) { cerrarModalRegistro(); cerrarModalCatalogos(); cerrarConfirm(); }
+        });
+    });
+
+    /* XHR helper */
+    function xhrPost(payload) {
+        return new Promise((resolve, reject) => {
+            if (payload && payload.action === 'getCatalogos') {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', API_URL + '?action=getCatalogos', true);
+                xhr.timeout = 20000;
+                xhr.onload = function() {
+                    try { resolve(JSON.parse(xhr.responseText)); }
+                    catch(e) { reject(e); }
+                };
+                xhr.onerror   = () => reject(new Error('Error de red'));
+                xhr.ontimeout = () => reject(new Error('Timeout'));
+                xhr.send();
+                return;
+            }
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', API_URL, true);
+            xhr.setRequestHeader('Content-Type', 'text/plain');
+            xhr.timeout = 20000;
+            xhr.onload = function() {
+                try {
+                    const json = JSON.parse(xhr.responseText);
+                    if (json.error) reject(new Error(json.error));
+                    else resolve(json);
+                } catch(e) { reject(e); }
+            };
+            xhr.onerror   = () => reject(new Error('Error de red'));
+            xhr.ontimeout = () => reject(new Error('Timeout'));
+            xhr.send(JSON.stringify(payload));
+        });
+    }
+
 </script>
 </body>
 </html>
