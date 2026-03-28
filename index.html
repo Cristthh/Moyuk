@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard Financiero - Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. RFC: OCA2410151E0">
-    <title>Dashboard Financiero · Moyuk v10</title>
+    <title>Dashboard Financiero · Moyuk v12</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -420,6 +420,18 @@
         @media (max-width: 639px) {
             .table-wrapper table { display: none; }
             .mobile-card-list { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.75rem; }
+        }
+
+        /* ── V12: Mobile Gestión fixes ── */
+        @media (max-width: 639px) {
+            #app { padding: 1rem 0.75rem 3rem; }
+            #vista-gestion .card { padding: 1rem 0.75rem; }
+            .gestion-table-wrapper { max-height: 420px; }
+            .gestion-filter-sel { max-width: 100% !important; flex: 1 1 120px; }
+            #gestion-search { min-width: 0 !important; width: 100%; }
+            .modal-box { padding: 1.25rem 1rem; }
+            .modal-grid { grid-template-columns: 1fr !important; }
+            .cat-section { min-width: 0; }
         }
         .m-card {
             background: var(--surface-2);
@@ -910,7 +922,7 @@
         </nav>
     </div>
 
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem; position:relative; z-index:100;" class="fade-up delay-1">
+    <div id="filter-card" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1.5rem; position:relative; z-index:100;" class="fade-up delay-1">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
             <p style="font-family:var(--font-display); font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3);">
                 <i class="ph ph-funnel" style="margin-right:0.3rem;"></i> Filtros &nbsp;<span id="filter-context-label">Dashboard General</span>
@@ -1165,12 +1177,12 @@
         </div>
         <div class="card fade-up delay-1" style="margin-bottom:1.25rem;display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
             <i class="ph ph-magnifying-glass" style="color:var(--text-3);flex-shrink:0;"></i>
-            <input type="text" id="gestion-search" class="form-input" style="flex:1;min-width:200px;border:none;box-shadow:none;padding:0.25rem 0;"
+            <input type="text" id="gestion-search" class="form-input" style="flex:1;min-width:0;border:none;box-shadow:none;padding:0.25rem 0;"
                 placeholder="Buscar por negocio, categoría, proveedor, producto, folio..." oninput="filtrarGestion()">
-            <select id="gestion-filtro-negocio" class="form-select" style="max-width:180px;" onchange="filtrarGestion()">
+            <select id="gestion-filtro-negocio" class="form-select gestion-filter-sel" style="max-width:180px;" onchange="filtrarGestion()">
                 <option value="">Todos los negocios</option>
             </select>
-            <select id="gestion-filtro-tipo" class="form-select" style="max-width:145px;" onchange="filtrarGestion()">
+            <select id="gestion-filtro-tipo" class="form-select gestion-filter-sel" style="max-width:145px;" onchange="filtrarGestion()">
                 <option value="">Ingreso / Egreso</option>
                 <option value="INGRESO">Ingreso</option>
                 <option value="EGRESO">Egreso</option>
@@ -1581,23 +1593,38 @@ const FILTER_FIELDS = [
 function initFilters() {
     FILTER_FIELDS.forEach(col => {
         const sel = document.getElementById(col.id);
+        if (!sel) return;
         const unique = [...new Set(AppState.raw.map(d => d[col.field]).filter(v => v && v !== '-'))].sort();
-        unique.forEach(val => {
-            const opt = document.createElement('option');
-            opt.value = val; opt.textContent = val;
-            sel.appendChild(opt);
-        });
-        AppState.tomSelects[col.id] = new TomSelect(`#${col.id}`, {
-            create: false, placeholder: 'Buscar...', maxOptions: null,
-            sortField: { field: 'text', direction: 'asc' }
-        });
-        AppState.tomSelects[col.id].on('change', applyFilters);
+
+        if (AppState.tomSelects[col.id]) {
+            // Ya existe — actualizar opciones sin recrear
+            const ts = AppState.tomSelects[col.id];
+            const curVal = ts.getValue();
+            ts.clearOptions();
+            unique.forEach(val => ts.addOption({ value: val, text: val }));
+            ts.refreshOptions(false);
+            if (curVal && unique.includes(curVal)) ts.setValue(curVal, true);
+        } else {
+            // Primera vez — poblar y crear instancia
+            unique.forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val; opt.textContent = val;
+                sel.appendChild(opt);
+            });
+            AppState.tomSelects[col.id] = new TomSelect(`#${col.id}`, {
+                create: false, placeholder: 'Buscar...', maxOptions: null,
+                sortField: { field: 'text', direction: 'asc' }
+            });
+            AppState.tomSelects[col.id].on('change', applyFilters);
+        }
     });
 }
 
 const debouncedFilter = debounce(applyFilters, 280);
 
 function setupListeners() {
+    if (AppState.listenersSetup) return;
+    AppState.listenersSetup = true;
     document.getElementById('date-from').addEventListener('change', () => { clearActiveRange(); debouncedFilter(); });
     document.getElementById('date-to').addEventListener('change',   () => { clearActiveRange(); debouncedFilter(); });
     $('page-input').addEventListener('input', debounce(function() {
@@ -1997,14 +2024,23 @@ function exportCSV() {
 /* ER NEGOCIO FILTER INIT                                              */
 /* ------------------------------------------------------------------ */
 function initERNegocioFilter() {
-    const sel = document.getElementById('er-filtro-negocio');
     const negocios = [...new Set(AppState.raw.map(d => d.NEGOCIO).filter(v => v && v !== '-'))].sort();
-    negocios.forEach(n => {
-        const opt = document.createElement('option');
-        opt.value = n; opt.textContent = n;
-        sel.appendChild(opt);
-    });
-    if (!AppState.tomSelects['er-filtro-negocio']) {
+    if (AppState.tomSelects['er-filtro-negocio']) {
+        // Ya existe — actualizar opciones
+        const ts = AppState.tomSelects['er-filtro-negocio'];
+        const curVal = ts.getValue();
+        ts.clearOptions();
+        negocios.forEach(n => ts.addOption({ value: n, text: n }));
+        ts.refreshOptions(false);
+        if (curVal && negocios.includes(curVal)) ts.setValue(curVal, true);
+    } else {
+        // Primera vez — poblar select y crear instancia
+        const sel = document.getElementById('er-filtro-negocio');
+        negocios.forEach(n => {
+            const opt = document.createElement('option');
+            opt.value = n; opt.textContent = n;
+            sel.appendChild(opt);
+        });
         AppState.tomSelects['er-filtro-negocio'] = new TomSelect('#er-filtro-negocio', {
             create: false, placeholder: 'Todos los negocios', maxOptions: null,
             sortField: { field: 'text', direction: 'asc' }
@@ -2563,18 +2599,20 @@ document.addEventListener('DOMContentLoaded', initDashboard);
         const [y,m,d] = fecha.split('-');
         const fechaFmt = `${d}/${m}/${y}`;
 
+        const up = s => (s || '').toString().trim().toUpperCase();
         const data = {
-            FECHA: fechaFmt, NEGOCIO: negocio,
-            'CUENTA DE MAYOR': cuenta,
-            SUBCUENTA:         $('f-subcuenta').value,
-            PROVEEDOR:         $('f-proveedor').value,
-            'RAZON SOCIAL':    $('f-razon').value,
-            NOMBRE:            $('f-nombre').value,
-            MARCA:             $('f-marca').value,
+            FECHA:             fechaFmt,
+            NEGOCIO:           up(negocio),
+            'CUENTA DE MAYOR': up(cuenta),
+            SUBCUENTA:         up($('f-subcuenta').value),
+            PROVEEDOR:         up($('f-proveedor').value),
+            'RAZON SOCIAL':    up($('f-razon').value),
+            NOMBRE:            up($('f-nombre').value),
+            MARCA:             up($('f-marca').value),
             IMPORTE:           parseFloat(importe) || 0,
-            'METODO DE PAGO':  $('f-metodo').value,
-            FACTURA:           $('f-factura').value,
-            '# FOLIO':         $('f-folio').value,
+            'METODO DE PAGO':  up($('f-metodo').value),
+            FACTURA:           up($('f-factura').value),
+            '# FOLIO':         up($('f-folio').value),
         };
 
         // ══ V9: Validación de reglas de negocio ══
@@ -2804,6 +2842,9 @@ document.addEventListener('DOMContentLoaded', initDashboard);
         if (lbl) lbl.textContent =
             tab === 'dashboard'  ? 'Dashboard General' :
             tab === 'resultados' ? 'Estado de Resultados' : 'Gestión de Datos';
+        // Ocultar la barra de filtros compartida en Gestión (tiene sus propios filtros)
+        const fc = document.getElementById('filter-card');
+        if (fc) fc.style.display = (tab === 'gestion') ? 'none' : '';
         if (tab === 'resultados') calcularEstadoResultados();
         if (tab === 'gestion')    initGestion();
     }
