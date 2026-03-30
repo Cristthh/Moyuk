@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard Financiero - Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. RFC: OCA2410151E0">
-    <title>Dashboard Financiero · Moyuk v31</title>
+    <title>Dashboard Financiero · Moyuk v35</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1456,64 +1456,72 @@
 
     </div>
 
-    <div class="card fade-up delay-5">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.25rem; flex-wrap:wrap; gap:1rem;">
-            <div>
-                <h2 class="section-title">Registro de Transacciones</h2>
-                <p class="section-sub" id="pagination-info">Cargando registros...</p>
-            </div>
 
-            <div style="display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap;">
-                <button id="btn-first" class="page-btn" onclick="goToPage(1)" aria-label="Primera página">
-                    <i class="ph ph-caret-double-left"></i>
-                </button>
-                <button id="btn-prev" class="page-btn" onclick="changePage(-1)" aria-label="Página anterior">
-                    <i class="ph ph-caret-left"></i> Ant
-                </button>
-                <div class="page-info" style="display:flex; align-items:center; gap:0.4rem;">
-                    Pág
-                    <input type="number" id="page-input" class="page-input" min="1" value="1" aria-label="Ir a página">
-                    / <span id="total-pages">1</span>
+    <!-- V35: Métricas adicionales reemplazan la tabla del Dashboard -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:1.25rem;" class="fade-up delay-5">
+
+        <!-- Ticket Promedio Egreso -->
+        <div class="card" style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:0.35rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.15rem;">
+                <div style="width:30px;height:30px;border-radius:8px;background:var(--rose-alpha);color:var(--rose);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="ph ph-receipt" style="font-size:1rem;"></i>
                 </div>
-                <button id="btn-next" class="page-btn" onclick="changePage(1)" aria-label="Página siguiente">
-                    Sig <i class="ph ph-caret-right"></i>
-                </button>
-                <button id="btn-last" class="page-btn" onclick="goLastPage()" aria-label="Última página">
-                    <i class="ph ph-caret-double-right"></i>
-                </button>
+                <span style="font-family:var(--font-display);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);">Ticket Promedio</span>
             </div>
+            <div id="metric-ticket-avg" style="font-family:var(--font-display);font-size:1.35rem;font-weight:800;color:var(--text-1);letter-spacing:-0.02em;">—</div>
+            <div style="font-size:0.7rem;color:var(--text-3);">Importe medio por egreso</div>
         </div>
 
-        <div style="position:relative;">
-            <div class="table-wrapper" role="region" aria-label="Tabla de transacciones">
-                <table>
-                    <thead>
-                        <tr>
-                            <th scope="col">Fecha</th>
-                            <th scope="col">Negocio</th>
-                            <th scope="col">Tipo</th>
-                            <th scope="col">Cuenta Mayor</th>
-                            <th scope="col">Subcuenta</th>
-                            <th scope="col">Categoría</th>
-                            <th scope="col">Proveedor</th>
-                            <th scope="col">Nombre / Producto</th>
-                            <th scope="col">Marca</th>
-                            <th scope="col">Método Pago</th>
-                            <th scope="col">Factura</th>
-                            <th scope="col" style="text-align:right;">Importe</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-                <div class="mobile-card-list" id="mobile-card-list"></div>
-                <div class="empty-state" id="empty-state" role="status" aria-live="polite">
-                    <i class="ph ph-magnifying-glass" style="font-size:2.5rem; color:var(--teal); opacity:0.5;"></i>
-                    <p style="font-family:var(--font-display); font-weight:700; color:var(--text-1);">Sin resultados para estos filtros</p>
-                    <p style="font-size:0.78rem; color:var(--text-3);">Ajusta los filtros o el rango de fechas</p>
+        <!-- Top Proveedor -->
+        <div class="card" style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:0.35rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.15rem;">
+                <div style="width:30px;height:30px;border-radius:8px;background:var(--teal-alpha);color:var(--teal);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="ph ph-storefront" style="font-size:1rem;"></i>
                 </div>
+                <span style="font-family:var(--font-display);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);">Top Proveedor</span>
             </div>
+            <div id="metric-top-prov" style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+            <div id="metric-top-prov-monto" style="font-size:0.7rem;color:var(--text-3);">mayor gasto acumulado</div>
         </div>
+
+        <!-- Top Categoría -->
+        <div class="card" style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:0.35rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.15rem;">
+                <div style="width:30px;height:30px;border-radius:8px;background:rgba(245,158,11,0.12);color:var(--amber);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="ph ph-tag" style="font-size:1rem;"></i>
+                </div>
+                <span style="font-family:var(--font-display);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);">Top Categoría</span>
+            </div>
+            <div id="metric-top-cat" style="font-family:var(--font-display);font-size:1rem;font-weight:800;color:var(--text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
+            <div id="metric-top-cat-monto" style="font-size:0.7rem;color:var(--text-3);">mayor categoría de egreso</div>
+        </div>
+
+        <!-- % Facturado -->
+        <div class="card" style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:0.35rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.15rem;">
+                <div style="width:30px;height:30px;border-radius:8px;background:rgba(16,185,129,0.12);color:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="ph ph-check-square" style="font-size:1rem;"></i>
+                </div>
+                <span style="font-family:var(--font-display);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);">% Facturado</span>
+            </div>
+            <div id="metric-facturado-pct" style="font-family:var(--font-display);font-size:1.35rem;font-weight:800;color:var(--green);letter-spacing:-0.02em;">—</div>
+            <div id="metric-facturado-sub" style="font-size:0.7rem;color:var(--text-3);">de egresos con factura</div>
+        </div>
+
+        <!-- Registros totales (badge compacto) -->
+        <div class="card" style="padding:1rem 1.25rem; display:flex; flex-direction:column; gap:0.35rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.15rem;">
+                <div style="width:30px;height:30px;border-radius:8px;background:var(--surface-2);color:var(--text-2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="ph ph-list-numbers" style="font-size:1rem;"></i>
+                </div>
+                <span style="font-family:var(--font-display);font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-3);">Registros</span>
+            </div>
+            <div id="metric-total-regs" style="font-family:var(--font-display);font-size:1.35rem;font-weight:800;color:var(--text-1);letter-spacing:-0.02em;">—</div>
+            <p id="pagination-info" style="font-size:0.7rem;color:var(--text-3);margin:0;">en el período filtrado</p>
+        </div>
+
     </div>
+
 
     </div><div id="vista-resultados" style="display:none;" role="tabpanel" aria-labelledby="tab-resultados">
 
@@ -1592,7 +1600,7 @@
         <div class="card fade-up" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
             <div>
                 <h2 class="section-title" style="display:flex;align-items:center;gap:0.5rem;">
-                    <i class="ph ph-database" style="color:var(--teal);"></i> Registros
+                    <i class="ph ph-database" style="color:var(--teal);"></i> Registro de Transacciones
                 </h2>
                 <p class="section-sub" id="gestion-count">Cargando...</p>
             </div>
@@ -1958,13 +1966,17 @@ function initDashboard() {
         return;
     }
     cargarClasificacion(); // V14: cargar clasificación ER desde Sheets al iniciar
-    Chart.defaults.font.family = "'DM Sans', sans-serif";
-    Chart.defaults.color = getChartTextColor();
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.92)';
-    Chart.defaults.plugins.tooltip.padding = 12;
-    Chart.defaults.plugins.tooltip.cornerRadius = 8;
-    Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: 'bold', family: "'Sora',sans-serif" };
-    Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+    if (typeof Chart !== 'undefined') {
+        Chart.defaults.font.family = "'DM Sans', sans-serif";
+        Chart.defaults.color = getChartTextColor();
+        Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.92)';
+        Chart.defaults.plugins.tooltip.padding = 12;
+        Chart.defaults.plugins.tooltip.cornerRadius = 8;
+        Chart.defaults.plugins.tooltip.titleFont = { size: 13, weight: 'bold', family: "'Sora',sans-serif" };
+        Chart.defaults.plugins.tooltip.bodyFont = { size: 12 };
+    } else {
+        console.warn('Chart.js no cargó a tiempo. Las gráficas pueden no mostrarse.');
+    }
 
     const cached = getCachedCSV();
     if (cached) {
@@ -2149,7 +2161,10 @@ function hideLoader() {
     const loader = document.getElementById('loader');
     if (!loader) return;
     loader.classList.add('hidden-loader');
-    setTimeout(() => loader.remove(), 700);
+    setTimeout(() => {
+        loader.style.display = 'none';
+        loader.classList.remove('hidden-loader'); // reset por si vuelve a mostrarse
+    }, 700);
 }
 
 /* ------------------------------------------------------------------ */
@@ -2164,6 +2179,10 @@ const FILTER_FIELDS = [
 ];
 
 function initFilters() {
+    if (typeof TomSelect === 'undefined') {
+        console.warn('Advertencia: TomSelect no está definido. Revisa tu conexión a internet o CDNs.');
+        return;
+    }
     FILTER_FIELDS.forEach(col => {
         const sel = document.getElementById(col.id);
         if (!sel) return;
@@ -2200,7 +2219,8 @@ function setupListeners() {
     AppState.listenersSetup = true;
     document.getElementById('date-from').addEventListener('change', () => { clearActiveRange(); debouncedFilter(); });
     document.getElementById('date-to').addEventListener('change',   () => { clearActiveRange(); debouncedFilter(); });
-    $('page-input').addEventListener('input', debounce(function() {
+    const piEl = document.getElementById('page-input');
+    if (piEl) piEl.addEventListener('input', debounce(function() {
         const tp = Math.ceil(AppState.filtered.length / ROWS_PER_PAGE) || 1;
         const v  = parseInt(this.value) || 1;
         goToPage(Math.min(Math.max(v, 1), tp));
@@ -2291,6 +2311,7 @@ function updateDashboard() {
     renderChartNegocios();
     renderChartCategorias();
     renderTable();
+    updateMetrics(); // V35: métricas adicionales
 }
 
 /* ------------------------------------------------------------------ */
@@ -2332,6 +2353,73 @@ function updateKPIs() {
 
     $('kpi-balance-pct').textContent = inT > 0 ? `${pct}% vs egresos` : '—';
 }
+
+/* ------------------------------------------------------------------
+   V35: MÉTRICAS ADICIONALES DEL DASHBOARD
+   ------------------------------------------------------------------ */
+function updateMetrics() {
+    const data = AppState.filtered;
+
+    // ── Ticket Promedio Egreso ──────────────────────────────────────
+    const egresos = data.filter(d => d.TRANSACCION === 'EGRESO');
+    const ticketAvg = egresos.length > 0
+        ? egresos.reduce((s, d) => s + d.IMPORTE, 0) / egresos.length
+        : 0;
+    const elAvg = document.getElementById('metric-ticket-avg');
+    if (elAvg) elAvg.textContent = ticketAvg > 0 ? fmt.format(ticketAvg) : '—';
+
+    // ── Top Proveedor (por monto acumulado de egresos) ──────────────
+    const provMap = {};
+    egresos.forEach(d => {
+        const p = (d.PROVEEDOR || '').trim();
+        if (!p || p === '-') return;
+        provMap[p] = (provMap[p] || 0) + d.IMPORTE;
+    });
+    const topProv = Object.entries(provMap).sort((a, b) => b[1] - a[1])[0];
+    const elProv  = document.getElementById('metric-top-prov');
+    const elProvM = document.getElementById('metric-top-prov-monto');
+    if (elProv) elProv.textContent = topProv ? topProv[0] : '—';
+    if (elProvM) elProvM.textContent = topProv ? fmt.format(topProv[1]) + ' acumulado' : 'sin datos';
+
+    // ── Top Categoría de Egreso ─────────────────────────────────────
+    const catMap = {};
+    egresos.forEach(d => {
+        const c = (d.CATEGORIA || '').trim();
+        if (!c || c === '-') return;
+        catMap[c] = (catMap[c] || 0) + d.IMPORTE;
+    });
+    const topCat  = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
+    const elCat   = document.getElementById('metric-top-cat');
+    const elCatM  = document.getElementById('metric-top-cat-monto');
+    if (elCat)  elCat.textContent  = topCat ? topCat[0] : '—';
+    if (elCatM) elCatM.textContent = topCat ? fmt.format(topCat[1]) + ' acumulado' : 'sin datos';
+
+    // ── % Facturado ─────────────────────────────────────────────────
+    const facturados  = egresos.filter(d => (d.FACTURA || '').toUpperCase() === 'FACTURADO').length;
+    const pctFact     = egresos.length > 0 ? (facturados / egresos.length * 100).toFixed(1) : 0;
+    const elFact      = document.getElementById('metric-facturado-pct');
+    const elFactSub   = document.getElementById('metric-facturado-sub');
+    if (elFact) {
+        elFact.textContent = egresos.length > 0 ? pctFact + '%' : '—';
+        elFact.style.color = pctFact >= 50 ? 'var(--green)' : 'var(--amber)';
+    }
+    if (elFactSub) elFactSub.textContent = egresos.length > 0
+        ? `${facturados.toLocaleString('es-MX')} de ${egresos.length.toLocaleString('es-MX')} egresos`
+        : 'sin datos';
+
+    // ── Total Registros ─────────────────────────────────────────────
+    const elTotal = document.getElementById('metric-total-regs');
+    if (elTotal) elTotal.textContent = data.length.toLocaleString('es-MX');
+
+    // Reutilizamos pagination-info como subtítulo dinámico
+    const pInfo = document.getElementById('pagination-info');
+    if (pInfo) {
+        const ing = data.filter(d => d.TRANSACCION === 'INGRESO').length;
+        const egr = data.filter(d => d.TRANSACCION === 'EGRESO').length;
+        pInfo.textContent = `${ing.toLocaleString('es-MX')} ingresos · ${egr.toLocaleString('es-MX')} egresos`;
+    }
+}
+
 
 /* ------------------------------------------------------------------ */
 /* CHART HELPERS                                                       */
@@ -2491,14 +2579,28 @@ function renderTable() {
     const empty   = document.getElementById('empty-state');
     const total   = AppState.filtered.length;
 
+    // V32: Sin tabla en dashboard → solo actualizar badge de conteo y salir
+    if (!tbody) {
+        const pInfo = document.getElementById('pagination-info');
+        if (pInfo) {
+            if (total === 0) {
+                pInfo.textContent = '0 registros';
+            } else {
+                const end = Math.min(ROWS_PER_PAGE, total);
+                pInfo.textContent = `Mostrando 1 – ${end.toLocaleString('es-MX')} de ${total.toLocaleString('es-MX')} registros`;
+            }
+        }
+        return;
+    }
+
     if (total === 0) {
-        tbody.innerHTML = ''; mList.innerHTML = '';
-        empty.classList.add('visible');
+        tbody.innerHTML = ''; if (mList) mList.innerHTML = '';
+        if (empty) empty.classList.add('visible');
         document.getElementById('pagination-info').textContent = '0 registros';
         updatePaginationControls(0);
         return;
     }
-    empty.classList.remove('visible');
+    if (empty) empty.classList.remove('visible');
 
     const totalPages = Math.ceil(total / ROWS_PER_PAGE) || 1;
     if (AppState.page > totalPages) AppState.page = totalPages;
@@ -2535,6 +2637,7 @@ function renderTable() {
     tbody.innerHTML = '';
     tbody.appendChild(frag);
 
+    if (mList) mList.innerHTML = '';
     const mFrag = document.createDocumentFragment();
     pageData.forEach(row => {
         const isIng = row.TRANSACCION === 'INGRESO';
@@ -2553,19 +2656,22 @@ function renderTable() {
         `;
         mFrag.appendChild(card);
     });
-    mList.innerHTML = '';
-    mList.appendChild(mFrag);
+    if (mList) { mList.innerHTML = ''; mList.appendChild(mFrag); }
 }
 
 function updatePaginationControls(totalPages) {
-    document.getElementById('total-pages').textContent = totalPages;
+    const tp = document.getElementById('total-pages');
+    if (tp) tp.textContent = totalPages;
     const pi = document.getElementById('page-input');
-    if (pi) pi.value = AppState.page;
-    pi.max = totalPages;
-    document.getElementById('btn-prev').disabled  = AppState.page <= 1;
-    document.getElementById('btn-next').disabled  = AppState.page >= totalPages;
-    document.getElementById('btn-first').disabled = AppState.page <= 1;
-    document.getElementById('btn-last').disabled  = AppState.page >= totalPages;
+    if (pi) { pi.value = AppState.page; pi.max = totalPages; }
+    const btnPrev  = document.getElementById('btn-prev');
+    const btnNext  = document.getElementById('btn-next');
+    const btnFirst = document.getElementById('btn-first');
+    const btnLast  = document.getElementById('btn-last');
+    if (btnPrev)  btnPrev.disabled  = AppState.page <= 1;
+    if (btnNext)  btnNext.disabled  = AppState.page >= totalPages;
+    if (btnFirst) btnFirst.disabled = AppState.page <= 1;
+    if (btnLast)  btnLast.disabled  = AppState.page >= totalPages;
 }
 
 function changePage(delta) {
@@ -3739,12 +3845,25 @@ function renderERSection(totalId, rowsId, map, total, color) {
                     xhr2.onload = function() {
                         try {
                             const d = JSON.parse(xhr2.responseText);
-                            if (d.error || d.code === 401) { showToast(d.error || 'Error al cargar datos', 'warn'); return; }
+                            if (d.error || d.code === 401) {
+                                hideLoader();
+                                showToast(d.error || 'Error al cargar datos', 'warn');
+                                return;
+                            }
                             const rows = Array.isArray(d) ? d : (d.rows || []);
-                            setCachedCSV(rows); processData(rows);
-                        } catch(e) { showToast('Error al procesar datos', 'warn'); }
+                            setCachedCSV(rows);
+                            processData(rows);
+                        } catch(e) {
+                            hideLoader();
+                            console.error('Error crítico procesando datos. Respuesta API:', xhr2.responseText);
+                            console.error('Detalle:', e);
+                            showAPIError('Error al procesar los datos recibidos. Revisa la consola (F12).');
+                        }
                     };
-                    xhr2.onerror = () => showToast('Error de red', 'warn');
+                    xhr2.onerror = () => {
+                        hideLoader();
+                        showAPIError('Error de red al conectar con Google Sheets.');
+                    };
                     xhr2.send();
                 }
                 cargarClasificacion();
