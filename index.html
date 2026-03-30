@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard Financiero - Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. RFC: OCA2410151E0">
-    <title>Dashboard Financiero · Moyuk v12</title>
+    <title>Dashboard Financiero · Moyuk v19</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js" defer></script>
     <script src="https://unpkg.com/@phosphor-icons/web" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js" defer></script>
 
     <style>
         /* ============================================================
@@ -836,6 +836,110 @@
             margin-left:0.4rem; vertical-align:middle;
         }
 
+
+        /* ══════════════════════════════════════
+           V14: TABS INTERNAS DEL MODAL CATÁLOGOS
+        ══════════════════════════════════════ */
+        .cat-tab-nav {
+            display: flex; gap: 0.25rem;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+        }
+        .cat-tab-btn {
+            padding: 0.5rem 1.1rem;
+            font-size: 0.78rem; font-weight: 700;
+            font-family: var(--font-display);
+            text-transform: uppercase; letter-spacing: 0.06em;
+            border: none; background: none; cursor: pointer;
+            color: var(--text-3);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            transition: all 0.18s;
+        }
+        .cat-tab-btn:hover { color: var(--teal); background: var(--teal-alpha); }
+        .cat-tab-btn.active {
+            color: var(--teal);
+            border-bottom-color: var(--teal);
+            background: var(--teal-alpha);
+        }
+        .cat-tab-panel { display: none; }
+        .cat-tab-panel.active { display: block; }
+
+        /* Tabla de clasificación ER */
+        .clasif-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .clasif-table th {
+            text-align: left; padding: 0.5rem 0.75rem;
+            font-family: var(--font-display); font-size: 0.7rem;
+            font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--text-3);
+            border-bottom: 2px solid var(--border);
+            background: var(--surface-2);
+        }
+        .clasif-table td {
+            padding: 0.45rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-1);
+            vertical-align: middle;
+        }
+        .clasif-table tr:last-child td { border-bottom: none; }
+        .clasif-table tr:hover td { background: var(--teal-alpha); }
+        .clasif-select {
+            padding: 0.3rem 0.6rem; font-size: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface); color: var(--text-1);
+            cursor: pointer; width: 100%; max-width: 200px;
+        }
+        .clasif-select:focus { border-color: var(--teal); outline: none; }
+        .clasif-badge {
+            display: inline-block; font-size: 0.65rem; font-weight: 700;
+            padding: 0.15rem 0.5rem; border-radius: 99px;
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .clasif-badge-ventas    { background: rgba(16,185,129,0.12); color: var(--green); }
+        .clasif-badge-costo     { background: rgba(239,68,68,0.1);   color: #ef4444; }
+        .clasif-badge-gasto     { background: rgba(245,158,11,0.12); color: #f59e0b; }
+        .clasif-add-row {
+            display: flex; gap: 0.5rem; margin-top: 1rem;
+            flex-wrap: wrap; align-items: center;
+        }
+        @media (max-width:639px) {
+            .clasif-select { max-width: 100%; }
+            .clasif-table th:first-child,
+            .clasif-table td:first-child { width: 55%; }
+        }
+
+        /* ══════════════════════════════════════
+           V18: BOTONES DE NEGOCIO EN ESTADO DE RESULTADOS
+        ══════════════════════════════════════ */
+        .er-neg-btn {
+            font-family: var(--font-body);
+            font-size: 0.78rem;
+            font-weight: 500;
+            padding: 0.35rem 0.9rem;
+            border-radius: 99px;
+            border: 1.5px solid var(--border);
+            background: var(--surface-2);
+            color: var(--text-2);
+            cursor: pointer;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .er-neg-btn:hover {
+            border-color: var(--teal);
+            color: var(--teal);
+            background: var(--teal-alpha);
+        }
+        .er-neg-btn.active {
+            background: var(--teal);
+            border-color: var(--teal);
+            color: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+        }
     </style>
 </head>
 <body>
@@ -881,6 +985,7 @@
                 </div>
 
                 <div style="display:flex; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:3px; gap:2px;">
+                    <button onclick="setMesAnterior()" class="btn btn-ghost" id="range-prev" aria-label="Ver mes anterior">Mes anterior</button>
                     <button onclick="setDateRange(1)"  class="btn btn-ghost" id="range-1"  aria-label="Ver mes actual">Último mes</button>
                     <button onclick="setDateRange(3)"  class="btn btn-ghost" id="range-3"  aria-label="Ver 3 meses">3 meses</button>
                     <button onclick="setDateRange(12)" class="btn btn-ghost" id="range-12" aria-label="Ver 1 año">1 año</button>
@@ -938,14 +1043,11 @@
             <div><label class="filter-label" for="filtro-categoria">Categoría</label><select id="filtro-categoria"><option value="">Todos</option></select></div>
             <div><label class="filter-label" for="filtro-proveedor">Proveedor</label><select id="filtro-proveedor"><option value="">Todos</option></select></div>
         </div>
-        <div id="er-only-filters" style="align-items:flex-end; gap:0.875rem; flex-wrap:wrap; margin-top:0.25rem;">
-            <div style="min-width:220px;">
-                <label class="filter-label" for="er-filtro-negocio">Negocio</label>
-                <select id="er-filtro-negocio"><option value="">Todos los negocios</option></select>
+        <div id="er-only-filters" style="align-items:center; gap:0.5rem; flex-wrap:wrap; margin-top:0.25rem;">
+            <span style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-3); margin-right:0.25rem;">Negocio:</span>
+            <div id="er-negocio-btns" style="display:flex; flex-wrap:wrap; gap:0.4rem;">
+                <!-- Los botones se generan dinámicamente en JS -->
             </div>
-            <p style="font-size:0.72rem; color:var(--text-3); padding-bottom:0.5rem;">
-                <i class="ph ph-info"></i>&nbsp; Usa los controles de fecha del encabezado para filtrar el período.
-            </p>
         </div>
     </div>
 
@@ -1266,22 +1368,82 @@
     </div>
 
     <div class="modal-overlay" id="modal-catalogos" role="dialog" aria-modal="true">
-        <div class="modal-box" style="max-width:880px;">
+        <div class="modal-box" style="max-width:920px;">
             <div class="modal-title">
                 <i class="ph ph-gear" style="color:var(--teal);"></i> Configurar Catálogos
                 <button onclick="cerrarModalCatalogos()" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.5rem;color:var(--text-3);line-height:1;">×</button>
             </div>
-            <p style="font-size:0.78rem;color:var(--text-2);margin-bottom:1.5rem;">Administra los valores de los dropdowns. Los cambios se guardan directamente en Google Sheets.</p>
-            <div style="position:relative;">
+
+            <!-- TABS NAV -->
+            <nav class="cat-tab-nav">
+                <button class="cat-tab-btn active" id="cat-tab-btn-generales"
+                    onclick="switchCatTab('generales')">
+                    <i class="ph ph-tag"></i> Generales
+                </button>
+                <button class="cat-tab-btn" id="cat-tab-btn-clasificacion"
+                    onclick="switchCatTab('clasificacion')">
+                    <i class="ph ph-chart-pie"></i> Clasificación ER
+                </button>
+            </nav>
+
+            <!-- Overlay de carga (shared) -->
             <div class="cat-busy-overlay" id="cat-busy-overlay">
                 <div class="cat-busy-ring"></div>
                 <div class="cat-busy-msg" id="cat-busy-msg">Guardando en Google Sheets…</div>
                 <div class="cat-busy-bar-wrap"><div class="cat-busy-bar" id="cat-busy-bar"></div></div>
             </div>
-            <div id="catalogos-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;">
-                <p style="color:var(--text-3);font-size:0.78rem;">Cargando catálogos...</p>
+
+            <!-- PANEL: GENERALES -->
+            <div class="cat-tab-panel active" id="cat-panel-generales">
+                <p style="font-size:0.78rem;color:var(--text-2);margin-bottom:1.25rem;">
+                    Administra los valores de los dropdowns. Los cambios se guardan directamente en Google Sheets.
+                </p>
+                <div id="catalogos-container" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.25rem;">
+                    <p style="color:var(--text-3);font-size:0.78rem;">Cargando catálogos...</p>
+                </div>
             </div>
-            </div><!-- /position:relative wrapper -->
+
+            <!-- PANEL: CLASIFICACIÓN ER -->
+            <div class="cat-tab-panel" id="cat-panel-clasificacion">
+                <p style="font-size:0.78rem;color:var(--text-2);margin-bottom:1.25rem;">
+                    Define cómo se clasifica cada <strong>Cuenta de Mayor</strong> en el Estado de Resultados.
+                    Los cambios se guardan en Google Sheets al instante.
+                </p>
+                <div style="overflow-x:auto;">
+                    <table class="clasif-table" id="clasif-table">
+                        <thead>
+                            <tr>
+                                <th>Cuenta de Mayor</th>
+                                <th>Clasificación ER</th>
+                                <th style="width:60px;text-align:center;">—</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clasif-tbody">
+                            <tr><td colspan="3" style="color:var(--text-3);text-align:center;padding:1.5rem;">
+                                Cargando clasificaciones…
+                            </td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Agregar cuenta nueva -->
+                <div class="clasif-add-row" id="clasif-add-row">
+                    <input type="text" id="clasif-new-cuenta"
+                        class="form-input" style="flex:1;min-width:160px;max-width:280px;"
+                        placeholder="Nueva cuenta de mayor…"
+                        oninput="this.value=this.value.toUpperCase()">
+                    <select id="clasif-new-tipo" class="clasif-select" style="max-width:180px;">
+                        <option value="">— Tipo —</option>
+                        <option value="Ventas">Ventas</option>
+                        <option value="Costo de Venta">Costo de Venta</option>
+                        <option value="Gasto Operativo">Gasto Operativo</option>
+                    </select>
+                    <button class="btn btn-primary" style="font-size:0.78rem;"
+                        onclick="agregarClasificacion()">
+                        <i class="ph ph-plus"></i> Agregar
+                    </button>
+                </div>
+            </div>
+
             <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);">
                 <button class="btn btn-ghost" onclick="cerrarModalCatalogos()">Cerrar</button>
             </div>
@@ -1328,7 +1490,7 @@ const $$ = sel => document.querySelectorAll(sel);
 /* ------------------------------------------------------------------ */
 /* CONFIG                                                              */
 /* ------------------------------------------------------------------ */
-const API_URL      = 'https://script.google.com/macros/s/AKfycbyqLRs0C04nI1gF9MjXR-qGgIdulsvTDvKPntxiuBcDYErYydEGfGTCH-oMmRDvDdYApg/exec';
+const API_URL      = 'https://script.google.com/macros/s/AKfycbwnZZhNeQm0HWLtRYAdzmKQPhnE9Lan8CxxzQ-QFuobab3tTjbP6b1QiRjpKTW0vgguXA/exec';
 const ROWS_PER_PAGE = 50;
 const CACHE_KEY    = 'moyuk_csv_cache';
 const CACHE_TTL    = 10 * 60 * 1000; // 10 min
@@ -1337,13 +1499,15 @@ const CACHE_TTL    = 10 * 60 * 1000; // 10 min
 /* STATE                                                               */
 /* ------------------------------------------------------------------ */
 const AppState = {
-    raw:         [],
-    filtered:    [],
-    charts:      {},
-    tomSelects:  {},
-    page:        1,
-    maxDate:     null,
-    activeRange: null
+    raw:             [],
+    filtered:        [],
+    charts:          {},
+    tomSelects:      {},
+    page:            1,
+    maxDate:         null,
+    activeRange:     null,
+    clasificacion:   {},  // V14: mapa CUENTA_MAYOR → tipo (cargado desde Sheets)
+    erNegocioActivo: ''   // V18: negocio activo en Estado de Resultados
 };
 
 /* ------------------------------------------------------------------ */
@@ -1449,6 +1613,7 @@ function setCachedCSV(data) {
 /* INIT                                                                */
 /* ------------------------------------------------------------------ */
 function initDashboard() {
+    cargarClasificacion(); // V14: cargar clasificación ER desde Sheets al iniciar
     applyStoredTheme();
     Chart.defaults.font.family = "'DM Sans', sans-serif";
     Chart.defaults.color = getChartTextColor();
@@ -1513,6 +1678,63 @@ function showAPIError(msg) {
     errEl.classList.add('visible');
 }
 
+/* ================================================================
+   V13: DERIVAR ESTADO DE RESULTADOS Y TRANSACCIÓN DESDE CUENTA DE MAYOR
+   Se aplica solo cuando los campos vienen vacíos (registros desde marzo 2026)
+   Los registros anteriores con datos ya rellenos no se tocan.
+================================================================ */
+/* ════════════════════════════════════════════════════════
+   V14: Clasificación ER dinámica — viene de Google Sheets
+   CLASIF_FALLBACK se usa solo si Sheets no está disponible
+════════════════════════════════════════════════════════ */
+const CLASIF_FALLBACK = {
+    'CAJA':'Ventas',
+    'ABARROTES':'Costo de Venta','AGUA Y HIELO':'Costo de Venta',
+    'BEBIDAS NO GASEOSAS':'Costo de Venta','CAFE':'Costo de Venta',
+    'CARNES':'Costo de Venta','FRUTAS, VERDURAS, CHILES Y SEMILLAS':'Costo de Venta',
+    'GAS':'Costo de Venta','HUEVOS':'Costo de Venta','LACTEOS':'Costo de Venta',
+    'MARISCOS':'Costo de Venta','PANADERIA Y REPOSTERIA':'Costo de Venta',
+    'PLASTICOS':'Costo de Venta','REFRESCOS':'Costo de Venta',
+    'SNACKS':'Costo de Venta','TORTILLAS':'Costo de Venta',
+    'DEVOLUCIONES Y CANCELACIONES':'Costo de Venta',
+    'AGUINALDO':'Gasto Operativo','COMISIONES BANCARIAS':'Gasto Operativo',
+    'COMPRA DE EQUIPO':'Gasto Operativo','CORTESIAS':'Gasto Operativo',
+    'DECORATIVOS':'Gasto Operativo','DESCUENTOS':'Gasto Operativo',
+    'EQUIPO PARA EL PERSONAL':'Gasto Operativo','FLETES':'Gasto Operativo',
+    'GASOLINA':'Gasto Operativo','IMPUESTOS FEDERALES':'Gasto Operativo',
+    'IMSS':'Gasto Operativo','INFRAESTRUCTURA':'Gasto Operativo',
+    'LIMPIEZA':'Gasto Operativo','LUZ':'Gasto Operativo',
+    'MANTENIMIENTO':'Gasto Operativo','MTTO TACOMA':'Gasto Operativo',
+    'NOMINAS':'Gasto Operativo','NOMINAS EVENTUALES':'Gasto Operativo',
+    'OTROS GASTOS':'Gasto Operativo','PAPELERIA':'Gasto Operativo',
+    'PERMISOS Y LICENCIAS':'Gasto Operativo','POSADA':'Gasto Operativo',
+    'PRIMA VACACIONAL':'Gasto Operativo','PUBLICIDAD':'Gasto Operativo',
+    'RENTA':'Gasto Operativo','SEGURIDAD Y VIGILANCIA':'Gasto Operativo',
+    'SEGURO DE INMUEBLE':'Gasto Operativo','SISTEMA':'Gasto Operativo',
+    'TELCEL':'Gasto Operativo','TELMEX':'Gasto Operativo',
+    'UTENSILIOS':'Gasto Operativo'
+};
+
+function derivarEstadoResultados(cuentaMayor) {
+    const mapa = Object.keys(AppState.clasificacion).length
+                 ? AppState.clasificacion
+                 : CLASIF_FALLBACK;
+    return mapa[cuentaMayor] || (cuentaMayor ? 'Gasto Operativo' : '');
+}
+
+async function cargarClasificacion() {
+    try {
+        const json = await xhrGet('?action=getClasificacion');
+        if (json && !json.error && typeof json === 'object') {
+            AppState.clasificacion = json;
+        } else {
+            AppState.clasificacion = { ...CLASIF_FALLBACK };
+        }
+    } catch(e) {
+        AppState.clasificacion = { ...CLASIF_FALLBACK };
+    }
+}
+
 function processData(raw) {
     AppState.raw = raw.map((row, idx) => {
         const dateObj  = parseDateRobust(row['FECHA'] || row.FECHA || '');
@@ -1534,7 +1756,11 @@ function processData(raw) {
             CATEGORIA:            categoria,
             NEGOCIO:              (row.NEGOCIO || '').trim().toUpperCase() || '-',
             TRANSACCION:          transaccion,
-            ESTADO_DE_RESULTADOS: (row.ESTADO_DE_RESULTADOS || row['ESTADO_DE_RESULTADOS'] || '').trim(),
+            ESTADO_DE_RESULTADOS: (() => {
+                const er = (row.ESTADO_DE_RESULTADOS || row['ESTADO_DE_RESULTADOS'] || '').trim();
+                // Si ya viene con valor (registros viejos), respetar. Si no, derivar de CUENTA DE MAYOR
+                return er || derivarEstadoResultados(cuentaMayor);
+            })(),
             'CUENTA DE MAYOR':    cuentaMayor,
             SUBCUENTA:            subcuenta,
             'RAZON SOCIAL':       (row['RAZON SOCIAL'] || '').trim(),
@@ -1636,7 +1862,7 @@ function setupListeners() {
 
 function clearActiveRange() {
     AppState.activeRange = null;
-    ['range-1','range-3','range-12'].forEach(id => {
+    ['range-prev','range-1','range-3','range-12'].forEach(id => {
         document.getElementById(id)?.classList.remove('active');
     });
 }
@@ -1651,6 +1877,21 @@ function setDateRange(months) {
     const from = new Date(AppState.maxDate.getFullYear(), AppState.maxDate.getMonth() - (months - 1), 1);
     document.getElementById('date-to').value   = fmtDateForInput(to);
     document.getElementById('date-from').value = fmtDateForInput(from);
+    applyFilters();
+}
+
+function setMesAnterior() {
+    if (!AppState.maxDate) { showToast('Datos no cargados aún', 'warn'); return; }
+    clearActiveRange();
+    document.getElementById('range-prev')?.classList.add('active');
+    // Mes anterior relativo a hoy
+    const hoy   = new Date();
+    const year  = hoy.getMonth() === 0 ? hoy.getFullYear() - 1 : hoy.getFullYear();
+    const month = hoy.getMonth() === 0 ? 11 : hoy.getMonth() - 1; // 0-indexed
+    const from  = new Date(year, month, 1);
+    const to    = new Date(year, month + 1, 0); // último día del mes anterior
+    document.getElementById('date-from').value = fmtDateForInput(from);
+    document.getElementById('date-to').value   = fmtDateForInput(to);
     applyFilters();
 }
 
@@ -2025,28 +2266,37 @@ function exportCSV() {
 /* ------------------------------------------------------------------ */
 function initERNegocioFilter() {
     const negocios = [...new Set(AppState.raw.map(d => d.NEGOCIO).filter(v => v && v !== '-'))].sort();
-    if (AppState.tomSelects['er-filtro-negocio']) {
-        // Ya existe — actualizar opciones
-        const ts = AppState.tomSelects['er-filtro-negocio'];
-        const curVal = ts.getValue();
-        ts.clearOptions();
-        negocios.forEach(n => ts.addOption({ value: n, text: n }));
-        ts.refreshOptions(false);
-        if (curVal && negocios.includes(curVal)) ts.setValue(curVal, true);
-    } else {
-        // Primera vez — poblar select y crear instancia
-        const sel = document.getElementById('er-filtro-negocio');
-        negocios.forEach(n => {
-            const opt = document.createElement('option');
-            opt.value = n; opt.textContent = n;
-            sel.appendChild(opt);
-        });
-        AppState.tomSelects['er-filtro-negocio'] = new TomSelect('#er-filtro-negocio', {
-            create: false, placeholder: 'Todos los negocios', maxOptions: null,
-            sortField: { field: 'text', direction: 'asc' }
-        });
-        AppState.tomSelects['er-filtro-negocio'].on('change', calcularEstadoResultados);
-    }
+    renderERNegocioBtns(negocios);
+}
+
+function renderERNegocioBtns(negocios) {
+    const container = document.getElementById('er-negocio-btns');
+    if (!container) return;
+    container.innerHTML = '';
+
+    // Botón "Todos los negocios"
+    const btnTodos = document.createElement('button');
+    btnTodos.className   = 'er-neg-btn' + (AppState.erNegocioActivo === '' ? ' active' : '');
+    btnTodos.textContent = 'Todos los negocios';
+    btnTodos.onclick     = () => seleccionarERNegocio('');
+    container.appendChild(btnTodos);
+
+    // Un botón por cada negocio
+    negocios.forEach(n => {
+        const btn = document.createElement('button');
+        btn.className   = 'er-neg-btn' + (AppState.erNegocioActivo === n ? ' active' : '');
+        btn.textContent = n;
+        btn.onclick     = () => seleccionarERNegocio(n);
+        container.appendChild(btn);
+    });
+}
+
+function seleccionarERNegocio(negocio) {
+    AppState.erNegocioActivo = negocio;
+    document.querySelectorAll('.er-neg-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.textContent === (negocio || 'Todos los negocios'));
+    });
+    calcularEstadoResultados();
 }
 
 /* ------------------------------------------------------------------ */
@@ -2055,7 +2305,7 @@ function initERNegocioFilter() {
 function calcularEstadoResultados() {
     const dfStr   = document.getElementById('date-from').value;
     const dtStr   = document.getElementById('date-to').value;
-    const negocio = document.getElementById('er-filtro-negocio').value;
+    const negocio = AppState.erNegocioActivo;
 
     const dateFrom = dfStr ? new Date(dfStr + 'T00:00:00') : null;
     const dateTo   = dtStr ? new Date(dtStr + 'T23:59:59') : null;
@@ -2731,9 +2981,103 @@ document.addEventListener('DOMContentLoaded', initDashboard);
     ================================================================ */
     async function abrirModalCatalogos() {
         $('modal-catalogos').classList.add('open');
-        await cargarCatalogos();
+        switchCatTab('generales');
+        await Promise.all([cargarCatalogos(), cargarClasificacion()]);
         renderCatalogos();
+        renderClasificacion();
     }
+    /* ================================================================
+       V14: TABS + CLASIFICACIÓN ER — GESTIÓN COMPLETA
+    ================================================================ */
+    function switchCatTab(tab) {
+        ['generales','clasificacion'].forEach(t => {
+            document.getElementById('cat-panel-'  + t)?.classList.toggle('active', t === tab);
+            document.getElementById('cat-tab-btn-'+ t)?.classList.toggle('active', t === tab);
+        });
+    }
+
+    function clasifBadge(tipo) {
+        if (!tipo) return '';
+        const cls = tipo === 'Ventas' ? 'clasif-badge-ventas'
+                  : tipo === 'Costo de Venta' ? 'clasif-badge-costo'
+                  : 'clasif-badge-gasto';
+        return `<span class="clasif-badge ${cls}">${tipo}</span>`;
+    }
+
+    function renderClasificacion() {
+        const tbody = document.getElementById('clasif-tbody');
+        if (!tbody) return;
+        const mapa = AppState.clasificacion;
+        const cuentas = Object.keys(mapa).sort();
+        if (!cuentas.length) {
+            tbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-3);text-align:center;padding:1.5rem;">Sin clasificaciones cargadas.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = cuentas.map(cuenta => {
+            const tipo = mapa[cuenta] || '';
+            const safeC = cuenta.replace(/'/g,"\'");
+            return `<tr>
+                <td style="font-weight:600;">${cuenta}</td>
+                <td>
+                    <select class="clasif-select" onchange="guardarClasificacion('${safeC}',this.value)">
+                        <option value="">— Selecciona —</option>
+                        ${['Ventas','Costo de Venta','Gasto Operativo'].map(t =>
+                            `<option value="${t}"${tipo===t?' selected':''}>${t}</option>`
+                        ).join('')}
+                    </select>
+                </td>
+                <td style="text-align:center;">
+                    <button onclick="eliminarClasificacion('${safeC}')"
+                        style="background:none;border:none;cursor:pointer;color:var(--text-3);font-size:1rem;line-height:1;"
+                        title="Eliminar">×</button>
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function guardarClasificacion(cuenta, tipo) {
+        if (!tipo) return;
+        setCatBusy(true, `Guardando ${cuenta}…`);
+        try {
+            const json = await xhrPost({ action:'setClasificacion', cuenta, tipo });
+            if (json.error) throw new Error(json.error);
+            AppState.clasificacion[cuenta.toUpperCase()] = tipo;
+            showToast(`✅ ${cuenta} → ${tipo}`, 'info');
+        } catch(e) { showToast('Error: ' + e.message, 'warn'); }
+        finally { setCatBusy(false); }
+    }
+
+    async function agregarClasificacion() {
+        const cuenta = (document.getElementById('clasif-new-cuenta')?.value || '').trim().toUpperCase();
+        const tipo   =  document.getElementById('clasif-new-tipo')?.value || '';
+        if (!cuenta) { showToast('Escribe el nombre de la cuenta', 'warn'); return; }
+        if (!tipo)   { showToast('Selecciona un tipo', 'warn'); return; }
+        if (AppState.clasificacion[cuenta]) {
+            showToast(`"${cuenta}" ya existe — usa el dropdown para cambiar su tipo`, 'warn'); return;
+        }
+        setCatBusy(true, `Agregando ${cuenta}…`);
+        try {
+            const json = await xhrPost({ action:'setClasificacion', cuenta, tipo });
+            if (json.error) throw new Error(json.error);
+            AppState.clasificacion[cuenta] = tipo;
+            document.getElementById('clasif-new-cuenta').value = '';
+            document.getElementById('clasif-new-tipo').value   = '';
+            renderClasificacion();
+            showToast(`✅ "${cuenta}" agregado como ${tipo}`, 'info');
+        } catch(e) { showToast('Error: ' + e.message, 'warn'); }
+        finally { setCatBusy(false); }
+    }
+
+    function eliminarClasificacion(cuenta) {
+        if (!confirm(`¿Eliminar la clasificación de "${cuenta}"?`)) return;
+        delete AppState.clasificacion[cuenta.toUpperCase()];
+        // Guardar con tipo vacío en Sheets para marcarlo como eliminado
+        xhrPost({ action:'setClasificacion', cuenta, tipo:'—' })
+            .then(() => showToast(`"${cuenta}" eliminado de la clasificación`, 'info'))
+            .catch(e => showToast('Error: ' + e.message, 'warn'));
+        renderClasificacion();
+    }
+
     function cerrarModalCatalogos() { $('modal-catalogos').classList.remove('open'); }
 
     function renderCatalogos() {
@@ -2845,6 +3189,11 @@ document.addEventListener('DOMContentLoaded', initDashboard);
         // Ocultar la barra de filtros compartida en Gestión (tiene sus propios filtros)
         const fc = document.getElementById('filter-card');
         if (fc) fc.style.display = (tab === 'gestion') ? 'none' : '';
+        // V18: mostrar el bloque correcto de filtros según pestaña activa
+        const dashF = document.getElementById('dash-only-filters');
+        const erF   = document.getElementById('er-only-filters');
+        if (dashF) dashF.style.display = (tab === 'resultados') ? 'none' : 'grid';
+        if (erF)   erF.style.display   = (tab === 'resultados') ? 'flex' : 'none';
         if (tab === 'resultados') calcularEstadoResultados();
         if (tab === 'gestion')    initGestion();
     }
@@ -2862,6 +3211,18 @@ document.addEventListener('DOMContentLoaded', initDashboard);
     });
 
     /* XHR helper */
+    function xhrGet(queryString) {
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', API_URL + queryString, true);
+            xhr.timeout = 20000;
+            xhr.onload    = function() { try { resolve(JSON.parse(xhr.responseText)); } catch(e) { reject(e); } };
+            xhr.onerror   = () => reject(new Error('Error de red'));
+            xhr.ontimeout = () => reject(new Error('Timeout'));
+            xhr.send();
+        });
+    }
+
     function xhrPost(payload) {
         return new Promise((resolve, reject) => {
             if (payload && payload.action === 'getCatalogos') {
