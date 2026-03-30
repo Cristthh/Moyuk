@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard Financiero - Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. RFC: OCA2410151E0">
-    <title>Dashboard Financiero · Moyuk v27</title>
+    <title>Dashboard Financiero · Moyuk v31</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -384,17 +384,17 @@
         /* ============================================================
            ANIMATIONS
         ============================================================ */
+        /* ============================================================
+           ANIMATIONS (Preparado para GSAP — V28)
+        ============================================================ */
         .fade-up {
-            opacity: 0; transform: translateY(16px);
-            animation: fadeUp 0.5s cubic-bezier(0.4,0,0.2,1) forwards;
+            opacity: 0;
+            visibility: hidden; /* GSAP toma el control de la aparición */
         }
-        @keyframes fadeUp { to { opacity: 1; transform: none; } }
-        .delay-1 { animation-delay: 0.08s; }
-        .delay-2 { animation-delay: 0.16s; }
-        .delay-3 { animation-delay: 0.24s; }
-        .delay-4 { animation-delay: 0.32s; }
-        .delay-5 { animation-delay: 0.40s; }
-        .delay-6 { animation-delay: 0.48s; }
+        /* @keyframes fadeUp y .delay-* desactivados — GSAP los reemplaza */
+        .delay-1, .delay-2, .delay-3,
+        .delay-4, .delay-5, .delay-6 { animation: none; }
+
         .delay-7 { animation-delay: 0.56s; }
 
         /* ============================================================
@@ -1134,7 +1134,85 @@
                 padding: 1rem !important;
             }
         }
+
+        /* ============================================================
+           V30: ESTILOS DE IMPRESIÓN (GERENCIAL / TAMAÑO CARTA)
+        ============================================================ */
+        @media print {
+            /* 1. Configurar página a tamaño Carta con márgenes */
+            @page {
+                size: letter portrait;
+                margin: 1.5cm;
+            }
+
+            /* 2. Ocultar toda la interfaz */
+            header.card, 
+            .tab-nav, 
+            #filter-card, 
+            #toast-container, 
+            .btn, 
+            .theme-toggle,
+            footer,
+            .er-neg-btn {
+                display: none !important;
+            }
+
+            /* 3. Mostrar el encabezado fantasma */
+            #print-header {
+                display: block !important;
+            }
+
+            /* 4. Fondos blancos y textos negros */
+            body, #app, .card, .er-section {
+                background: #ffffff !important;
+                color: #000000 !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            /* 5. Eliminar espacios innecesarios */
+            #app { padding: 0 !important; }
+            .card { padding: 0 !important; border: none !important; margin-bottom: 20px !important; }
+
+            /* 6. Estado de Resultados gerencial */
+            .er-bruta, .er-neta, .er-neta.negativa, .er-bruta.negativa {
+                background: transparent !important;
+                border: 2px solid #000 !important;
+                box-shadow: none !important;
+                padding: 15px !important;
+                color: #000 !important;
+            }
+
+            .er-neta-value, .er-bruta-value {
+                font-size: 16pt !important;
+                color: #000 !important;
+            }
+
+            .er-neta-label, .er-bruta-label, .er-neta-formula, .er-bruta-formula {
+                color: #333 !important;
+            }
+
+            .er-neta-margen, .er-bruta-margen {
+                background: transparent !important;
+                border: 1px solid #666 !important;
+                color: #000 !important;
+                font-size: 10pt !important;
+            }
+
+            /* 7. Evitar partición de cajas */
+            .er-section {
+                page-break-inside: avoid;
+                border: 1px solid #ccc !important;
+                margin-bottom: 15px !important;
+            }
+
+            .er-section-title, .er-section-total, .er-row-amount {
+                color: #000 !important;
+            }
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
 </head>
 <body>
 
@@ -1228,6 +1306,10 @@
                     <i class="ph ph-download-simple"></i> Exportar
                 </button>
 
+                <button onclick="imprimirPantalla()" class="btn btn-ghost" aria-label="Imprimir reporte">
+                    <i class="ph ph-printer"></i> Imprimir
+                </button>
+
                 <div id="session-chip">
                     <i class="ph ph-user-circle"></i>
                     <span id="session-nombre">—</span>
@@ -1241,6 +1323,18 @@
             </div>
         </div>
     </header>
+    <!-- V30: Print Header (invisible en pantalla, visible en impresión) -->
+    <div id="print-header" style="display: none;">
+        <div style="border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">
+            <h1 style="font-family: 'Sora'; font-size: 18pt; font-weight: 800; color: #000; margin: 0;">REPORTE FINANCIERO</h1>
+            <p style="font-family: 'DM Sans'; font-size: 11pt; color: #333; margin: 5px 0 0 0;">
+                <strong>Período:</strong> <span id="print-periodo">Cargando...</span>
+            </p>
+            <p style="font-family: 'DM Sans'; font-size: 11pt; color: #333; margin: 2px 0 0 0;">
+                <strong>Negocio(s):</strong> <span id="print-negocio">Cargando...</span>
+            </p>
+        </div>
+    </div>
 
 
     <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap;" class="fade-up">
@@ -2046,6 +2140,9 @@ function processData(raw) {
     setupListeners();
     applyFilters();
     hideLoader();
+
+    // V28: disparar animación GSAP cuando el DOM ya pintó las gráficas
+    setTimeout(animarDashboardGSAP, 300);
 }
 
 function hideLoader() {
@@ -2644,7 +2741,87 @@ function renderERSection(totalId, rowsId, map, total, color) {
 /* ------------------------------------------------------------------ */
 /* BOOT                                                                */
 /* ------------------------------------------------------------------ */
-document.addEventListener('DOMContentLoaded', initDashboard);
+/* ------------------------------------------------------------------ */
+    /* V28: GSAP ANIMATIONS                                              */
+    /* ------------------------------------------------------------------ */
+    function animarDashboardGSAP() {
+        if (typeof gsap === 'undefined') {
+            // Fallback si GSAP no cargó (sin internet): mostrar todo de golpe
+            document.querySelectorAll('.fade-up').forEach(el => {
+                el.style.opacity = '1'; el.style.visibility = 'visible';
+            });
+            return;
+        }
+
+        // CORRECCIÓN: devolver opacity:1 a todos los contenedores padre
+        gsap.set(".fade-up", { visibility: "visible", opacity: 1 });
+
+        const tl = gsap.timeline();
+
+        // A. Header — desliza desde arriba
+        tl.fromTo("header.card.fade-up",
+            { y: -40, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.6, ease: "power3.out" }
+        )
+        // B. Tab nav + filter card
+        .fromTo(".tab-nav, #filter-card",
+            { y: 20, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.5, stagger: 0.15, ease: "power2.out" },
+            "-=0.3"
+        )
+        // C. KPI cards — efecto rebote
+        .fromTo(".kpi-card",
+            { scale: 0.85, y: 20, opacity: 0 },
+            { scale: 1, y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.5)" },
+            "-=0.2"
+        )
+        // D. Tarjetas de gráficas y tabla de registros
+        .fromTo("#vista-dashboard .card:not(header)",
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.7, stagger: 0.15, ease: "power3.out" },
+            "-=0.4"
+        );
+    }
+
+    document.addEventListener('DOMContentLoaded', initDashboard);
+
+    /* ================================================================
+       V30: LÓGICA DE IMPRESIÓN INTELIGENTE
+    ================================================================ */
+    function imprimirPantalla() {
+        window.print();
+    }
+
+    window.addEventListener('beforeprint', () => {
+        const df = document.getElementById('date-from')?.value;
+        const dt = document.getElementById('date-to')?.value;
+        let periodoTexto = 'Histórico Completo';
+
+        if (df && dt) {
+            periodoTexto = `Del ${df} al ${dt}`;
+        } else if (df) {
+            periodoTexto = `Desde el ${df}`;
+        } else if (dt) {
+            periodoTexto = `Hasta el ${dt}`;
+        }
+        const printPeriodoEl = document.getElementById('print-periodo');
+        if (printPeriodoEl) printPeriodoEl.textContent = periodoTexto;
+
+        const activeTabBtn = document.querySelector('.tab-btn.active');
+        const activeTab = activeTabBtn?.id;
+        let negocioTexto = 'Todos los negocios';
+
+        if (activeTab === 'tab-resultados') {
+            negocioTexto = AppState.erNegocioActivo || 'Todos los negocios';
+        } else if (activeTab === 'tab-dashboard') {
+            negocioTexto = document.getElementById('filtro-negocio')?.value || 'Todos los negocios';
+        } else if (activeTab === 'tab-gestion') {
+            negocioTexto = document.getElementById('gestion-filtro-negocio')?.value || 'Todos los negocios';
+        }
+
+        const printNegocioEl = document.getElementById('print-negocio');
+        if (printNegocioEl) printNegocioEl.textContent = negocioTexto;
+    });
 
     /* ================================================================
        GESTIÓN — Estado global
@@ -3429,7 +3606,13 @@ document.addEventListener('DOMContentLoaded', initDashboard);
         ['dashboard','resultados','gestion'].forEach(t => {
             const v = document.getElementById('vista-' + t);
             const b = document.getElementById('tab-' + t);
-            if (v) v.style.display = (t === tab) ? 'block' : 'none';
+            if (v) {
+                v.style.display = (t === tab) ? 'block' : 'none';
+                // V28: animar la vista que entra
+                if (t === tab && typeof gsap !== 'undefined') {
+                    gsap.fromTo(v, { opacity: 0, y: 15 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
+                }
+            }
             if (b) { b.classList.toggle('active', t === tab); b.setAttribute('aria-selected', t === tab); }
         });
         const lbl = $('filter-context-label');
