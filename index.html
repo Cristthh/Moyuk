@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Dashboard Financiero - Operadora y Comercializadora de Alimentos Moyuk S.A. de C.V. RFC: OCA2410151E0">
-    <title>Dashboard Financiero · Moyuk v20</title>
+    <title>Dashboard Financiero · Moyuk v25</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -974,6 +974,106 @@
             color: #fff;
             box-shadow: 0 1px 4px rgba(0,0,0,0.12);
         }
+
+        /* ══════════════════════════════════════
+           V21: PANTALLA DE LOGIN
+        ══════════════════════════════════════ */
+        #login-screen {
+            position: fixed; inset: 0; z-index: 10000;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem;
+        }
+        #login-screen.hidden { display: none; }
+        .login-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem 2rem;
+            width: 100%; max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            animation: fadeUp 0.35s ease;
+        }
+        .login-logo {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg,#0a4c5e,#3fb875);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 4px 16px rgba(10,76,94,0.3);
+        }
+        .login-logo i { font-size: 1.75rem; color: #fff; }
+        .login-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem; font-weight: 800;
+            text-align: center; color: var(--text-1);
+            margin-bottom: 0.25rem;
+        }
+        .login-sub {
+            font-size: 0.75rem; color: var(--text-3);
+            text-align: center; margin-bottom: 2rem;
+        }
+        .login-field { margin-bottom: 1rem; }
+        .login-field label {
+            display: block; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.07em;
+            color: var(--text-3); margin-bottom: 0.35rem;
+        }
+        .login-field input {
+            width: 100%; padding: 0.6rem 0.875rem;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface-2); color: var(--text-1);
+            font-size: 0.9rem; font-family: var(--font-body);
+            transition: border-color 0.18s;
+            box-sizing: border-box;
+        }
+        .login-field input:focus {
+            outline: none; border-color: var(--teal);
+        }
+        .login-btn {
+            width: 100%; padding: 0.7rem;
+            background: var(--teal); color: #fff;
+            border: none; border-radius: var(--radius-sm);
+            font-family: var(--font-display); font-size: 0.85rem;
+            font-weight: 700; letter-spacing: 0.04em;
+            cursor: pointer; margin-top: 0.5rem;
+            transition: opacity 0.18s;
+        }
+        .login-btn:hover { opacity: 0.88; }
+        .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .login-error {
+            background: rgba(239,68,68,0.1);
+            border: 1px solid rgba(239,68,68,0.3);
+            color: #ef4444; border-radius: var(--radius-sm);
+            padding: 0.5rem 0.75rem; font-size: 0.78rem;
+            margin-bottom: 1rem; display: none;
+        }
+        .login-error.show { display: block; }
+        .login-pw-wrap {
+            position: relative; display: flex; align-items: center;
+        }
+        .login-pw-wrap input {
+            padding-right: 2.6rem;
+        }
+        .login-pw-toggle {
+            position: absolute; right: 0.65rem;
+            background: none; border: none; cursor: pointer;
+            color: var(--text-3); font-size: 1.05rem;
+            display: flex; align-items: center;
+            padding: 0; line-height: 1;
+            transition: color 0.15s;
+        }
+        .login-pw-toggle:hover { color: var(--teal); }
+        /* Chip de usuario en header */
+        #session-chip {
+            display: flex; align-items: center; gap: 0.4rem;
+            font-size: 0.75rem; color: var(--text-2);
+            background: var(--surface-2); border: 1px solid var(--border);
+            border-radius: 99px; padding: 0.25rem 0.75rem;
+            cursor: default;
+        }
+        #session-chip i { color: var(--teal); font-size: 0.85rem; }
     </style>
 </head>
 <body>
@@ -994,7 +1094,36 @@
 
 <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
-<div id="app" style="max-width:1680px; margin:0 auto; padding:2rem 1.5rem 4rem;">
+    <!-- ════ V21: PANTALLA DE LOGIN ════ -->
+    <div id="login-screen" style="display:none;">
+        <div class="login-card">
+            <div class="login-logo"><i class="ph ph-chart-line-up"></i></div>
+            <p class="login-title">Dashboard Financiero</p>
+            <p class="login-sub">Operadora y Comercializadora de Alimentos Moyuk</p>
+            <div class="login-error" id="login-error"></div>
+            <div class="login-field">
+                <label for="login-usuario">Usuario</label>
+                <input type="text" id="login-usuario" autocomplete="username"
+                    placeholder="tu usuario" onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
+            </div>
+            <div class="login-field">
+                <label for="login-password">Contraseña</label>
+                <div class="login-pw-wrap">
+                    <input type="password" id="login-password" autocomplete="current-password"
+                        placeholder="••••••••" onkeydown="if(event.key==='Enter')hacerLogin()">
+                    <button type="button" class="login-pw-toggle" id="pw-toggle-btn"
+                        onclick="toggleVerPassword()" title="Mostrar / ocultar contraseña" tabindex="-1">
+                        <i class="ph ph-eye" id="pw-toggle-icon"></i>
+                    </button>
+                </div>
+            </div>
+            <button class="login-btn" id="login-btn" onclick="hacerLogin()">
+                <i class="ph ph-sign-in"></i> &nbsp;Entrar
+            </button>
+        </div>
+    </div>
+
+    <div id="app" style="max-width:1680px; margin:0 auto; padding:2rem 1.5rem 4rem; display:none;">
 
     <header class="card fade-up" style="margin-bottom:1.5rem;">
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1.5rem;">
@@ -1039,6 +1168,13 @@
                     <i class="ph ph-download-simple"></i> Exportar
                 </button>
 
+                <div id="session-chip">
+                    <i class="ph ph-user-circle"></i>
+                    <span id="session-nombre">—</span>
+                </div>
+                <button class="btn btn-ghost btn-icon" onclick="hacerLogout()" title="Cerrar sesión" style="color:var(--text-3); font-size:1.1rem; padding:0.35rem;">
+                    <i class="ph ph-sign-out"></i>
+                </button>
                 <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambiar tema claro/oscuro">
                     <i class="ph ph-moon" id="theme-icon"></i>
                 </button>
@@ -1524,7 +1660,7 @@ const $$ = sel => document.querySelectorAll(sel);
 /* ------------------------------------------------------------------ */
 /* CONFIG                                                              */
 /* ------------------------------------------------------------------ */
-const API_URL      = 'https://script.google.com/macros/s/AKfycbwnZZhNeQm0HWLtRYAdzmKQPhnE9Lan8CxxzQ-QFuobab3tTjbP6b1QiRjpKTW0vgguXA/exec';
+const API_URL      = 'https://script.google.com/macros/s/AKfycbyLy0u1XeM2rn8AQYhJXakcFAnTKPCyuuGZTGTf0k0dnNOtYHKWpxJARNgcoAaar4Sk7g/exec';
 const ROWS_PER_PAGE = 50;
 const CACHE_KEY    = 'moyuk_csv_cache';
 const CACHE_TTL    = 10 * 60 * 1000; // 10 min
@@ -1541,7 +1677,8 @@ const AppState = {
     maxDate:         null,
     activeRange:     null,
     clasificacion:   {},  // V14: mapa CUENTA_MAYOR → tipo (cargado desde Sheets)
-    erNegocioActivo: ''   // V18: negocio activo en Estado de Resultados
+    erNegocioActivo: '',  // V18: negocio activo en Estado de Resultados
+    session:         { token: '', nombre: '', rol: '' } // V21: sesión activa
 };
 
 /* ------------------------------------------------------------------ */
@@ -1647,8 +1784,26 @@ function setCachedCSV(data) {
 /* INIT                                                                */
 /* ------------------------------------------------------------------ */
 function initDashboard() {
-    cargarClasificacion(); // V14: cargar clasificación ER desde Sheets al iniciar
     applyStoredTheme();
+    // V25: Verificar sesión — envuelta en try-catch por seguridad (file://)
+    let saved = null;
+    try { saved = sessionStorage.getItem('moyuk_session'); }
+    catch(e) { saved = null; }
+
+    if (!saved) {
+        mostrarLogin();
+        return;
+    }
+    try {
+        const s = JSON.parse(saved);
+        if (!s || !s.token) throw new Error('Sesión inválida');
+        AppState.session = s;
+        mostrarDashboard();
+    } catch(e) {
+        mostrarLogin();
+        return;
+    }
+    cargarClasificacion(); // V14: cargar clasificación ER desde Sheets al iniciar
     Chart.defaults.font.family = "'DM Sans', sans-serif";
     Chart.defaults.color = getChartTextColor();
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,23,42,0.92)';
@@ -1663,8 +1818,9 @@ function initDashboard() {
         return;
     }
 
+    const token = AppState.session.token;
     const xhr = new XMLHttpRequest();
-    xhr.open('GET', API_URL + '?action=getData', true);
+    xhr.open('GET', API_URL + '?action=getData' + (token ? '&token=' + encodeURIComponent(token) : ''), true);
     xhr.timeout = 20000;
 
     xhr.onload = function() {
@@ -3245,12 +3401,158 @@ document.addEventListener('DOMContentLoaded', initDashboard);
     });
 
     /* XHR helper */
+    /* ════════════════════════════════════════════════════════
+       V21: LOGIN / LOGOUT / SESIÓN
+    ════════════════════════════════════════════════════════ */
+    function mostrarLogin() {
+        // Ocultar loader si está visible
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = 'none';
+        // Ocultar app
+        const app = document.getElementById('app');
+        if (app) app.style.display = 'none';
+        // Mostrar pantalla de login
+        const ls = document.getElementById('login-screen');
+        if (ls) ls.style.display = 'flex';
+        setTimeout(() => document.getElementById('login-usuario')?.focus(), 150);
+    }
+
+    function mostrarDashboard() {
+        const ls = document.getElementById('login-screen');
+        if (ls) ls.style.display = 'none';
+        const app = document.getElementById('app');
+        if (app) app.style.display = 'block';
+        const nombre = AppState.session.nombre || 'Usuario';
+        const el = document.getElementById('session-nombre');
+        if (el) el.textContent = nombre;
+        // V21: ocultar botones de admin si es viewer
+        if (AppState.session.rol !== 'admin') aplicarModoViewer();
+    }
+
+    function aplicarModoViewer() {
+        // Ocultar botones que requieren admin
+        const adminEls = document.querySelectorAll(
+            '#btn-nuevo-registro, .cat-add-row, .cat-chip-del, #btn-open-catalogos, .clasif-add-row'
+        );
+        adminEls.forEach(el => el && (el.style.display = 'none'));
+    }
+
+    function toggleVerPassword() {
+        const input = document.getElementById('login-password');
+        const icon  = document.getElementById('pw-toggle-icon');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'ph ph-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'ph ph-eye';
+        }
+        input.focus();
+    }
+
+    async function hacerLogin() {
+        const usuario  = (document.getElementById('login-usuario')?.value  || '').trim();
+        const password = (document.getElementById('login-password')?.value || '').trim();
+        const errorEl  = document.getElementById('login-error');
+        const btnEl    = document.getElementById('login-btn');
+
+        if (!usuario || !password) {
+            errorEl.textContent = 'Escribe tu usuario y contraseña.';
+            errorEl.classList.add('show'); return;
+        }
+
+        btnEl.disabled  = true;
+        btnEl.innerHTML = '<i class="ph ph-circle-notch" style="animation:spin 0.8s linear infinite;display:inline-block;"></i> &nbsp;Entrando…';
+        errorEl.classList.remove('show');
+
+        try {
+            const json = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', API_URL, true);
+                xhr.setRequestHeader('Content-Type', 'text/plain');
+                xhr.timeout = 20000;
+                xhr.onload    = () => { try { resolve(JSON.parse(xhr.responseText)); } catch(e) { reject(e); } };
+                xhr.onerror   = () => reject(new Error('Error de red'));
+                xhr.ontimeout = () => reject(new Error('Tiempo de espera agotado'));
+                xhr.send(JSON.stringify({ action: 'login', usuario, password }));
+            });
+
+            if (json.ok) {
+                AppState.session = { token: json.token, nombre: json.nombre, rol: json.rol };
+                sessionStorage.setItem('moyuk_session', JSON.stringify(AppState.session));
+                mostrarDashboard();
+                // Trigger data load
+                const cached = getCachedCSV();
+                if (cached) { processData(cached); }
+                else {
+                    // Mostrar loader mientras cargan los datos
+                    const loaderEl = document.getElementById('loader');
+                    if (loaderEl) loaderEl.style.display = 'flex';
+                    const token = AppState.session.token;
+                    const xhr2  = new XMLHttpRequest();
+                    xhr2.open('GET', API_URL + '?action=getData&token=' + encodeURIComponent(token), true);
+                    xhr2.timeout = 20000;
+                    xhr2.onload = function() {
+                        try {
+                            const d = JSON.parse(xhr2.responseText);
+                            if (d.error || d.code === 401) { showToast(d.error || 'Error al cargar datos', 'warn'); return; }
+                            const rows = Array.isArray(d) ? d : (d.rows || []);
+                            setCachedCSV(rows); processData(rows);
+                        } catch(e) { showToast('Error al procesar datos', 'warn'); }
+                    };
+                    xhr2.onerror = () => showToast('Error de red', 'warn');
+                    xhr2.send();
+                }
+                cargarClasificacion();
+            } else {
+                errorEl.textContent = json.error || 'Credenciales incorrectas.';
+                errorEl.classList.add('show');
+            }
+        } catch(e) {
+            errorEl.textContent = e.message || 'Error al conectar. Verifica tu conexión.';
+            errorEl.classList.add('show');
+        } finally {
+            btnEl.disabled  = false;
+            btnEl.innerHTML = '<i class="ph ph-sign-in"></i> &nbsp;Entrar';
+        }
+    }
+
+    async function hacerLogout(silencioso = false) {
+        const token = AppState.session.token;
+        sessionStorage.removeItem('moyuk_session');
+        AppState.session = { token: '', nombre: '', rol: '' };
+        if (token && !silencioso) {
+            try {
+                await new Promise((resolve) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', API_URL, true);
+                    xhr.setRequestHeader('Content-Type', 'text/plain');
+                    xhr.timeout = 5000;
+                    xhr.onload = () => resolve();
+                    xhr.onerror = () => resolve();
+                    xhr.send(JSON.stringify({ action: 'logout', token }));
+                });
+            } catch(e) { /* ignorar errores en logout */ }
+        }
+        mostrarLogin();
+    }
+
     function xhrGet(queryString) {
         return new Promise((resolve, reject) => {
+            const token = AppState.session.token;
+            const sep   = queryString.includes('?') ? '&' : '?';
+            const url   = API_URL + queryString + (token ? sep + 'token=' + encodeURIComponent(token) : '');
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', API_URL + queryString, true);
+            xhr.open('GET', url, true);
             xhr.timeout = 20000;
-            xhr.onload    = function() { try { resolve(JSON.parse(xhr.responseText)); } catch(e) { reject(e); } };
+            xhr.onload    = function() {
+                try {
+                    const json = JSON.parse(xhr.responseText);
+                    if (json && json.code === 401) { hacerLogout(true); reject(new Error('Sesión expirada')); return; }
+                    resolve(json);
+                } catch(e) { reject(e); }
+            };
             xhr.onerror   = () => reject(new Error('Error de red'));
             xhr.ontimeout = () => reject(new Error('Timeout'));
             xhr.send();
@@ -3258,14 +3560,26 @@ document.addEventListener('DOMContentLoaded', initDashboard);
     }
 
     function xhrPost(payload) {
+        // Inject token into every request (except login/logout which are public)
+        const publicActions = ['login', 'logout'];
+        if (!publicActions.includes(payload.action) && AppState.session.token) {
+            payload.token = AppState.session.token;
+        }
+
         return new Promise((resolve, reject) => {
-            if (payload && payload.action === 'getCatalogos') {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', API_URL + '?action=getCatalogos', true);
+            // GET-based actions
+            if (payload.action === 'getCatalogos' || payload.action === 'getClasificacion') {
+                const token = AppState.session.token;
+                const qs    = '?action=' + payload.action + (token ? '&token=' + encodeURIComponent(token) : '');
+                const xhr   = new XMLHttpRequest();
+                xhr.open('GET', API_URL + qs, true);
                 xhr.timeout = 20000;
                 xhr.onload = function() {
-                    try { resolve(JSON.parse(xhr.responseText)); }
-                    catch(e) { reject(e); }
+                    try {
+                        const json = JSON.parse(xhr.responseText);
+                        if (json && json.code === 401) { hacerLogout(true); reject(new Error('Sesión expirada')); return; }
+                        resolve(json);
+                    } catch(e) { reject(e); }
                 };
                 xhr.onerror   = () => reject(new Error('Error de red'));
                 xhr.ontimeout = () => reject(new Error('Timeout'));
@@ -3279,6 +3593,7 @@ document.addEventListener('DOMContentLoaded', initDashboard);
             xhr.onload = function() {
                 try {
                     const json = JSON.parse(xhr.responseText);
+                    if (json && json.code === 401) { hacerLogout(true); reject(new Error('Sesión expirada')); return; }
                     if (json.error) reject(new Error(json.error));
                     else resolve(json);
                 } catch(e) { reject(e); }
